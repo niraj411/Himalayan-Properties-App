@@ -17,6 +17,7 @@ import {
   LogOut,
   ChevronLeft,
   Menu,
+  Calculator,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -29,6 +30,7 @@ const navigation = [
   { name: "Applications", href: "/admin/applications", icon: ClipboardList },
   { name: "Maintenance", href: "/admin/maintenance", icon: Wrench },
   { name: "Payments", href: "/admin/payments", icon: CreditCard },
+  { name: "Accounting", href: "/admin/accounting", icon: Calculator },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

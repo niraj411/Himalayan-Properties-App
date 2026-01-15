@@ -20,6 +20,8 @@ export async function GET(
         tenant: { include: { user: true } },
         unit: { include: { property: true } },
         payments: { orderBy: { date: "desc" } },
+        escalations: { orderBy: { effectiveDate: "asc" } },
+        insurance: { orderBy: { expirationDate: "asc" } },
       },
     });
 
@@ -46,7 +48,7 @@ export async function PUT(
 
     const { id } = await params;
     const data = await request.json();
-    const { startDate, endDate, monthlyRent, depositAmount, documentUrl, notes, status } = data;
+    const { startDate, endDate, monthlyRent, depositAmount, documentUrl, notes, status, leaseType } = data;
 
     const lease = await db.lease.update({
       where: { id },
@@ -58,10 +60,13 @@ export async function PUT(
         documentUrl,
         notes,
         status,
+        leaseType,
       },
       include: {
         tenant: { include: { user: true } },
         unit: { include: { property: true } },
+        escalations: { orderBy: { effectiveDate: "asc" } },
+        insurance: { orderBy: { expirationDate: "asc" } },
       },
     });
 

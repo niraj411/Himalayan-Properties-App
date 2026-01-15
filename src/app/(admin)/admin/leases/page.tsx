@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,11 @@ import {
   DollarSign,
   AlertTriangle,
   ExternalLink,
+  Eye,
+  Building2,
+  Home,
+  TrendingUp,
+  Shield,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -52,6 +58,7 @@ import {
 
 interface Lease {
   id: string;
+  leaseType: string;
   startDate: string;
   endDate: string;
   monthlyRent: number;
@@ -66,8 +73,10 @@ interface Lease {
   unit: {
     id: string;
     unitNumber: string;
-    property: { name: string };
+    property: { name: string; type: string };
   };
+  escalations: Array<{ id: string; effectiveDate: string; newMonthlyRent: number; applied: boolean }>;
+  insurance: Array<{ id: string; expirationDate: string; verified: boolean }>;
 }
 
 interface Tenant {
@@ -93,6 +102,7 @@ export default function LeasesPage() {
   const [formData, setFormData] = useState({
     tenantId: "",
     unitId: "",
+    leaseType: "RESIDENTIAL",
     startDate: "",
     endDate: "",
     monthlyRent: "",
@@ -160,6 +170,7 @@ export default function LeasesPage() {
     setFormData({
       tenantId: "",
       unitId: "",
+      leaseType: "RESIDENTIAL",
       startDate: "",
       endDate: "",
       monthlyRent: "",
@@ -175,6 +186,7 @@ export default function LeasesPage() {
     setFormData({
       tenantId: lease.tenant.id,
       unitId: lease.unit.id,
+      leaseType: lease.leaseType || "RESIDENTIAL",
       startDate: format(new Date(lease.startDate), "yyyy-MM-dd"),
       endDate: format(new Date(lease.endDate), "yyyy-MM-dd"),
       monthlyRent: lease.monthlyRent.toString(),
@@ -244,6 +256,31 @@ export default function LeasesPage() {
               <DialogTitle>{editingLease ? "Edit Lease" : "Create New Lease"}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label>Lease Type</Label>
+                <Select
+                  value={formData.leaseType}
+                  onValueChange={(value) => setFormData({ ...formData, leaseType: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="RESIDENTIAL">
+                      <div className="flex items-center gap-2">
+                        <Home className="h-4 w-4" />
+                        Residential
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="COMMERCIAL">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4" />
+                        Commercial
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="tenantId">Tenant</Label>
@@ -404,10 +441,10 @@ export default function LeasesPage() {
                 <TableRow>
                   <TableHead>Tenant</TableHead>
                   <TableHead>Unit</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Period</TableHead>
                   <TableHead>Rent</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Document</TableHead>
                   <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -419,6 +456,11 @@ export default function LeasesPage() {
                   const isExpired =
                     lease.status === "ACTIVE" && isBefore(new Date(lease.endDate), new Date());
 
+                  const pendingEscalations = lease.escalations?.filter(e => !e.applied).length || 0;
+                  const expiringInsurance = lease.insurance?.filter(i =>
+                    isBefore(new Date(i.expirationDate), addDays(new Date(), 30))
+                  ).length || 0;
+
                   return (
                     <TableRow key={lease.id}>
                       <TableCell>
@@ -427,6 +469,39 @@ export default function LeasesPage() {
                       </TableCell>
                       <TableCell>
                         {lease.unit.property.name} #{lease.unit.unitNumber}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            lease.leaseType === "COMMERCIAL"
+                              ? "bg-purple-50 text-purple-700 border-purple-200"
+                              : "bg-blue-50 text-blue-700 border-blue-200"
+                          }
+                        >
+                          {lease.leaseType === "COMMERCIAL" ? (
+                            <Building2 className="h-3 w-3 mr-1" />
+                          ) : (
+                            <Home className="h-3 w-3 mr-1" />
+                          )}
+                          {lease.leaseType || "RESIDENTIAL"}
+                        </Badge>
+                        {lease.leaseType === "COMMERCIAL" && (
+                          <div className="flex gap-1 mt-1">
+                            {pendingEscalations > 0 && (
+                              <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
+                                <TrendingUp className="h-3 w-3 mr-1" />
+                                {pendingEscalations}
+                              </Badge>
+                            )}
+                            {expiringInsurance > 0 && (
+                              <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
+                                <Shield className="h-3 w-3 mr-1" />
+                                {expiringInsurance}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
@@ -464,21 +539,6 @@ export default function LeasesPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {lease.documentUrl ? (
-                          <a
-                            href={lease.documentUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            View
-                          </a>
-                        ) : (
-                          <span className="text-slate-400">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -486,6 +546,12 @@ export default function LeasesPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/leases/${lease.id}`}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEdit(lease)}>
                               <Pencil className="h-4 w-4 mr-2" />
                               Edit

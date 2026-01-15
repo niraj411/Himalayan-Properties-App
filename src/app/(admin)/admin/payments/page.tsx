@@ -29,9 +29,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Plus, CreditCard, Loader2, Trash2, DollarSign } from "lucide-react";
+import { Plus, CreditCard, Loader2, Trash2, DollarSign, Calculator } from "lucide-react";
 
 interface Payment {
   id: string;
@@ -58,6 +59,8 @@ export default function PaymentsPage() {
   const [leases, setLeases] = useState<Lease[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [qbConnected, setQbConnected] = useState(false);
+  const [syncToQuickBooks, setSyncToQuickBooks] = useState(false);
   const [formData, setFormData] = useState({
     leaseId: "",
     amount: "",
@@ -70,15 +73,21 @@ export default function PaymentsPage() {
 
   const fetchData = async () => {
     try {
-      const [paymentsRes, leasesRes] = await Promise.all([
+      const [paymentsRes, leasesRes, qbStatusRes] = await Promise.all([
         fetch("/api/payments"),
         fetch("/api/leases"),
+        fetch("/api/quickbooks/status"),
       ]);
 
       if (paymentsRes.ok) setPayments(await paymentsRes.json());
       if (leasesRes.ok) {
         const allLeases = await leasesRes.json();
         setLeases(allLeases.filter((l: Lease & { status: string }) => l.status === "ACTIVE"));
+      }
+      if (qbStatusRes.ok) {
+        const qbStatus = await qbStatusRes.json();
+        setQbConnected(qbStatus.connected);
+        setSyncToQuickBooks(qbStatus.connected);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -100,11 +109,18 @@ export default function PaymentsPage() {
       const response = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, syncToQuickBooks }),
       });
 
       if (response.ok) {
-        toast.success("Payment recorded");
+        const result = await response.json();
+        if (syncToQuickBooks && result.qbSynced) {
+          toast.success("Payment recorded and synced to QuickBooks");
+        } else if (syncToQuickBooks && !result.qbSynced) {
+          toast.success("Payment recorded (QuickBooks sync failed)");
+        } else {
+          toast.success("Payment recorded");
+        }
         setIsDialogOpen(false);
         setFormData({
           leaseId: "",
@@ -265,6 +281,22 @@ export default function PaymentsPage() {
                   rows={2}
                 />
               </div>
+              {qbConnected && (
+                <div className="flex items-center space-x-2 p-3 bg-green-50 rounded-lg border border-green-100">
+                  <Checkbox
+                    id="syncToQuickBooks"
+                    checked={syncToQuickBooks}
+                    onCheckedChange={(checked) => setSyncToQuickBooks(checked === true)}
+                  />
+                  <label
+                    htmlFor="syncToQuickBooks"
+                    className="flex items-center gap-2 text-sm font-medium text-green-800 cursor-pointer"
+                  >
+                    <Calculator className="h-4 w-4" />
+                    Sync to QuickBooks
+                  </label>
+                </div>
+              )}
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel

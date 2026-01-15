@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { isConnected, createPaymentReceipt } from "@/lib/quickbooks";
 
 export async function GET(request: Request) {
   try {
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    const { leaseId, amount, date, method, reference, notes } = data;
+    const { leaseId, amount, date, method, reference, notes, syncToQuickBooks } = data;
 
     if (!leaseId || !amount || !date) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -78,7 +79,28 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(payment, { status: 201 });
+    // Sync to QuickBooks if requested and connected
+    let qbSynced = false;
+    if (syncToQuickBooks) {
+      const qbConnected = await isConnected();
+      if (qbConnected) {
+        try {
+          const tenantName = payment.lease.tenant.user.name;
+          const unitInfo = `${payment.lease.unit.property.name} - Unit ${payment.lease.unit.unitNumber}`;
+          await createPaymentReceipt({
+            tenantName,
+            amount: payment.amount,
+            date: new Date(date).toISOString().split("T")[0],
+            memo: `Rent payment for ${unitInfo}. Ref: ${reference || "N/A"}`,
+          });
+          qbSynced = true;
+        } catch (qbError) {
+          console.error("Failed to sync payment to QuickBooks:", qbError);
+        }
+      }
+    }
+
+    return NextResponse.json({ ...payment, qbSynced }, { status: 201 });
   } catch (error) {
     console.error("Error creating payment:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

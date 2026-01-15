@@ -11,8 +11,27 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Himalayan Properties",
-  description: "Property Management System by Himalayan Holdings",
+  description: "Property Management System for residential and commercial properties",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Himalayan Properties",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: "/icon-192.svg",
+    apple: "/icon-192.svg",
+  },
+};
+
+export const viewport = {
+  themeColor: "#2563eb",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({

@@ -123,7 +123,7 @@ export default function TenantsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          unitId: formData.unitId || null,
+          unitId: formData.unitId && formData.unitId !== "none" ? formData.unitId : null,
         }),
       });
 
@@ -262,7 +262,7 @@ export default function TenantsPage() {
                       <SelectValue placeholder="Select unit..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No unit</SelectItem>
+                      <SelectItem value="none">No unit</SelectItem>
                       {availableUnits.map((unit) => (
                         <SelectItem key={unit.id} value={unit.id}>
                           {unit.property.name} - #{unit.unitNumber}

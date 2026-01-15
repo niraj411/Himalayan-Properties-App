@@ -33,6 +33,10 @@ import {
   Briefcase,
   DollarSign,
   Calendar,
+  Store,
+  Home,
+  FileText,
+  ExternalLink,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -43,6 +47,7 @@ import {
 
 interface Application {
   id: string;
+  applicationType: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -57,9 +62,12 @@ interface Application {
   pets: string | null;
   references: string | null;
   additionalNotes: string | null;
+  businessName: string | null;
+  taxReturnsUrl: string | null;
+  bankStatementsUrl: string | null;
   status: string;
   createdAt: string;
-  property: { name: string } | null;
+  property: { name: string; type: string } | null;
 }
 
 export default function ApplicationsPage() {
@@ -132,7 +140,7 @@ export default function ApplicationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Tenant Applications</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Applications</h1>
         <p className="text-slate-500 mt-1">Review and manage rental applications</p>
       </div>
 
@@ -153,12 +161,11 @@ export default function ApplicationsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Applicant</TableHead>
-                  <TableHead>Contact</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Property</TableHead>
-                  <TableHead>Income</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Applied</TableHead>
-                  <TableHead className="w-12"></TableHead>
+                  <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -169,36 +176,32 @@ export default function ApplicationsPage() {
                     onClick={() => setSelectedApplication(app)}
                   >
                     <TableCell>
-                      <div className="font-medium text-slate-900">
-                        {app.firstName} {app.lastName}
+                      <div>
+                        <div className="font-medium text-slate-900">
+                          {app.businessName || `${app.firstName} ${app.lastName}`}
+                        </div>
+                        <div className="text-xs text-slate-500">{app.email}</div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1 text-sm text-slate-500">
-                        <div className="flex items-center gap-1">
-                          <Mail className="h-3.5 w-3.5" />
-                          {app.email}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Phone className="h-3.5 w-3.5" />
-                          {app.phone}
-                        </div>
-                      </div>
+                      <Badge variant="outline" className={
+                        app.applicationType === "COMMERCIAL"
+                          ? "border-purple-200 text-purple-700 bg-purple-50"
+                          : "border-blue-200 text-blue-700 bg-blue-50"
+                      }>
+                        {app.applicationType === "COMMERCIAL" ? (
+                          <Store className="h-3 w-3 mr-1" />
+                        ) : (
+                          <Home className="h-3 w-3 mr-1" />
+                        )}
+                        {app.applicationType === "COMMERCIAL" ? "Commercial" : "Residential"}
+                      </Badge>
                     </TableCell>
-                    <TableCell>{app.property?.name || "General"}</TableCell>
-                    <TableCell>
-                      {app.monthlyIncome ? (
-                        <div className="flex items-center">
-                          <DollarSign className="h-4 w-4 text-slate-400" />
-                          {app.monthlyIncome.toLocaleString()}/mo
-                        </div>
-                      ) : (
-                        <span className="text-slate-400">-</span>
-                      )}
+                    <TableCell className="text-slate-600">
+                      {app.property?.name || "General Inquiry"}
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={app.status === "APPROVED" ? "default" : "secondary"}
                         className={
                           app.status === "PENDING"
                             ? "bg-yellow-50 text-yellow-700"
@@ -210,7 +213,7 @@ export default function ApplicationsPage() {
                         {app.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-slate-500">
+                    <TableCell className="text-slate-500 text-sm">
                       {format(new Date(app.createdAt), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
@@ -249,22 +252,41 @@ export default function ApplicationsPage() {
       )}
 
       <Dialog open={!!selectedApplication} onOpenChange={(open) => !open && setSelectedApplication(null)}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Application Details</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Application Details
+              {selectedApplication?.applicationType === "COMMERCIAL" && (
+                <Badge variant="outline" className="border-purple-200 text-purple-700 bg-purple-50">
+                  <Store className="h-3 w-3 mr-1" />
+                  Commercial
+                </Badge>
+              )}
+            </DialogTitle>
           </DialogHeader>
           {selectedApplication && (
-            <div className="space-y-6 mt-4">
+            <div className="space-y-5 mt-4">
+              {/* Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="h-6 w-6 text-blue-600" />
+                  <div className={`w-11 h-11 rounded-full flex items-center justify-center ${
+                    selectedApplication.applicationType === "COMMERCIAL"
+                      ? "bg-purple-100"
+                      : "bg-blue-100"
+                  }`}>
+                    {selectedApplication.applicationType === "COMMERCIAL" ? (
+                      <Store className="h-5 w-5 text-purple-600" />
+                    ) : (
+                      <User className="h-5 w-5 text-blue-600" />
+                    )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">
+                    {selectedApplication.businessName && (
+                      <h3 className="font-semibold text-lg">{selectedApplication.businessName}</h3>
+                    )}
+                    <p className={selectedApplication.businessName ? "text-sm text-slate-500" : "font-semibold text-lg"}>
                       {selectedApplication.firstName} {selectedApplication.lastName}
-                    </h3>
-                    <p className="text-slate-500">{selectedApplication.email}</p>
+                    </p>
                   </div>
                 </div>
                 <Badge
@@ -280,33 +302,36 @@ export default function ApplicationsPage() {
                 </Badge>
               </div>
 
+              {/* Contact & Property Info */}
               <div className="grid md:grid-cols-2 gap-4">
-                <Card className="border-0 shadow-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-slate-500">Contact Information</CardTitle>
+                <Card className="border shadow-none">
+                  <CardHeader className="pb-2 pt-3 px-4">
+                    <CardTitle className="text-xs font-medium text-slate-500 uppercase tracking-wide">Contact</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center gap-2">
+                  <CardContent className="space-y-2 px-4 pb-3">
+                    <div className="flex items-center gap-2 text-sm">
                       <Phone className="h-4 w-4 text-slate-400" />
                       <span>{selectedApplication.phone}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-sm">
                       <Mail className="h-4 w-4 text-slate-400" />
                       <span>{selectedApplication.email}</span>
                     </div>
                     {selectedApplication.currentAddress && (
-                      <p className="text-sm text-slate-600 mt-2">{selectedApplication.currentAddress}</p>
+                      <p className="text-sm text-slate-600 pt-1">{selectedApplication.currentAddress}</p>
                     )}
                   </CardContent>
                 </Card>
 
-                <Card className="border-0 shadow-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-slate-500">Employment</CardTitle>
+                <Card className="border shadow-none">
+                  <CardHeader className="pb-2 pt-3 px-4">
+                    <CardTitle className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                      {selectedApplication.applicationType === "COMMERCIAL" ? "Business Details" : "Employment"}
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2">
+                  <CardContent className="space-y-2 px-4 pb-3">
                     {selectedApplication.employerName && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-sm">
                         <Briefcase className="h-4 w-4 text-slate-400" />
                         <span>{selectedApplication.employerName}</span>
                       </div>
@@ -315,7 +340,7 @@ export default function ApplicationsPage() {
                       <p className="text-sm text-slate-600">{selectedApplication.jobTitle}</p>
                     )}
                     {selectedApplication.monthlyIncome && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-sm">
                         <DollarSign className="h-4 w-4 text-slate-400" />
                         <span>${selectedApplication.monthlyIncome.toLocaleString()}/month</span>
                       </div>
@@ -324,15 +349,52 @@ export default function ApplicationsPage() {
                 </Card>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              {/* Commercial Documents */}
+              {selectedApplication.applicationType === "COMMERCIAL" && (
+                <Card className="border-purple-200 bg-purple-50/50 shadow-none">
+                  <CardHeader className="pb-2 pt-3 px-4">
+                    <CardTitle className="text-xs font-medium text-purple-700 uppercase tracking-wide flex items-center gap-1">
+                      <FileText className="h-3.5 w-3.5" />
+                      Commercial Documents
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 px-4 pb-3">
+                    {selectedApplication.taxReturnsUrl && (
+                      <a
+                        href={selectedApplication.taxReturnsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm text-purple-700 hover:text-purple-900"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        2 Years Corporate Tax Returns
+                      </a>
+                    )}
+                    {selectedApplication.bankStatementsUrl && (
+                      <a
+                        href={selectedApplication.bankStatementsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm text-purple-700 hover:text-purple-900"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        3 Months Bank Statements
+                      </a>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Move-in Date & Occupants */}
+              <div className="flex flex-wrap gap-4 text-sm">
                 {selectedApplication.moveInDate && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-slate-600">
                     <Calendar className="h-4 w-4 text-slate-400" />
                     <span>Move-in: {format(new Date(selectedApplication.moveInDate), "MMM d, yyyy")}</span>
                   </div>
                 )}
                 {selectedApplication.numberOfOccupants && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 text-slate-600">
                     <User className="h-4 w-4 text-slate-400" />
                     <span>{selectedApplication.numberOfOccupants} occupant(s)</span>
                   </div>
@@ -341,40 +403,42 @@ export default function ApplicationsPage() {
 
               {selectedApplication.pets && (
                 <div>
-                  <p className="text-sm font-medium text-slate-500 mb-1">Pets</p>
-                  <p className="text-slate-700">{selectedApplication.pets}</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Pets</p>
+                  <p className="text-sm text-slate-700">{selectedApplication.pets}</p>
                 </div>
               )}
 
               {selectedApplication.references && (
                 <div>
-                  <p className="text-sm font-medium text-slate-500 mb-1">References</p>
-                  <p className="text-slate-700 whitespace-pre-wrap">{selectedApplication.references}</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">References</p>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap">{selectedApplication.references}</p>
                 </div>
               )}
 
               {selectedApplication.additionalNotes && (
                 <div>
-                  <p className="text-sm font-medium text-slate-500 mb-1">Additional Notes</p>
-                  <p className="text-slate-700 whitespace-pre-wrap">{selectedApplication.additionalNotes}</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Additional Notes</p>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap">{selectedApplication.additionalNotes}</p>
                 </div>
               )}
 
               {selectedApplication.status === "PENDING" && (
-                <div className="flex justify-end gap-3 pt-4 border-t">
+                <div className="flex justify-end gap-2 pt-4 border-t">
                   <Button
                     variant="outline"
+                    size="sm"
                     className="text-red-600 hover:text-red-700"
                     onClick={() => updateStatus(selectedApplication.id, "REJECTED")}
                   >
-                    <XCircle className="h-4 w-4 mr-2" />
+                    <XCircle className="h-4 w-4 mr-1" />
                     Reject
                   </Button>
                   <Button
+                    size="sm"
                     className="bg-green-600 hover:bg-green-700"
                     onClick={() => updateStatus(selectedApplication.id, "APPROVED")}
                   >
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="h-4 w-4 mr-1" />
                     Approve
                   </Button>
                 </div>

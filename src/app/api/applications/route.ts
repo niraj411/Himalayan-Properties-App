@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     const data = await request.json();
     const {
       propertyId,
+      applicationType,
       firstName,
       lastName,
       email,
@@ -42,15 +43,26 @@ export async function POST(request: Request) {
       pets,
       references,
       additionalNotes,
+      businessName,
+      taxReturnsUrl,
+      bankStatementsUrl,
     } = data;
 
     if (!firstName || !lastName || !email || !phone) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // Validate commercial application required fields
+    if (applicationType === "COMMERCIAL") {
+      if (!businessName || !taxReturnsUrl || !bankStatementsUrl) {
+        return NextResponse.json({ error: "Commercial applications require business name, tax returns, and bank statements" }, { status: 400 });
+      }
+    }
+
     const application = await db.application.create({
       data: {
         propertyId: propertyId || null,
+        applicationType: applicationType || "RESIDENTIAL",
         firstName,
         lastName,
         email,
@@ -65,6 +77,9 @@ export async function POST(request: Request) {
         pets,
         references,
         additionalNotes,
+        businessName,
+        taxReturnsUrl,
+        bankStatementsUrl,
         status: "PENDING",
       },
     });

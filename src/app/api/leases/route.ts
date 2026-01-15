@@ -15,6 +15,8 @@ export async function GET() {
         tenant: { include: { user: true } },
         unit: { include: { property: true } },
         payments: { orderBy: { date: "desc" }, take: 5 },
+        escalations: { orderBy: { effectiveDate: "asc" } },
+        insurance: { orderBy: { expirationDate: "asc" } },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    const { tenantId, unitId, startDate, endDate, monthlyRent, depositAmount, documentUrl, notes } = data;
+    const { tenantId, unitId, startDate, endDate, monthlyRent, depositAmount, documentUrl, notes, leaseType } = data;
 
     if (!tenantId || !unitId || !startDate || !endDate || !monthlyRent) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -50,6 +52,7 @@ export async function POST(request: Request) {
       data: {
         tenantId,
         unitId,
+        leaseType: leaseType || "RESIDENTIAL",
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         monthlyRent: parseFloat(monthlyRent),
@@ -61,6 +64,8 @@ export async function POST(request: Request) {
       include: {
         tenant: { include: { user: true } },
         unit: { include: { property: true } },
+        escalations: true,
+        insurance: true,
       },
     });
 

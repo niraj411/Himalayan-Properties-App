@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { format, differenceInDays } from "date-fns";
+import { format, differenceInDays, isBefore, addDays } from "date-fns";
 import {
   FileText,
   Calendar,
@@ -13,7 +13,12 @@ import {
   Home,
   ExternalLink,
   AlertTriangle,
+  Building2,
+  Shield,
+  Check,
+  TrendingUp,
 } from "lucide-react";
+import { InsuranceUploadSection } from "./insurance-upload";
 
 async function getLeaseData(tenantId: string) {
   const tenant = await db.tenant.findUnique({
@@ -26,6 +31,8 @@ async function getLeaseData(tenantId: string) {
         orderBy: { createdAt: "desc" },
         include: {
           unit: { include: { property: true } },
+          insurance: { orderBy: { expirationDate: "desc" } },
+          escalations: { orderBy: { effectiveDate: "asc" } },
         },
       },
     },
@@ -86,8 +93,17 @@ export default async function TenantLeasePage() {
           <Card className="border-0 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-blue-600" />
+                {activeLease.leaseType === "COMMERCIAL" ? (
+                  <Building2 className="h-5 w-5 text-purple-600" />
+                ) : (
+                  <FileText className="h-5 w-5 text-blue-600" />
+                )}
                 Active Lease
+                {activeLease.leaseType === "COMMERCIAL" && (
+                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 ml-2">
+                    Commercial
+                  </Badge>
+                )}
               </CardTitle>
               <Badge className="bg-green-50 text-green-700">Active</Badge>
             </CardHeader>
@@ -170,6 +186,31 @@ export default async function TenantLeasePage() {
                 </div>
               )}
 
+              {/* Upcoming Rent Escalations - Commercial Only */}
+              {activeLease.leaseType === "COMMERCIAL" && activeLease.escalations && activeLease.escalations.length > 0 && (
+                <div className="p-4 border border-amber-200 bg-amber-50 rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <TrendingUp className="h-5 w-5 text-amber-600" />
+                    <span className="font-medium text-amber-800">Upcoming Rent Changes</span>
+                  </div>
+                  <div className="space-y-2">
+                    {activeLease.escalations
+                      .filter((e: { applied: boolean }) => !e.applied)
+                      .slice(0, 3)
+                      .map((escalation: { id: string; effectiveDate: Date; newMonthlyRent: number }) => (
+                        <div key={escalation.id} className="flex justify-between text-sm">
+                          <span className="text-amber-700">
+                            {format(new Date(escalation.effectiveDate), "MMMM d, yyyy")}
+                          </span>
+                          <span className="font-medium text-amber-800">
+                            ${escalation.newMonthlyRent.toLocaleString()}/mo
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
               {/* Notes */}
               {activeLease.notes && (
                 <div className="p-4 bg-slate-50 rounded-lg">
@@ -179,6 +220,14 @@ export default async function TenantLeasePage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Insurance Section - Commercial Only */}
+          {activeLease.leaseType === "COMMERCIAL" && (
+            <InsuranceUploadSection
+              leaseId={activeLease.id}
+              insurance={activeLease.insurance}
+            />
+          )}
         </>
       ) : (
         <Card className="border-dashed">

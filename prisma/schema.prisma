@@ -1,6 +1,5 @@
 generator client {
-  provider   = "prisma-client-js"
-  engineType = "library"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -77,27 +76,69 @@ model Tenant {
 }
 
 model Lease {
-  id          String   @id @default(cuid())
-  tenantId    String
-  unitId      String
-  startDate   DateTime
-  endDate     DateTime
-  monthlyRent Float
+  id            String   @id @default(cuid())
+  tenantId      String
+  unitId        String
+  leaseType     String   @default("RESIDENTIAL") // RESIDENTIAL or COMMERCIAL
+  startDate     DateTime
+  endDate       DateTime
+  monthlyRent   Float
   depositAmount Float?
-  documentUrl String?
-  status      String   @default("ACTIVE") // ACTIVE, EXPIRED, TERMINATED
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  documentUrl   String?
+  status        String   @default("ACTIVE") // ACTIVE, EXPIRED, TERMINATED
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  unit     Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  payments Payment[]
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  unit        Unit             @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  payments    Payment[]
+  escalations LeaseEscalation[]
+  insurance   InsuranceRecord[]
+}
+
+// Lease escalations for commercial properties
+model LeaseEscalation {
+  id              String   @id @default(cuid())
+  leaseId         String
+  effectiveDate   DateTime
+  newMonthlyRent  Float
+  increaseType    String   // PERCENTAGE, FIXED_AMOUNT, CPI
+  increaseValue   Float?   // e.g., 3 for 3% or 100 for $100
+  notes           String?
+  applied         Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+}
+
+// Insurance tracking for commercial tenants
+model InsuranceRecord {
+  id                  String    @id @default(cuid())
+  leaseId             String
+  insuranceType       String    @default("LIABILITY") // LIABILITY, PROPERTY, WORKERS_COMP
+  carrier             String?
+  policyNumber        String?
+  coverageAmount      Float?
+  effectiveDate       DateTime
+  expirationDate      DateTime
+  documentUrl         String?
+  beneficiaryName     String    @default("Himalayan Holdings Property LLC")
+  verified            Boolean   @default(false)
+  verifiedAt          DateTime?
+  reminderSent        Boolean   @default(false)
+  reminderSentAt      DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
 }
 
 model Application {
   id              String   @id @default(cuid())
   propertyId      String?
+  applicationType String   @default("RESIDENTIAL") // RESIDENTIAL or COMMERCIAL
   firstName       String
   lastName        String
   email           String
@@ -112,6 +153,10 @@ model Application {
   pets            String?
   references      String?
   additionalNotes String?
+  // Commercial application fields
+  businessName        String?
+  taxReturnsUrl       String?  // 2 years of corporate tax returns
+  bankStatementsUrl   String?  // 3 months of bank statements
   status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -178,4 +223,16 @@ model Settings {
   bankAccountNumber String?
   checkMailingAddress String?
   paymentInstructions String?
+}
+
+// QuickBooks Integration
+model QuickBooksToken {
+  id            String   @id @default(cuid())
+  realmId       String   @unique
+  accessToken   String
+  refreshToken  String
+  accessTokenExpiresAt  DateTime
+  refreshTokenExpiresAt DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

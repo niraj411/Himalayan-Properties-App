@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   Calendar,
   DollarSign,
+  Shield,
 } from "lucide-react";
 import { format, addDays, isBefore } from "date-fns";
 import Link from "next/link";
@@ -28,6 +29,7 @@ async function getDashboardData() {
     pendingApplicationsCount,
     expiringLeases,
     recentMaintenanceRequests,
+    expiringInsurance,
   ] = await Promise.all([
     db.property.count(),
     db.unit.count(),
@@ -57,6 +59,22 @@ async function getDashboardData() {
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
+    db.insuranceRecord.findMany({
+      where: {
+        expirationDate: { lte: addDays(new Date(), 30) },
+        lease: { status: "ACTIVE" },
+      },
+      include: {
+        lease: {
+          include: {
+            tenant: { include: { user: true } },
+            unit: { include: { property: true } },
+          },
+        },
+      },
+      orderBy: { expirationDate: "asc" },
+      take: 5,
+    }),
   ]);
 
   return {
@@ -69,6 +87,7 @@ async function getDashboardData() {
     pendingApplicationsCount,
     expiringLeases,
     recentMaintenanceRequests,
+    expiringInsurance,
   };
 }
 
@@ -163,7 +182,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Content Grid */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-3 gap-6">
         {/* Expiring Leases */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -246,6 +265,49 @@ export default async function AdminDashboard() {
                     </div>
                   </li>
                 ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Expiring Insurance */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-500" />
+              Insurance Alerts
+            </CardTitle>
+            <Link href="/admin/leases" className="text-sm text-blue-600 hover:text-blue-700">
+              View all
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {data.expiringInsurance.length === 0 ? (
+              <p className="text-slate-500 text-sm py-4">No insurance expiring soon</p>
+            ) : (
+              <ul className="space-y-3">
+                {data.expiringInsurance.map((insurance) => {
+                  const isExpired = isBefore(new Date(insurance.expirationDate), new Date());
+                  return (
+                    <li key={insurance.id} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                      <div>
+                        <p className="font-medium text-slate-900">
+                          {insurance.lease.tenant.user.name}
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          {insurance.lease.unit.property.name} - Unit {insurance.lease.unit.unitNumber}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {insurance.insuranceType} - {insurance.carrier || "Unknown carrier"}
+                        </p>
+                      </div>
+                      <Badge variant={isExpired ? "destructive" : "secondary"} className="flex items-center gap-1">
+                        {isExpired && <AlertTriangle className="h-3 w-3" />}
+                        {format(new Date(insurance.expirationDate), "MMM d, yyyy")}
+                      </Badge>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </CardContent>
