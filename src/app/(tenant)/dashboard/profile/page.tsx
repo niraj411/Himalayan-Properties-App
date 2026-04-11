@@ -36,7 +36,10 @@ export default function TenantProfilePage() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!session?.user?.tenantId) return;
+      if (!session?.user?.tenantId) {
+        setIsLoading(false);
+        return;
+      }
 
       try {
         const response = await fetch(`/api/tenants/${session.user.tenantId}`);
@@ -118,6 +121,22 @@ export default function TenantProfilePage() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (!session?.user?.tenantId) {
+    return (
+      <div className="space-y-6 max-w-2xl">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Profile</h1>
+          <p className="text-slate-500 mt-1">Manage your account information</p>
+        </div>
+        <Card className="border-0 shadow-sm">
+          <CardContent className="py-10 text-center text-slate-500">
+            Admin accounts do not have a tenant profile. Manage tenants from the admin portal.
+          </CardContent>
+        </Card>
       </div>
     );
   }

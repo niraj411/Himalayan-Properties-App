@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   }
 
   const settings = await db.settings.findFirst();
-  const adminEmail = settings?.companyEmail;
+  const adminEmail = settings?.companyEmail || process.env.SMTP_USER;
 
   if (!adminEmail) {
     return NextResponse.json({ error: "Admin email not configured" }, { status: 500 });
