@@ -37,19 +37,19 @@ export default function HomePage() {
               <a href="#values" className="text-slate-600 hover:text-slate-900 text-sm">
                 Our Values
               </a>
-              <a href="#properties" className="text-slate-600 hover:text-slate-900 text-sm">
-                Properties
-              </a>
+              <Link href="/listings" className="text-slate-600 hover:text-slate-900 text-sm">
+                Available Units
+              </Link>
               <a href="#tenants" className="text-slate-600 hover:text-slate-900 text-sm">
                 For Tenants
               </a>
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/apply">
-                <Button variant="ghost" size="sm">Apply</Button>
+              <Link href="/listings">
+                <Button variant="ghost" size="sm">Browse Units</Button>
               </Link>
               <Link href="/login">
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Sign In</Button>
+                <Button size="sm" className="bg-gradient-to-br from-[#4f17ce] to-[#673de6] border-0">Sign In</Button>
               </Link>
             </div>
           </div>
@@ -69,9 +69,9 @@ export default function HomePage() {
             commercial properties in Erie, Lafayette, and the North Denver Metro area.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/apply">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 h-11 px-6">
-                Apply for a Property
+            <Link href="/listings">
+              <Button size="lg" className="bg-gradient-to-br from-[#4f17ce] to-[#673de6] border-0 h-11 px-6">
+                Browse Available Properties
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -266,20 +266,20 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 px-4 bg-blue-600">
+      <section className="py-16 px-4 bg-gradient-to-br from-[#4f17ce] to-[#673de6]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
             Looking for a Property?
           </h2>
-          <p className="text-blue-100 mb-6">
-            Browse available properties and submit your application online.
+          <p className="text-purple-100 mb-6">
+            Browse available units and submit your application online.
           </p>
-          <Link href="/apply">
+          <Link href="/listings">
             <Button
               size="lg"
-              className="bg-white text-blue-600 hover:bg-blue-50 h-11 px-6"
+              className="bg-white text-[#4f17ce] hover:bg-purple-50 h-11 px-6"
             >
-              Apply Now
+              View Available Units
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -307,6 +307,9 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold text-white mb-3 text-sm">Links</h3>
               <div className="space-y-2">
+                <Link href="/listings" className="block text-slate-400 hover:text-white text-sm">
+                  Available Units
+                </Link>
                 <Link href="/apply" className="block text-slate-400 hover:text-white text-sm">
                   Apply for Housing
                 </Link>

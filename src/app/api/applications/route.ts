@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { sendEmail } from "@/lib/email";
 
 export async function GET() {
   try {
@@ -83,6 +84,20 @@ export async function POST(request: Request) {
         status: "PENDING",
       },
     });
+
+    // Notify admin of new application
+    try {
+      const settings = await db.settings.findFirst();
+      if (settings?.companyEmail) {
+        await sendEmail({
+          to: settings.companyEmail,
+          subject: `New ${application.applicationType} Application from ${firstName} ${lastName}`,
+          body: `A new application has been submitted.\n\nApplicant: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}\nType: ${applicationType || "RESIDENTIAL"}\n\nPlease log in to the admin portal to review.`,
+        });
+      }
+    } catch (emailErr) {
+      console.error("Failed to send application email:", emailErr);
+    }
 
     return NextResponse.json(application, { status: 201 });
   } catch (error) {

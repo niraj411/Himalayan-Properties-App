@@ -18,6 +18,8 @@ import {
   ChevronLeft,
   Menu,
   Calculator,
+  Mail,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -30,7 +32,9 @@ const navigation = [
   { name: "Applications", href: "/admin/applications", icon: ClipboardList },
   { name: "Maintenance", href: "/admin/maintenance", icon: Wrench },
   { name: "Payments", href: "/admin/payments", icon: CreditCard },
+  { name: "Rent Roll", href: "/admin/rent-roll", icon: BarChart3 },
   { name: "Accounting", href: "/admin/accounting", icon: Calculator },
+  { name: "Messages", href: "/admin/messages", icon: Mail },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

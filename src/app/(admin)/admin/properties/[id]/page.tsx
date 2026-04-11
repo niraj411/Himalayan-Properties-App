@@ -43,6 +43,10 @@ import {
   Trash2,
   User,
   DollarSign,
+  ExternalLink,
+  Landmark,
+  Upload,
+  X,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -82,6 +86,13 @@ interface Property {
   state: string;
   zip: string;
   description: string | null;
+  imageUrl: string | null;
+  photos: string | null;
+  zillowUrl: string | null;
+  mortgageLender: string | null;
+  mortgageMonthlyPayment: number | null;
+  mortgageDueDay: number | null;
+  mortgageBalance: number | null;
   units: Unit[];
 }
 
@@ -105,6 +116,7 @@ export default function PropertyDetailPage({
     status: "VACANT",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const fetchProperty = async () => {
     try {
@@ -218,6 +230,47 @@ export default function PropertyDetailPage({
     setIsUnitDialogOpen(true);
   };
 
+  const handleAddPhoto = async (file: File) => {
+    setIsUploadingPhoto(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("type", "property");
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      if (!res.ok) { toast.error("Upload failed"); return; }
+      const { url } = await res.json();
+
+      const existing: string[] = property?.photos ? JSON.parse(property.photos) : [];
+      const updated = [...existing, url];
+
+      const updateRes = await fetch(`/api/properties/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photos: JSON.stringify(updated) }),
+      });
+      if (updateRes.ok) {
+        toast.success("Photo added");
+        fetchProperty();
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
+  const handleRemovePhoto = async (photoUrl: string) => {
+    if (!property) return;
+    const existing: string[] = property.photos ? JSON.parse(property.photos) : [];
+    const updated = existing.filter((p) => p !== photoUrl);
+    const res = await fetch(`/api/properties/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ photos: JSON.stringify(updated) }),
+    });
+    if (res.ok) { toast.success("Photo removed"); fetchProperty(); }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -285,6 +338,18 @@ export default function PropertyDetailPage({
             )}
           </div>
         </div>
+        {/* Zillow button for residential */}
+        {property.zillowUrl && (
+          <a
+            href={property.zillowUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#e9e8ea] text-[#1b1c1e] text-sm font-medium rounded-xl self-start"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Zillow Listing
+          </a>
+        )}
       </div>
 
       {/* Stats */}
@@ -310,6 +375,89 @@ export default function PropertyDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      {/* Mortgage Card */}
+      {(property.mortgageLender || property.mortgageMonthlyPayment) && (
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Landmark className="h-5 w-5 text-[#4f17ce]" />
+              Mortgage
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {property.mortgageLender && (
+              <div className="p-4 bg-[#f5f3f5] rounded-xl">
+                <p className="text-xs text-slate-400 mb-1">Lender</p>
+                <p className="font-semibold text-[#1b1c1e]">{property.mortgageLender}</p>
+              </div>
+            )}
+            {property.mortgageMonthlyPayment && (
+              <div className="p-4 bg-[#f5f3f5] rounded-xl">
+                <p className="text-xs text-slate-400 mb-1">Monthly Payment</p>
+                <p className="font-semibold text-[#1b1c1e]">${property.mortgageMonthlyPayment.toLocaleString()}</p>
+                {property.mortgageDueDay && (
+                  <p className="text-xs text-slate-400 mt-0.5">Due on the {property.mortgageDueDay}th</p>
+                )}
+              </div>
+            )}
+            {property.mortgageBalance && (
+              <div className="p-4 bg-[#f5f3f5] rounded-xl">
+                <p className="text-xs text-slate-400 mb-1">Remaining Balance</p>
+                <p className="font-semibold text-[#1b1c1e]">${property.mortgageBalance.toLocaleString()}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Photo Gallery */}
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-base">Photos</CardTitle>
+          <label className="flex items-center gap-2 px-3 py-1.5 bg-[#e9e8ea] text-[#1b1c1e] text-sm font-medium rounded-xl cursor-pointer">
+            {isUploadingPhoto ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {isUploadingPhoto ? "Uploading..." : "Add Photo"}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAddPhoto(f); e.target.value = ""; }}
+            />
+          </label>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const allPhotos: string[] = [
+              ...(property.imageUrl ? [property.imageUrl] : []),
+              ...(property.photos ? JSON.parse(property.photos) : []),
+            ];
+            if (allPhotos.length === 0) {
+              return <p className="text-sm text-slate-400 py-4 text-center">No photos yet. Add a main photo in Edit Property or upload additional photos here.</p>;
+            }
+            return (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {allPhotos.map((photo, i) => (
+                  <div key={i} className="relative group rounded-xl overflow-hidden h-28 bg-[#f5f3f5]">
+                    <img src={photo} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                    {i === 0 && (
+                      <span className="absolute top-1.5 left-1.5 text-xs px-2 py-0.5 bg-black/60 text-white rounded-lg">Main</span>
+                    )}
+                    {i > 0 && (
+                      <button
+                        onClick={() => handleRemovePhoto(photo)}
+                        className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/60 text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
 
       {/* Units Table */}
       <Card className="border-0 shadow-sm">

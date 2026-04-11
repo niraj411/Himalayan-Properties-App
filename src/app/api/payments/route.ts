@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { isConnected, createPaymentReceipt } from "@/lib/quickbooks";
+import { sendTenantEmail } from "@/lib/email";
 
 export async function GET(request: Request) {
   try {
@@ -98,6 +99,20 @@ export async function POST(request: Request) {
           console.error("Failed to sync payment to QuickBooks:", qbError);
         }
       }
+    }
+
+    // Email tenant receipt
+    try {
+      const tenantUser = payment.lease.tenant.user;
+      const unitInfo = `${payment.lease.unit.property.name} - Unit ${payment.lease.unit.unitNumber}`;
+      await sendTenantEmail({
+        tenantName: tenantUser.name,
+        tenantEmail: tenantUser.email,
+        subject: "Payment Received",
+        body: `We have recorded a payment of $${payment.amount.toLocaleString()} for ${unitInfo} on ${new Date(date).toLocaleDateString()}.\n\nReference: ${reference || "N/A"}\n\nThank you for your payment.`,
+      });
+    } catch (emailErr) {
+      console.error("Failed to send payment email:", emailErr);
     }
 
     return NextResponse.json({ ...payment, qbSynced }, { status: 201 });

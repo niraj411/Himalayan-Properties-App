@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { sendTenantEmail } from "@/lib/email";
 
 export async function GET(
   request: Request,
@@ -66,6 +67,27 @@ export async function PUT(
         unit: { include: { property: true } },
       },
     });
+
+    // Email tenant on status change
+    if (status) {
+      try {
+        const tenantUser = maintenanceRequest.tenant.user;
+        const statusLabel: Record<string, string> = {
+          IN_PROGRESS: "In Progress",
+          COMPLETED: "Completed",
+          CANCELLED: "Cancelled",
+          OPEN: "Open",
+        };
+        await sendTenantEmail({
+          tenantName: tenantUser.name,
+          tenantEmail: tenantUser.email,
+          subject: `Maintenance Update: ${maintenanceRequest.title}`,
+          body: `Your maintenance request "${maintenanceRequest.title}" has been updated to: ${statusLabel[status] || status}.${notes ? `\n\nNote from management: ${notes}` : ""}`,
+        });
+      } catch (emailErr) {
+        console.error("Failed to send maintenance email:", emailErr);
+      }
+    }
 
     return NextResponse.json(maintenanceRequest);
   } catch (error) {

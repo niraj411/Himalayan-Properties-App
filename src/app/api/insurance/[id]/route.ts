@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { sendTenantEmail } from "@/lib/email";
+import { format } from "date-fns";
 
 export async function GET(
   request: NextRequest,
@@ -111,7 +113,28 @@ export async function PATCH(
           reminderSentAt: body.reminderSent ? new Date() : null,
         }),
       },
+      include: {
+        lease: {
+          include: { tenant: { include: { user: true } } },
+        },
+      },
     });
+
+    // Send reminder email if reminderSent was just set to true
+    if (body.reminderSent === true) {
+      try {
+        const tenant = insurance.lease.tenant;
+        const expDate = format(new Date(insurance.expirationDate), "MMMM d, yyyy");
+        await sendTenantEmail({
+          tenantName: tenant.user.name,
+          tenantEmail: tenant.user.email,
+          subject: "Action Required: Insurance Certificate Renewal",
+          body: `Your liability insurance certificate on file expires on ${expDate}.\n\nPlease upload a renewed certificate through your tenant portal or email it to us as soon as possible to remain in compliance with your lease terms.\n\nIf you have already renewed, please disregard this message.`,
+        });
+      } catch (emailErr) {
+        console.error("Failed to send insurance reminder email:", emailErr);
+      }
+    }
 
     return NextResponse.json(insurance);
   } catch (error) {

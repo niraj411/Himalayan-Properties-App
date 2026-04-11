@@ -55,7 +55,7 @@ export async function PUT(
 
     const { id } = await params;
     const data = await request.json();
-    const { name, type, address, city, state, zip, description, imageUrl } = data;
+    const { name, type, address, city, state, zip, description, imageUrl, zillowUrl, photos, mortgageLender, mortgageMonthlyPayment, mortgageDueDay, mortgageBalance } = data;
 
     const property = await db.property.update({
       where: { id },
@@ -68,6 +68,12 @@ export async function PUT(
         zip,
         description,
         imageUrl,
+        zillowUrl: zillowUrl || null,
+        photos: photos !== undefined ? photos : undefined,
+        mortgageLender: mortgageLender || null,
+        mortgageMonthlyPayment: mortgageMonthlyPayment ? parseFloat(mortgageMonthlyPayment) : null,
+        mortgageDueDay: mortgageDueDay ? parseInt(mortgageDueDay) : null,
+        mortgageBalance: mortgageBalance ? parseFloat(mortgageBalance) : null,
       },
     });
 

@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    const { name, type, address, city, state, zip, description, imageUrl } = data;
+    const { name, type, address, city, state, zip, description, imageUrl, zillowUrl, photos, mortgageLender, mortgageMonthlyPayment, mortgageDueDay, mortgageBalance } = data;
 
     if (!name || !type || !address || !city || !state || !zip) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -57,6 +57,12 @@ export async function POST(request: Request) {
         zip,
         description,
         imageUrl,
+        zillowUrl: zillowUrl || null,
+        photos: photos || null,
+        mortgageLender: mortgageLender || null,
+        mortgageMonthlyPayment: mortgageMonthlyPayment ? parseFloat(mortgageMonthlyPayment) : null,
+        mortgageDueDay: mortgageDueDay ? parseInt(mortgageDueDay) : null,
+        mortgageBalance: mortgageBalance ? parseFloat(mortgageBalance) : null,
       },
     });
 

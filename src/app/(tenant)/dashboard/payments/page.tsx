@@ -1,9 +1,11 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -12,41 +14,79 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { toast } from "sonner";
 import { format } from "date-fns";
-import { CreditCard, Building, DollarSign, Clock, AlertCircle } from "lucide-react";
+import {
+  CreditCard,
+  Building,
+  DollarSign,
+  Clock,
+  AlertCircle,
+  Loader2,
+  ExternalLink,
+} from "lucide-react";
 
-async function getPaymentData(tenantId: string) {
-  const [settings, payments] = await Promise.all([
-    db.settings.findFirst(),
-    db.payment.findMany({
-      where: {
-        lease: {
-          tenantId,
-        },
-      },
-      include: {
-        lease: {
-          include: {
-            unit: { include: { property: true } },
-          },
-        },
-      },
-      orderBy: { date: "desc" },
-      take: 20,
-    }),
-  ]);
-
-  return { settings, payments };
+interface Payment {
+  id: string;
+  amount: number;
+  date: string;
+  method: string | null;
+  reference: string | null;
 }
 
-export default async function TenantPaymentsPage() {
-  const session = await getServerSession(authOptions);
+interface Settings {
+  bankName?: string;
+  bankRoutingNumber?: string;
+  bankAccountNumber?: string;
+  checkMailingAddress?: string;
+  paymentInstructions?: string;
+}
 
-  if (!session || !session.user.tenantId) {
-    redirect("/login");
+export default function TenantPaymentsPage() {
+  const { data: session, status } = useSession();
+  const [isLoading, setIsLoading] = useState(true);
+  const [settings, setSettings] = useState<Settings | null>(null);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [baselaneLink, setBaselaneLink] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      redirect("/login");
+    }
+    if (status === "authenticated") {
+      fetchData();
+    }
+  }, [status]);
+
+  const fetchData = async () => {
+    try {
+      const [settingsRes, paymentsRes, baselaneRes] = await Promise.all([
+        fetch("/api/settings"),
+        fetch("/api/payments"),
+        fetch("/api/tenant-payments"),
+      ]);
+
+      if (settingsRes.ok) setSettings(await settingsRes.json());
+      if (paymentsRes.ok) setPayments(await paymentsRes.json());
+      if (baselaneRes.ok) {
+        const { baselaneLink: link } = await baselaneRes.json();
+        setBaselaneLink(link);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Failed to load payment info");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (status === "loading" || isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
   }
-
-  const { settings, payments } = await getPaymentData(session.user.tenantId);
 
   return (
     <div className="space-y-6">
@@ -55,23 +95,48 @@ export default async function TenantPaymentsPage() {
         <p className="text-slate-500 mt-1">View payment information and history</p>
       </div>
 
-      {/* Coming Soon Banner */}
-      <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <CreditCard className="h-6 w-6" />
+      {/* Baselane Online Payment */}
+      {baselaneLink ? (
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <CreditCard className="h-6 w-6" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold">Pay Rent Online</h2>
+                  <p className="text-blue-100">Securely pay via Baselane</p>
+                </div>
+              </div>
+              <Button
+                asChild
+                className="bg-white text-blue-600 hover:bg-blue-50"
+              >
+                <a href={baselaneLink} target="_blank" rel="noopener noreferrer">
+                  Pay Now <ExternalLink className="h-4 w-4 ml-1" />
+                </a>
+              </Button>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold">Online Payments Coming Soon</h2>
-              <p className="text-blue-100">
-                We&apos;re working on adding online payment options. For now, please use the payment
-                methods below.
-              </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-0 shadow-sm bg-slate-100">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center">
+                <CreditCard className="h-6 w-6 text-slate-500" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-slate-700">Online Payments</h2>
+                <p className="text-slate-500">
+                  Online payments are being set up. Please use the payment methods below for now.
+                </p>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Payment Methods */}
       <div className="grid md:grid-cols-2 gap-6">
@@ -93,17 +158,13 @@ export default async function TenantPaymentsPage() {
                 {settings.bankRoutingNumber && (
                   <div>
                     <p className="text-sm text-slate-500">Routing Number</p>
-                    <p className="font-mono font-medium text-slate-900">
-                      {settings.bankRoutingNumber}
-                    </p>
+                    <p className="font-mono font-medium text-slate-900">{settings.bankRoutingNumber}</p>
                   </div>
                 )}
                 {settings.bankAccountNumber && (
                   <div>
                     <p className="text-sm text-slate-500">Account Number</p>
-                    <p className="font-mono font-medium text-slate-900">
-                      {settings.bankAccountNumber}
-                    </p>
+                    <p className="font-mono font-medium text-slate-900">{settings.bankAccountNumber}</p>
                   </div>
                 )}
               </>
@@ -191,6 +252,10 @@ export default async function TenantPaymentsPage() {
                           ? "Check"
                           : payment.method === "CASH"
                           ? "Cash"
+                          : payment.method === "CARD"
+                          ? "Card"
+                          : payment.method === "ACH"
+                          ? "Bank (ACH)"
                           : payment.method || "Other"}
                       </Badge>
                     </TableCell>

@@ -19,6 +19,8 @@ model User {
 
   tenant        Tenant?
   reminders     Reminder[]
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
 }
 
 model Property {
@@ -31,6 +33,12 @@ model Property {
   zip         String
   description String?
   imageUrl    String?
+  photos      String?  // JSON array of additional image URLs
+  zillowUrl   String?
+  mortgageLender          String?
+  mortgageMonthlyPayment  Float?
+  mortgageDueDay          Int?
+  mortgageBalance         Float?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -66,6 +74,7 @@ model Tenant {
   moveOutDate      DateTime?
   emergencyContact String?
   emergencyPhone   String?
+  baselaneLink     String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -87,6 +96,11 @@ model Lease {
   documentUrl   String?
   status        String   @default("ACTIVE") // ACTIVE, EXPIRED, TERMINATED
   notes         String?
+  depositPaidDate      DateTime?
+  depositStatus        String?   // HELD, RETURNED, PARTIAL_RETURN
+  depositReturnDate    DateTime?
+  depositReturnAmount  Float?
+  depositDeductionNotes String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -133,6 +147,18 @@ model InsuranceRecord {
   updatedAt           DateTime  @updatedAt
 
   lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id      String   @id @default(cuid())
+  fromId  String?
+  toId    String?
+  subject String
+  body    String
+  sentAt  DateTime @default(now())
+
+  from User? @relation("SentMessages", fields: [fromId], references: [id])
+  to   User? @relation("ReceivedMessages", fields: [toId], references: [id])
 }
 
 model Application {
@@ -223,6 +249,9 @@ model Settings {
   bankAccountNumber String?
   checkMailingAddress String?
   paymentInstructions String?
+  baselanePaymentLink String?
+  zillowUrl           String?
+  emailNotificationsEnabled Boolean @default(false)
 }
 
 // QuickBooks Integration

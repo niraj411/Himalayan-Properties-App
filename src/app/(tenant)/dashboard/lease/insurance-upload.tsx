@@ -62,19 +62,36 @@ export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSe
     expirationDate: "",
     documentUrl: "",
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
+      let documentUrl = formData.documentUrl;
+
+      // Upload file if selected
+      if (selectedFile) {
+        const uploadForm = new FormData();
+        uploadForm.append("file", selectedFile);
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadForm,
+        });
+        if (!uploadRes.ok) {
+          toast.error("File upload failed");
+          setIsSubmitting(false);
+          return;
+        }
+        const { url } = await uploadRes.json();
+        documentUrl = url;
+      }
+
       const response = await fetch("/api/insurance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          leaseId,
-          ...formData,
-        }),
+        body: JSON.stringify({ leaseId, ...formData, documentUrl }),
       });
 
       if (response.ok) {
@@ -89,7 +106,7 @@ export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSe
           expirationDate: "",
           documentUrl: "",
         });
-        // Refresh the page to show updated data
+        setSelectedFile(null);
         window.location.reload();
       } else {
         toast.error("Failed to submit insurance");
@@ -212,17 +229,29 @@ export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSe
               </div>
 
               <div className="space-y-2">
-                <Label>Certificate Document URL</Label>
+                <Label>Certificate Document</Label>
                 <Input
-                  type="url"
-                  value={formData.documentUrl}
-                  onChange={(e) => setFormData({ ...formData, documentUrl: e.target.value })}
-                  placeholder="https://..."
-                  required
+                  type="file"
+                  accept=".pdf,image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setSelectedFile(file);
+                    if (file) setFormData({ ...formData, documentUrl: "" });
+                  }}
+                  className="cursor-pointer"
                 />
-                <p className="text-xs text-slate-500">
-                  Upload your certificate to a file sharing service and paste the link here
-                </p>
+                {!selectedFile && (
+                  <>
+                    <p className="text-xs text-slate-400 text-center">or paste a link instead</p>
+                    <Input
+                      type="url"
+                      value={formData.documentUrl}
+                      onChange={(e) => setFormData({ ...formData, documentUrl: e.target.value })}
+                      placeholder="https://..."
+                    />
+                  </>
+                )}
+                <p className="text-xs text-slate-500">PDF or image, max 10MB</p>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">

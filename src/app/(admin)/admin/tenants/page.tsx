@@ -53,6 +53,7 @@ interface Tenant {
   unitId: string | null;
   emergencyContact: string | null;
   emergencyPhone: string | null;
+  baselaneLink: string | null;
   user: {
     name: string;
     email: string;
@@ -86,6 +87,7 @@ export default function TenantsPage() {
     unitId: "",
     emergencyContact: "",
     emergencyPhone: "",
+    baselaneLink: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -152,6 +154,7 @@ export default function TenantsPage() {
       unitId: "",
       emergencyContact: "",
       emergencyPhone: "",
+      baselaneLink: "",
     });
   };
 
@@ -164,6 +167,7 @@ export default function TenantsPage() {
       unitId: tenant.unitId || "",
       emergencyContact: tenant.emergencyContact || "",
       emergencyPhone: tenant.emergencyPhone || "",
+      baselaneLink: tenant.baselaneLink || "",
     });
     setIsDialogOpen(true);
   };
@@ -289,6 +293,16 @@ export default function TenantsPage() {
                     onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="baselaneLink">Baselane Payment Link (optional)</Label>
+                <Input
+                  id="baselaneLink"
+                  type="url"
+                  value={formData.baselaneLink}
+                  onChange={(e) => setFormData({ ...formData, baselaneLink: e.target.value })}
+                  placeholder="https://pay.baselane.com/..."
+                />
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>

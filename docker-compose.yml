@@ -9,8 +9,17 @@ services:
       - "3000:3000"
     environment:
       - DATABASE_URL=file:/app/data/himalayan.db
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-your-super-secret-key-change-in-production}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
       - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - QUICKBOOKS_CLIENT_ID=${QUICKBOOKS_CLIENT_ID}
+      - QUICKBOOKS_CLIENT_SECRET=${QUICKBOOKS_CLIENT_SECRET}
+      - QUICKBOOKS_ENVIRONMENT=${QUICKBOOKS_ENVIRONMENT:-sandbox}
+      - QUICKBOOKS_REDIRECT_URI=${QUICKBOOKS_REDIRECT_URI}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
     volumes:
       - app-data:/app/data
       - uploads:/app/public/uploads

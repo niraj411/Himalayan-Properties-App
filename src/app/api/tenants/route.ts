@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    const { name, email, phone, unitId, emergencyContact, emergencyPhone } = data;
+    const { name, email, phone, unitId, emergencyContact, emergencyPhone, baselaneLink } = data;
 
     if (!name || !email) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -76,6 +76,7 @@ export async function POST(request: Request) {
         unitId: unitId || null,
         emergencyContact,
         emergencyPhone,
+        baselaneLink: baselaneLink || null,
       },
       include: {
         user: true,

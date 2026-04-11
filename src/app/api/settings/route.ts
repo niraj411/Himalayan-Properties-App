@@ -38,39 +38,35 @@ export async function PUT(request: Request) {
       bankAccountNumber,
       checkMailingAddress,
       paymentInstructions,
+      baselanePaymentLink,
+      zillowUrl,
+      emailNotificationsEnabled,
     } = data;
+
+    const settingsData = {
+      companyName,
+      companyEmail,
+      companyPhone,
+      companyAddress,
+      bankName,
+      bankRoutingNumber,
+      bankAccountNumber,
+      checkMailingAddress,
+      paymentInstructions,
+      baselanePaymentLink,
+      zillowUrl,
+      emailNotificationsEnabled,
+    };
 
     let settings = await db.settings.findFirst();
 
     if (settings) {
       settings = await db.settings.update({
         where: { id: settings.id },
-        data: {
-          companyName,
-          companyEmail,
-          companyPhone,
-          companyAddress,
-          bankName,
-          bankRoutingNumber,
-          bankAccountNumber,
-          checkMailingAddress,
-          paymentInstructions,
-        },
+        data: settingsData,
       });
     } else {
-      settings = await db.settings.create({
-        data: {
-          companyName,
-          companyEmail,
-          companyPhone,
-          companyAddress,
-          bankName,
-          bankRoutingNumber,
-          bankAccountNumber,
-          checkMailingAddress,
-          paymentInstructions,
-        },
-      });
+      settings = await db.settings.create({ data: settingsData });
     }
 
     return NextResponse.json(settings);

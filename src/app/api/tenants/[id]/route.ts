@@ -47,7 +47,7 @@ export async function PUT(
 
     const { id } = await params;
     const data = await request.json();
-    const { name, email, phone, unitId, emergencyContact, emergencyPhone } = data;
+    const { name, email, phone, unitId, emergencyContact, emergencyPhone, baselaneLink } = data;
 
     const tenant = await db.tenant.findUnique({
       where: { id },
@@ -90,6 +90,7 @@ export async function PUT(
         unitId: unitId || null,
         emergencyContact,
         emergencyPhone,
+        baselaneLink: baselaneLink || null,
       },
       include: {
         user: true,

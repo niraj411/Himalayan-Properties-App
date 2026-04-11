@@ -50,6 +50,11 @@ interface Property {
   zip: string;
   description: string | null;
   imageUrl: string | null;
+  zillowUrl: string | null;
+  mortgageLender: string | null;
+  mortgageMonthlyPayment: number | null;
+  mortgageDueDay: number | null;
+  mortgageBalance: number | null;
   _count: {
     units: number;
   };
@@ -72,7 +77,15 @@ export default function PropertiesPage() {
     state: "",
     zip: "",
     description: "",
+    imageUrl: "",
+    zillowUrl: "",
+    mortgageLender: "",
+    mortgageMonthlyPayment: "",
+    mortgageDueDay: "",
+    mortgageBalance: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchProperties = async () => {
@@ -99,6 +112,22 @@ export default function PropertiesPage() {
     setIsSubmitting(true);
 
     try {
+      let imageUrl = formData.imageUrl;
+
+      // Upload image if a new file was selected
+      if (imageFile) {
+        setIsUploadingImage(true);
+        const fd = new FormData();
+        fd.append("file", imageFile);
+        fd.append("type", "property");
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: fd });
+        if (uploadRes.ok) {
+          const { url } = await uploadRes.json();
+          imageUrl = url;
+        }
+        setIsUploadingImage(false);
+      }
+
       const url = editingProperty
         ? `/api/properties/${editingProperty.id}`
         : "/api/properties";
@@ -107,15 +136,20 @@ export default function PropertiesPage() {
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          imageUrl,
+          mortgageMonthlyPayment: formData.mortgageMonthlyPayment || null,
+          mortgageDueDay: formData.mortgageDueDay || null,
+          mortgageBalance: formData.mortgageBalance || null,
+        }),
       });
 
       if (response.ok) {
-        toast.success(
-          editingProperty ? "Property updated" : "Property created"
-        );
+        toast.success(editingProperty ? "Property updated" : "Property created");
         setIsDialogOpen(false);
         setEditingProperty(null);
+        setImageFile(null);
         setFormData({
           name: "",
           type: "RESIDENTIAL",
@@ -124,6 +158,12 @@ export default function PropertiesPage() {
           state: "",
           zip: "",
           description: "",
+          imageUrl: "",
+          zillowUrl: "",
+          mortgageLender: "",
+          mortgageMonthlyPayment: "",
+          mortgageDueDay: "",
+          mortgageBalance: "",
         });
         fetchProperties();
       } else {
@@ -138,6 +178,7 @@ export default function PropertiesPage() {
 
   const handleEdit = (property: Property) => {
     setEditingProperty(property);
+    setImageFile(null);
     setFormData({
       name: property.name,
       type: property.type,
@@ -146,6 +187,12 @@ export default function PropertiesPage() {
       state: property.state,
       zip: property.zip,
       description: property.description || "",
+      imageUrl: property.imageUrl || "",
+      zillowUrl: property.zillowUrl || "",
+      mortgageLender: property.mortgageLender || "",
+      mortgageMonthlyPayment: property.mortgageMonthlyPayment?.toString() || "",
+      mortgageDueDay: property.mortgageDueDay?.toString() || "",
+      mortgageBalance: property.mortgageBalance?.toString() || "",
     });
     setIsDialogOpen(true);
   };
@@ -171,6 +218,7 @@ export default function PropertiesPage() {
 
   const openNewDialog = () => {
     setEditingProperty(null);
+    setImageFile(null);
     setFormData({
       name: "",
       type: "RESIDENTIAL",
@@ -179,6 +227,12 @@ export default function PropertiesPage() {
       state: "",
       zip: "",
       description: "",
+      imageUrl: "",
+      zillowUrl: "",
+      mortgageLender: "",
+      mortgageMonthlyPayment: "",
+      mortgageDueDay: "",
+      mortgageBalance: "",
     });
     setIsDialogOpen(true);
   };
@@ -303,6 +357,86 @@ export default function PropertiesPage() {
                   rows={3}
                 />
               </div>
+
+              {/* Main Photo */}
+              <div className="space-y-2">
+                <Label>Main Photo (Optional)</Label>
+                {formData.imageUrl && (
+                  <img src={formData.imageUrl} alt="Current" className="w-full h-32 object-cover rounded-xl mb-2" />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#e9e8ea] file:text-[#1b1c1e] cursor-pointer"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                />
+                {imageFile && <p className="text-xs text-[#4f17ce]">New photo ready to upload</p>}
+              </div>
+
+              {/* Zillow URL — residential only */}
+              {formData.type === "RESIDENTIAL" && (
+                <div className="space-y-2">
+                  <Label htmlFor="zillowUrl">Zillow Listing URL (Optional)</Label>
+                  <Input
+                    id="zillowUrl"
+                    type="url"
+                    value={formData.zillowUrl}
+                    onChange={(e) => setFormData({ ...formData, zillowUrl: e.target.value })}
+                    placeholder="https://www.zillow.com/homedetails/..."
+                  />
+                </div>
+              )}
+
+              {/* Mortgage */}
+              <div className="pt-2">
+                <p className="text-sm font-medium text-[#1b1c1e] mb-3">Mortgage (Optional)</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="mortgageLender">Lender</Label>
+                    <Input
+                      id="mortgageLender"
+                      value={formData.mortgageLender}
+                      onChange={(e) => setFormData({ ...formData, mortgageLender: e.target.value })}
+                      placeholder="Chase, Wells Fargo..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mortgageDueDay">Due Day of Month</Label>
+                    <Input
+                      id="mortgageDueDay"
+                      type="number"
+                      min="1"
+                      max="31"
+                      value={formData.mortgageDueDay}
+                      onChange={(e) => setFormData({ ...formData, mortgageDueDay: e.target.value })}
+                      placeholder="1"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mortgageMonthlyPayment">Monthly Payment ($)</Label>
+                    <Input
+                      id="mortgageMonthlyPayment"
+                      type="number"
+                      step="0.01"
+                      value={formData.mortgageMonthlyPayment}
+                      onChange={(e) => setFormData({ ...formData, mortgageMonthlyPayment: e.target.value })}
+                      placeholder="2500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mortgageBalance">Current Balance ($)</Label>
+                    <Input
+                      id="mortgageBalance"
+                      type="number"
+                      step="0.01"
+                      value={formData.mortgageBalance}
+                      onChange={(e) => setFormData({ ...formData, mortgageBalance: e.target.value })}
+                      placeholder="350000"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex justify-end gap-3 pt-4">
                 <Button
                   type="button"
@@ -313,14 +447,13 @@ export default function PropertiesPage() {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700"
-                  disabled={isSubmitting}
+                  className="bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white rounded-xl border-0"
+                  disabled={isSubmitting || isUploadingImage}
                 >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
+                  {isUploadingImage ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Uploading...</>
+                  ) : isSubmitting ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>
                   ) : editingProperty ? (
                     "Update Property"
                   ) : (

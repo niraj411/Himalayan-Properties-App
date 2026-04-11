@@ -48,7 +48,10 @@ export async function PUT(
 
     const { id } = await params;
     const data = await request.json();
-    const { startDate, endDate, monthlyRent, depositAmount, documentUrl, notes, status, leaseType } = data;
+    const {
+      startDate, endDate, monthlyRent, depositAmount, documentUrl, notes, status, leaseType,
+      depositPaidDate, depositStatus, depositReturnDate, depositReturnAmount, depositDeductionNotes,
+    } = data;
 
     const lease = await db.lease.update({
       where: { id },
@@ -56,11 +59,16 @@ export async function PUT(
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
         monthlyRent: monthlyRent ? parseFloat(monthlyRent) : undefined,
-        depositAmount: depositAmount ? parseFloat(depositAmount) : undefined,
+        depositAmount: depositAmount !== undefined ? (depositAmount ? parseFloat(depositAmount) : null) : undefined,
         documentUrl,
         notes,
         status,
         leaseType,
+        depositPaidDate: depositPaidDate !== undefined ? (depositPaidDate ? new Date(depositPaidDate) : null) : undefined,
+        depositStatus: depositStatus !== undefined ? depositStatus : undefined,
+        depositReturnDate: depositReturnDate !== undefined ? (depositReturnDate ? new Date(depositReturnDate) : null) : undefined,
+        depositReturnAmount: depositReturnAmount !== undefined ? (depositReturnAmount ? parseFloat(depositReturnAmount) : null) : undefined,
+        depositDeductionNotes: depositDeductionNotes !== undefined ? depositDeductionNotes : undefined,
       },
       include: {
         tenant: { include: { user: true } },

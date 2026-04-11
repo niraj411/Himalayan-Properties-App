@@ -23,6 +23,7 @@ interface Property {
   type: string;
   city: string;
   state: string;
+  zillowUrl: string | null;
 }
 
 export default function ApplyPage() {
@@ -30,6 +31,7 @@ export default function ApplyPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicationType, setApplicationType] = useState<"RESIDENTIAL" | "COMMERCIAL" | null>(null);
+  const [zillowUrl, setZillowUrl] = useState<string>("https://www.zillow.com/rental-manager/");
   const [formData, setFormData] = useState({
     propertyId: "",
     firstName: "",
@@ -53,18 +55,23 @@ export default function ApplyPage() {
   });
 
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/properties");
-        if (response.ok) {
-          setProperties(await response.json());
+        const [propertiesRes, settingsRes] = await Promise.all([
+          fetch("/api/properties"),
+          fetch("/api/settings"),
+        ]);
+        if (propertiesRes.ok) setProperties(await propertiesRes.json());
+        if (settingsRes.ok) {
+          const settings = await settingsRes.json();
+          if (settings.zillowUrl) setZillowUrl(settings.zillowUrl);
         }
       } catch (error) {
-        console.error("Error fetching properties:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchProperties();
+    fetchData();
   }, []);
 
   // Update application type when property changes
@@ -73,6 +80,8 @@ export default function ApplyPage() {
       const selectedProperty = properties.find(p => p.id === formData.propertyId);
       if (selectedProperty) {
         setApplicationType(selectedProperty.type as "RESIDENTIAL" | "COMMERCIAL");
+        // Use property-specific Zillow URL if set, else fall back to global
+        if (selectedProperty.zillowUrl) setZillowUrl(selectedProperty.zillowUrl);
       }
     } else if (formData.propertyId === "general") {
       setApplicationType(null);
@@ -202,7 +211,7 @@ export default function ApplyPage() {
                         For residential properties, we use Zillow for applications. Please apply through Zillow and reference this property in your application.
                       </p>
                       <a
-                        href="https://www.zillow.com/rental-manager/"
+                        href={zillowUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm mt-2"

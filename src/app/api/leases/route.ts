@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { sendTenantEmail } from "@/lib/email";
 
 export async function GET() {
   try {
@@ -80,6 +81,20 @@ export async function POST(request: Request) {
       where: { id: unitId },
       data: { status: "OCCUPIED" },
     });
+
+    // Email tenant welcome
+    try {
+      const tenantUser = lease.tenant.user;
+      const unitInfo = `${lease.unit.property.name} - Unit ${lease.unit.unitNumber}`;
+      await sendTenantEmail({
+        tenantName: tenantUser.name,
+        tenantEmail: tenantUser.email,
+        subject: "Your Lease is Ready",
+        body: `Your lease for ${unitInfo} has been set up.\n\nLease period: ${new Date(startDate).toLocaleDateString()} – ${new Date(endDate).toLocaleDateString()}\nMonthly rent: $${parseFloat(monthlyRent).toLocaleString()}\n\nPlease log in to your tenant portal to review your lease details.`,
+      });
+    } catch (emailErr) {
+      console.error("Failed to send lease email:", emailErr);
+    }
 
     return NextResponse.json(lease, { status: 201 });
   } catch (error) {

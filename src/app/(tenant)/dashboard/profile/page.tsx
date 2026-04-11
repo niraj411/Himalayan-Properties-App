@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, User, Mail, Phone, Shield } from "lucide-react";
+import { Loader2, User, Mail, Phone, Shield, Send } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface TenantProfile {
   user: {
@@ -24,6 +25,8 @@ export default function TenantProfilePage() {
   const [profile, setProfile] = useState<TenantProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [contactForm, setContactForm] = useState({ subject: "", message: "" });
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -85,6 +88,29 @@ export default function TenantProfilePage() {
       toast.error("Something went wrong");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contactForm.subject.trim() || !contactForm.message.trim()) return;
+    setIsSendingMessage(true);
+    try {
+      const res = await fetch("/api/email/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactForm),
+      });
+      if (res.ok) {
+        toast.success("Message sent to your property manager");
+        setContactForm({ subject: "", message: "" });
+      } else {
+        toast.error("Failed to send message");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setIsSendingMessage(false);
     }
   };
 
@@ -201,6 +227,56 @@ export default function TenantProfilePage() {
             )}
           </Button>
         </div>
+      </form>
+
+      {/* Contact Admin */}
+      <form onSubmit={handleSendMessage}>
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-purple-600" />
+              Contact Property Manager
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="contactSubject">Subject</Label>
+              <Input
+                id="contactSubject"
+                value={contactForm.subject}
+                onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
+                placeholder="Question about my lease..."
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contactMessage">Message</Label>
+              <Textarea
+                id="contactMessage"
+                value={contactForm.message}
+                onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                placeholder="Write your message here..."
+                rows={4}
+                required
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button type="submit" variant="outline" disabled={isSendingMessage}>
+                {isSendingMessage ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Send Message
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </form>
     </div>
   );

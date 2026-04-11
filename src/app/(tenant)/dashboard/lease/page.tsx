@@ -163,6 +163,18 @@ export default async function TenantLeasePage() {
                       ? `$${activeLease.depositAmount.toLocaleString()}`
                       : "-"}
                   </p>
+                  {activeLease.depositStatus && (
+                    <p className={`text-xs mt-1 font-medium ${
+                      activeLease.depositStatus === "RETURNED" ? "text-green-600" :
+                      activeLease.depositStatus === "PARTIAL_RETURN" ? "text-amber-600" :
+                      "text-slate-500"
+                    }`}>
+                      {activeLease.depositStatus === "HELD" ? "Held" :
+                       activeLease.depositStatus === "RETURNED" ? `Returned${activeLease.depositReturnDate ? ` ${format(new Date(activeLease.depositReturnDate), "MMM d, yyyy")}` : ""}` :
+                       activeLease.depositStatus === "PARTIAL_RETURN" ? `Partial return: $${activeLease.depositReturnAmount?.toLocaleString() || 0}` :
+                       activeLease.depositStatus}
+                    </p>
+                  )}
                 </div>
               </div>
 

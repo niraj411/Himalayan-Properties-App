@@ -71,6 +71,8 @@ interface Insurance {
   documentUrl: string | null;
   beneficiaryName: string;
   verified: boolean;
+  reminderSent: boolean;
+  reminderSentAt: string | null;
 }
 
 interface Lease {
@@ -80,6 +82,11 @@ interface Lease {
   endDate: string;
   monthlyRent: number;
   depositAmount: number | null;
+  depositPaidDate: string | null;
+  depositStatus: string | null;
+  depositReturnDate: string | null;
+  depositReturnAmount: number | null;
+  depositDeductionNotes: string | null;
   documentUrl: string | null;
   status: string;
   notes: string | null;
@@ -122,6 +129,17 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
     expirationDate: "",
     documentUrl: "",
   });
+  const [insuranceFile, setInsuranceFile] = useState<File | null>(null);
+
+  // Deposit state
+  const [depositForm, setDepositForm] = useState({
+    depositPaidDate: "",
+    depositStatus: "",
+    depositReturnDate: "",
+    depositReturnAmount: "",
+    depositDeductionNotes: "",
+  });
+  const [isSavingDeposit, setIsSavingDeposit] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -129,7 +147,15 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
     try {
       const response = await fetch(`/api/leases/${id}`);
       if (response.ok) {
-        setLease(await response.json());
+        const data = await response.json();
+        setLease(data);
+        setDepositForm({
+          depositPaidDate: data.depositPaidDate ? data.depositPaidDate.slice(0, 10) : "",
+          depositStatus: data.depositStatus || "",
+          depositReturnDate: data.depositReturnDate ? data.depositReturnDate.slice(0, 10) : "",
+          depositReturnAmount: data.depositReturnAmount?.toString() || "",
+          depositDeductionNotes: data.depositDeductionNotes || "",
+        });
       } else {
         toast.error("Failed to load lease");
       }
@@ -137,6 +163,33 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
       toast.error("Failed to load lease");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveDeposit = async () => {
+    setIsSavingDeposit(true);
+    try {
+      const res = await fetch(`/api/leases/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          depositPaidDate: depositForm.depositPaidDate || null,
+          depositStatus: depositForm.depositStatus || null,
+          depositReturnDate: depositForm.depositReturnDate || null,
+          depositReturnAmount: depositForm.depositReturnAmount || null,
+          depositDeductionNotes: depositForm.depositDeductionNotes || null,
+        }),
+      });
+      if (res.ok) {
+        toast.success("Deposit info saved");
+        fetchLease();
+      } else {
+        toast.error("Failed to save deposit info");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setIsSavingDeposit(false);
     }
   };
 
@@ -222,13 +275,20 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
     setIsSubmitting(true);
 
     try {
+      let documentUrl = insuranceForm.documentUrl;
+      if (insuranceFile) {
+        const uploadForm = new FormData();
+        uploadForm.append("file", insuranceFile);
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm });
+        if (!uploadRes.ok) { toast.error("File upload failed"); setIsSubmitting(false); return; }
+        const { url } = await uploadRes.json();
+        documentUrl = url;
+      }
+
       const response = await fetch("/api/insurance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          leaseId: id,
-          ...insuranceForm,
-        }),
+        body: JSON.stringify({ leaseId: id, ...insuranceForm, documentUrl }),
       });
 
       if (response.ok) {
@@ -243,6 +303,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
           expirationDate: "",
           documentUrl: "",
         });
+        setInsuranceFile(null);
         fetchLease();
       } else {
         toast.error("Failed to add insurance record");
@@ -267,6 +328,41 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
         fetchLease();
       } else {
         toast.error("Failed to verify insurance");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleRequestInsurance = async () => {
+    try {
+      const response = await fetch("/api/insurance/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leaseId: id }),
+      });
+      if (response.ok) {
+        toast.success("Insurance request email sent to tenant");
+      } else {
+        toast.error("Failed to send request");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleSendReminder = async (insuranceId: string) => {
+    try {
+      const response = await fetch(`/api/insurance/${insuranceId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reminderSent: true }),
+      });
+      if (response.ok) {
+        toast.success("Reminder email sent");
+        fetchLease();
+      } else {
+        toast.error("Failed to send reminder");
       }
     } catch {
       toast.error("Something went wrong");
@@ -433,6 +529,89 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
           </CardContent>
         </Card>
       </div>
+
+      {/* Deposit Tracking */}
+      {lease.depositAmount && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-purple-600" />
+              Security Deposit
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Date Received</Label>
+                <Input
+                  type="date"
+                  value={depositForm.depositPaidDate}
+                  onChange={(e) => setDepositForm({ ...depositForm, depositPaidDate: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={depositForm.depositStatus}
+                  onValueChange={(v) => setDepositForm({ ...depositForm, depositStatus: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="HELD">Held</SelectItem>
+                    <SelectItem value="RETURNED">Returned in Full</SelectItem>
+                    <SelectItem value="PARTIAL_RETURN">Partial Return</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {(depositForm.depositStatus === "RETURNED" || depositForm.depositStatus === "PARTIAL_RETURN") && (
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Return Date</Label>
+                  <Input
+                    type="date"
+                    value={depositForm.depositReturnDate}
+                    onChange={(e) => setDepositForm({ ...depositForm, depositReturnDate: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Amount Returned ($)</Label>
+                  <Input
+                    type="number"
+                    value={depositForm.depositReturnAmount}
+                    onChange={(e) => setDepositForm({ ...depositForm, depositReturnAmount: e.target.value })}
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+            )}
+            {depositForm.depositStatus === "PARTIAL_RETURN" && (
+              <div className="space-y-2">
+                <Label>Deduction Notes</Label>
+                <Textarea
+                  value={depositForm.depositDeductionNotes}
+                  onChange={(e) => setDepositForm({ ...depositForm, depositDeductionNotes: e.target.value })}
+                  placeholder="Reason for deductions..."
+                  rows={3}
+                />
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button
+                onClick={handleSaveDeposit}
+                disabled={isSavingDeposit}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isSavingDeposit ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>
+                ) : "Save Deposit Info"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Commercial-only sections */}
       {isCommercial && (
@@ -622,6 +801,17 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                 <Shield className="h-5 w-5 text-blue-600" />
                 Business Liability Insurance
               </CardTitle>
+              <div className="flex items-center gap-2">
+                {lease.insurance.length === 0 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleRequestInsurance}
+                    className="text-[#4f17ce] border-[#4f17ce]/30"
+                  >
+                    Request Insurance
+                  </Button>
+                )}
               <Dialog open={isInsuranceDialogOpen} onOpenChange={setIsInsuranceDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
@@ -701,13 +891,26 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>Document URL (Certificate of Insurance)</Label>
+                      <Label>Certificate Document</Label>
                       <Input
-                        type="url"
-                        value={insuranceForm.documentUrl}
-                        onChange={(e) => setInsuranceForm({ ...insuranceForm, documentUrl: e.target.value })}
-                        placeholder="https://..."
+                        type="file"
+                        accept=".pdf,image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setInsuranceFile(file);
+                          if (file) setInsuranceForm({ ...insuranceForm, documentUrl: "" });
+                        }}
+                        className="cursor-pointer"
                       />
+                      {!insuranceFile && (
+                        <Input
+                          type="url"
+                          value={insuranceForm.documentUrl}
+                          onChange={(e) => setInsuranceForm({ ...insuranceForm, documentUrl: e.target.value })}
+                          placeholder="Or paste a URL..."
+                          className="mt-2"
+                        />
+                      )}
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                       <Button type="button" variant="outline" onClick={() => setIsInsuranceDialogOpen(false)}>
@@ -720,6 +923,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                   </form>
                 </DialogContent>
               </Dialog>
+              </div>
             </CardHeader>
             <CardContent>
               {lease.insurance.length === 0 ? (
@@ -780,7 +984,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                             )}
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-1">
+                            <div className="flex gap-1 flex-wrap">
                               {ins.documentUrl && (
                                 <a href={ins.documentUrl} target="_blank" rel="noopener noreferrer">
                                   <Button size="sm" variant="outline">
@@ -797,6 +1001,22 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                                 >
                                   <Check className="h-4 w-4" />
                                 </Button>
+                              )}
+                              {(isExpired || isExpiringSoon) && (
+                                ins.reminderSent ? (
+                                  <span className="text-xs text-slate-400 px-2 py-1">
+                                    Reminded {ins.reminderSentAt ? format(new Date(ins.reminderSentAt), "MMM d") : ""}
+                                  </span>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-amber-600 border-amber-200 text-xs"
+                                    onClick={() => handleSendReminder(ins.id)}
+                                  >
+                                    Send Reminder
+                                  </Button>
+                                )
                               )}
                               <Button
                                 size="sm"
