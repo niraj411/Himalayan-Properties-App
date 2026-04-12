@@ -2,6 +2,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { Building2, Home, Store, MapPin, ArrowRight } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 async function getListings() {
   const properties = await db.property.findMany({
     where: { units: { some: { status: "VACANT" } } },

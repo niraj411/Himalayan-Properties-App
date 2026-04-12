@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 import {
   Building2, Home, Store, MapPin, ArrowLeft,
   BedDouble, Bath, Maximize2, ExternalLink, ChevronRight,
