@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import PhotoGallery from "./PhotoGallery";
 
 export const dynamic = "force-dynamic";
 import {
@@ -77,20 +78,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           <div className="lg:col-span-2 space-y-8">
             {/* Photo gallery */}
             {allPhotos.length > 0 ? (
-              <div className="space-y-3">
-                <div className="w-full h-72 md:h-96 rounded-2xl overflow-hidden bg-[#f5f3f5]">
-                  <img src={allPhotos[0]} alt={listing.name} className="w-full h-full object-cover" />
-                </div>
-                {allPhotos.length > 1 && (
-                  <div className="grid grid-cols-3 gap-3">
-                    {allPhotos.slice(1, 4).map((photo, i) => (
-                      <div key={i} className="h-24 rounded-xl overflow-hidden bg-[#f5f3f5]">
-                        <img src={photo} alt={`${listing.name} ${i + 2}`} className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <PhotoGallery photos={allPhotos} name={listing.name} />
             ) : (
               <div className="w-full h-72 rounded-2xl bg-[#f5f3f5] flex items-center justify-center">
                 {listing.type === "COMMERCIAL" ? (
