@@ -147,7 +147,7 @@ export default function ApplyPage() {
             </div>
             <div className="text-left">
               <h1 className="font-bold text-slate-900 text-sm">Himalayan</h1>
-              <p className="text-xs text-slate-500">Holdings</p>
+              <p className="text-xs text-slate-500">Properties</p>
             </div>
           </Link>
           <h2 className="text-2xl font-bold text-slate-900">Apply for a Property</h2>

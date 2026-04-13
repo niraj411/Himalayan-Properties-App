@@ -30,7 +30,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h1 className="font-bold text-slate-900">Himalayan</h1>
-                <p className="text-xs text-slate-500 -mt-1">Holdings</p>
+                <p className="text-xs text-slate-500 -mt-1">Properties</p>
               </div>
             </div>
             <div className="hidden md:flex items-center gap-6">

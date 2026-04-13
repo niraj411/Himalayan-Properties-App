@@ -52,7 +52,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               </div>
               <div>
                 <p className="font-bold text-[#1b1c1e] text-sm leading-none">Himalayan</p>
-                <p className="text-xs text-slate-500 leading-none mt-0.5">Holdings</p>
+                <p className="text-xs text-slate-500 leading-none mt-0.5">Properties</p>
               </div>
             </Link>
             <Link href="/login" className="text-sm px-4 py-2 bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white rounded-xl">
