@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       tenantName: lease.tenant.user.name,
       tenantEmail: lease.tenant.user.email,
       subject: "Action Required: Upload Your Liability Insurance Certificate",
-      body: `As part of your commercial lease at ${lease.unit.property.name} - Unit #${lease.unit.unitNumber}, you are required to maintain valid liability insurance with Himalayan Holdings Property LLC listed as an additional insured.\n\nPlease log in to your tenant portal and upload your current certificate of insurance at your earliest convenience.\n\nIf you have any questions, please don't hesitate to reach out.`,
+      body: `As part of your commercial lease at ${lease.unit.property.name} - Unit #${lease.unit.unitNumber}, you are required to maintain valid liability insurance with Himalayan Properties Property LLC listed as an additional insured.\n\nPlease log in to your tenant portal and upload your current certificate of insurance at your earliest convenience.\n\nIf you have any questions, please don't hesitate to reach out.`,
     });
 
     return NextResponse.json({ success: true });

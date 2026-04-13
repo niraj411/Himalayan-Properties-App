@@ -826,7 +826,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                   <form onSubmit={handleAddInsurance} className="space-y-4 mt-4">
                     <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
                       <p className="font-medium">Required Beneficiary:</p>
-                      <p>Himalayan Holdings Property LLC</p>
+                      <p>Himalayan Properties Property LLC</p>
                     </div>
                     <div className="space-y-2">
                       <Label>Insurance Type</Label>

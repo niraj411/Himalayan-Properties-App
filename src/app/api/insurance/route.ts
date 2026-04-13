@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         effectiveDate: new Date(effectiveDate),
         expirationDate: new Date(expirationDate),
         documentUrl,
-        beneficiaryName: "Himalayan Holdings Property LLC",
+        beneficiaryName: "Himalayan Properties Property LLC",
       },
     });
 

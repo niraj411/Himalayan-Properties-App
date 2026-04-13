@@ -65,7 +65,7 @@ export default function HomePage() {
             <span className="text-blue-600"> Quality Real Estate</span>
           </h1>
           <p className="mt-5 text-lg text-slate-600 max-w-2xl mx-auto">
-            Himalayan Holdings is a family-owned investment firm focused on residential and
+            Himalayan Properties is a family-owned investment firm focused on residential and
             commercial properties in Erie, Lafayette, and the North Denver Metro area.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -132,7 +132,7 @@ export default function HomePage() {
               &ldquo;When communities thrive, property values strengthen. When families have
               access to quality housing near good schools, neighborhoods flourish.&rdquo;
             </p>
-            <p className="text-slate-400 text-sm mt-3">— Himalayan Holdings</p>
+            <p className="text-slate-400 text-sm mt-3">— Himalayan Properties</p>
           </div>
         </div>
       </section>
@@ -295,7 +295,7 @@ export default function HomePage() {
                 <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Building2 className="w-4 h-4 text-white" />
                 </div>
-                <span className="font-bold text-white">Himalayan Holdings</span>
+                <span className="font-bold text-white">Himalayan Properties</span>
               </div>
               <p className="text-slate-400 text-sm">
                 Family-owned property management in the North Denver Metro Area.
@@ -328,7 +328,7 @@ export default function HomePage() {
           </div>
           <div className="pt-6 border-t border-slate-800 text-center">
             <p className="text-slate-500 text-sm">
-              &copy; {new Date().getFullYear()} Himalayan Holdings. All rights reserved.
+              &copy; {new Date().getFullYear()} Himalayan Properties. All rights reserved.
             </p>
           </div>
         </div>

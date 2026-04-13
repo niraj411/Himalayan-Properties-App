@@ -153,7 +153,7 @@ export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSe
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
                 <p className="font-medium">Required Beneficiary:</p>
-                <p className="font-bold">Himalayan Holdings Property LLC</p>
+                <p className="font-bold">Himalayan Properties Property LLC</p>
                 <p className="text-xs mt-1 text-blue-600">
                   Your insurance certificate must list this entity as an additional insured.
                 </p>
@@ -286,7 +286,7 @@ export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSe
             </div>
             <p className="text-sm text-red-700 mt-1">
               Commercial tenants must maintain valid business liability insurance with
-              Himalayan Holdings Property LLC listed as an additional insured.
+              Himalayan Properties Property LLC listed as an additional insured.
             </p>
           </div>
         )}
