@@ -27,18 +27,26 @@ async function getLeaseData(tenantId: string) {
       unit: {
         include: { property: true },
       },
-      leases: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          unit: { include: { property: true } },
-          insurance: { orderBy: { expirationDate: "desc" } },
-          escalations: { orderBy: { effectiveDate: "asc" } },
-        },
-      },
     },
   });
 
-  return tenant;
+  if (!tenant) return null;
+
+  const leases = await db.lease.findMany({
+    where: {
+      OR: [{ tenantId }, { coTenants: { some: { id: tenantId } } }],
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      unit: { include: { property: true } },
+      insurance: { orderBy: { expirationDate: "desc" } },
+      escalations: { orderBy: { effectiveDate: "asc" } },
+      coTenants: { include: { user: true } },
+      tenant: { include: { user: true } },
+    },
+  });
+
+  return { ...tenant, leases };
 }
 
 export default async function TenantLeasePage() {
@@ -220,6 +228,27 @@ export default async function TenantLeasePage() {
                         </div>
                       ))}
                   </div>
+                </div>
+              )}
+
+              {/* Co-tenants (jointly & severally liable) */}
+              {activeLease.coTenants && activeLease.coTenants.length > 1 && (
+                <div className="p-4 bg-slate-50 rounded-lg">
+                  <p className="text-sm font-medium text-slate-500 mb-2">
+                    Tenants on this lease (jointly & severally liable)
+                  </p>
+                  <ul className="space-y-1">
+                    {activeLease.coTenants.map((ct) => (
+                      <li key={ct.id} className="text-slate-700 text-sm">
+                        {ct.user.name}
+                        {ct.id === activeLease.tenantId && (
+                          <Badge variant="outline" className="ml-2 text-xs">
+                            Primary
+                          </Badge>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 

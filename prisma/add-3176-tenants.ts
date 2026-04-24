@@ -94,6 +94,9 @@ async function main() {
     where: { unitId: unit.id, status: "ACTIVE" },
   });
 
+  const allTenantIds = tenantRecords.map((r) => r.tenant.id);
+  const documentUrl = "/uploads/3176_W_Center_Ave_Lease_2026-2027.pdf";
+
   const leaseData = {
     tenantId: primary.id,
     unitId: unit.id,
@@ -103,6 +106,7 @@ async function main() {
     monthlyRent: 2791.25,
     depositAmount: 3050,
     status: "ACTIVE",
+    documentUrl,
     notes: [
       "Premises: 3176 W Center Ave, Denver, CO 80219 (Unit B of the 3174 duplex).",
       "Rent breakdown: $2,750.00 base + $41.25 pet rent = $2,791.25/mo. Annual: $33,495.00.",
@@ -114,9 +118,20 @@ async function main() {
   };
 
   if (existingLease) {
-    await db.lease.update({ where: { id: existingLease.id }, data: leaseData });
+    await db.lease.update({
+      where: { id: existingLease.id },
+      data: {
+        ...leaseData,
+        coTenants: { set: allTenantIds.map((id) => ({ id })) },
+      },
+    });
   } else {
-    await db.lease.create({ data: leaseData });
+    await db.lease.create({
+      data: {
+        ...leaseData,
+        coTenants: { connect: allTenantIds.map((id) => ({ id })) },
+      },
+    });
   }
 
   console.log(

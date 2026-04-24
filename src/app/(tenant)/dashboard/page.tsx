@@ -25,11 +25,6 @@ async function getTenantData(tenantId: string) {
       unit: {
         include: { property: true },
       },
-      leases: {
-        where: { status: "ACTIVE" },
-        take: 1,
-        orderBy: { createdAt: "desc" },
-      },
       maintenanceRequests: {
         where: { status: { in: ["OPEN", "IN_PROGRESS"] } },
         orderBy: { createdAt: "desc" },
@@ -38,7 +33,18 @@ async function getTenantData(tenantId: string) {
     },
   });
 
-  return tenant;
+  if (!tenant) return null;
+
+  const leases = await db.lease.findMany({
+    where: {
+      status: "ACTIVE",
+      OR: [{ tenantId }, { coTenants: { some: { id: tenantId } } }],
+    },
+    take: 1,
+    orderBy: { createdAt: "desc" },
+  });
+
+  return { ...tenant, leases };
 }
 
 export default async function TenantDashboard() {

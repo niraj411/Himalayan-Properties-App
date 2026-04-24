@@ -81,6 +81,7 @@ model Tenant {
   user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   unit                Unit?                @relation(fields: [unitId], references: [id])
   leases              Lease[]
+  coLeases            Lease[]              @relation("LeaseCoTenants")
   maintenanceRequests MaintenanceRequest[]
 }
 
@@ -106,6 +107,7 @@ model Lease {
 
   tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   unit        Unit             @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  coTenants   Tenant[]         @relation("LeaseCoTenants")
   payments    Payment[]
   escalations LeaseEscalation[]
   insurance   InsuranceRecord[]
