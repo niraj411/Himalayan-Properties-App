@@ -59,7 +59,7 @@ model Unit {
   updatedAt  DateTime @updatedAt
 
   property            Property             @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  tenant              Tenant?
+  tenants             Tenant[]
   leases              Lease[]
   maintenanceRequests MaintenanceRequest[]
 
@@ -69,7 +69,7 @@ model Unit {
 model Tenant {
   id               String    @id @default(cuid())
   userId           String    @unique
-  unitId           String?   @unique
+  unitId           String?
   moveInDate       DateTime?
   moveOutDate      DateTime?
   emergencyContact String?

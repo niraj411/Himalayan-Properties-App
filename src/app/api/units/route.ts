@@ -22,7 +22,7 @@ export async function GET(request: Request) {
       where,
       include: {
         property: true,
-        tenant: {
+        tenants: {
           include: { user: true },
         },
       },

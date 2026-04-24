@@ -63,13 +63,13 @@ interface Unit {
   sqft: number | null;
   rent: number;
   status: string;
-  tenant: {
+  tenants: {
     id: string;
     user: {
       name: string;
       email: string;
     };
-  } | null;
+  }[];
   leases: {
     id: string;
     status: string;
@@ -663,10 +663,10 @@ export default function PropertyDetailPage({
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {unit.tenant ? (
+                      {unit.tenants.length > 0 ? (
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-slate-400" />
-                          <span>{unit.tenant.user.name}</span>
+                          <span>{unit.tenants.map((t) => t.user.name).join(", ")}</span>
                         </div>
                       ) : (
                         <span className="text-slate-400">-</span>

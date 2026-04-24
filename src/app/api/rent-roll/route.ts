@@ -19,7 +19,7 @@ export async function GET() {
       include: {
         units: {
           include: {
-            tenant: { include: { user: true } },
+            tenants: { include: { user: true } },
             leases: {
               where: { status: "ACTIVE" },
               take: 1,
@@ -79,7 +79,7 @@ export async function GET() {
           unitNumber: unit.unitNumber,
           status: unit.status,
           rent,
-          tenantName: unit.tenant?.user.name || null,
+          tenantName: unit.tenants.map((t) => t.user.name).join(", ") || null,
           leaseId: activeLease?.id || null,
           paidThisMonth,
           paidAmount: leasePayment?.total || 0,
