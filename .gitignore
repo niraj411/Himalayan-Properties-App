@@ -39,6 +39,11 @@ yarn-error.log*
 *.db-wal
 *.db-shm
 
+# Private uploads (lease PDFs, insurance docs) — never commit, never serve publicly
+/private-uploads
+# Public user uploads (property photos)
+/public/uploads
+
 # vercel
 .vercel
 

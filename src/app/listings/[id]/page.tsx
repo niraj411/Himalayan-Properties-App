@@ -27,7 +27,67 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const listing = await getListing(id);
 
-  if (!listing || listing.units.length === 0) notFound();
+  if (!listing) notFound();
+
+  if (listing.units.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#faf9fb]">
+        <nav className="sticky top-0 z-50 bg-[#faf9fb]/80 backdrop-blur-[16px] border-b border-[#cac3d8]/15">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <Link href="/" className="flex items-center gap-2">
+                <div className="w-9 h-9 bg-gradient-to-br from-[#4f17ce] to-[#673de6] rounded-xl flex items-center justify-center">
+                  <Building2 className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="font-bold text-[#1b1c1e] text-sm leading-none">Himalayan</p>
+                  <p className="text-xs text-slate-500 leading-none mt-0.5">Properties</p>
+                </div>
+              </Link>
+              <Link href="/login" className="text-sm px-4 py-2 bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white rounded-xl">
+                Tenant Sign In
+              </Link>
+            </div>
+          </div>
+        </nav>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
+          <div className="flex items-center gap-2 text-sm text-slate-500 mb-8">
+            <Link href="/listings" className="flex items-center gap-1 hover:text-[#4f17ce] transition-colors">
+              <ArrowLeft className="h-4 w-4" />
+              Available Properties
+            </Link>
+          </div>
+
+          <div className="bg-white rounded-2xl p-10 max-w-xl mx-auto text-center" style={{ boxShadow: "0 40px 40px -10px rgba(27,28,30,0.06)" }}>
+            <div className="w-12 h-12 bg-[#f5f3f5] rounded-2xl flex items-center justify-center mx-auto mb-5">
+              {listing.type === "COMMERCIAL" ? (
+                <Store className="h-6 w-6 text-slate-400" />
+              ) : (
+                <Home className="h-6 w-6 text-slate-400" />
+              )}
+            </div>
+            <span className={`text-xs font-medium px-2.5 py-1 rounded-lg inline-block mb-4 ${listing.type === "COMMERCIAL" ? "bg-purple-50 text-purple-700" : "bg-blue-50 text-blue-700"}`}>
+              {listing.type === "COMMERCIAL" ? "Commercial" : "Residential"}
+            </span>
+            <h1 className="text-2xl font-bold text-[#1b1c1e] mb-2" style={{ letterSpacing: "-0.02em" }}>
+              Not currently for rent
+            </h1>
+            <p className="text-slate-500 leading-[1.5] mb-1">
+              This {listing.city}, {listing.state} property is fully leased and not accepting applications at this time.
+            </p>
+            <p className="text-slate-500 leading-[1.5] mb-6">
+              Check back later or browse other available properties.
+            </p>
+            <Link href="/listings" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white rounded-xl text-sm font-medium">
+              View Available Properties
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const allPhotos: string[] = [
     ...(listing.imageUrl ? [listing.imageUrl] : []),

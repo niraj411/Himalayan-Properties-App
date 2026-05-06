@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
@@ -29,15 +29,25 @@ export async function POST(req: NextRequest) {
   }
 
   const type = (formData.get("type") as string) || "insurance";
-  const folder = type === "property" ? "properties" : "insurance";
+  const isPublic = type === "property";
 
   const ext = file.name.split(".").pop();
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads", folder);
-  const filepath = path.join(uploadDir, filename);
 
+  let uploadDir: string;
+  let url: string;
+  if (isPublic) {
+    uploadDir = path.join(process.cwd(), "public", "uploads", "properties");
+    url = `/uploads/properties/${filename}`;
+  } else {
+    uploadDir = path.join(process.cwd(), "private-uploads");
+    url = `/api/files/${filename}`;
+  }
+
+  await mkdir(uploadDir, { recursive: true });
+  const filepath = path.join(uploadDir, filename);
   const bytes = await file.arrayBuffer();
   await writeFile(filepath, Buffer.from(bytes));
 
-  return NextResponse.json({ url: `/uploads/${folder}/${filename}` });
+  return NextResponse.json({ url });
 }
