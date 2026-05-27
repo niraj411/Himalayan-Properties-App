@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { format, isBefore, addDays } from "date-fns";
+import { BENEFICIARY_NAME, insuranceCopy } from "@/lib/insurance";
 import {
   Shield,
   Plus,
@@ -47,14 +48,16 @@ interface Insurance {
 
 interface InsuranceUploadSectionProps {
   leaseId: string;
+  leaseType: string;
   insurance: Insurance[];
 }
 
-export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSectionProps) {
+export function InsuranceUploadSection({ leaseId, leaseType, insurance }: InsuranceUploadSectionProps) {
+  const copy = insuranceCopy(leaseType);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    insuranceType: "LIABILITY",
+    insuranceType: copy.defaultInsuranceType,
     carrier: "",
     policyNumber: "",
     coverageAmount: "",
@@ -91,14 +94,14 @@ export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSe
       const response = await fetch("/api/insurance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leaseId, ...formData, documentUrl }),
+        body: JSON.stringify({ leaseId, ...formData, interestType: copy.interestType, documentUrl }),
       });
 
       if (response.ok) {
         toast.success("Insurance submitted for review");
         setIsDialogOpen(false);
         setFormData({
-          insuranceType: "LIABILITY",
+          insuranceType: copy.defaultInsuranceType,
           carrier: "",
           policyNumber: "",
           coverageAmount: "",
@@ -137,7 +140,7 @@ export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSe
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-blue-600" />
-          Business Liability Insurance
+          {copy.sectionTitle}
         </CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -153,9 +156,9 @@ export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSe
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
                 <p className="font-medium">Required Beneficiary:</p>
-                <p className="font-bold">Himalayan Properties Property LLC</p>
+                <p className="font-bold">{BENEFICIARY_NAME}</p>
                 <p className="text-xs mt-1 text-blue-600">
-                  Your insurance certificate must list this entity as an additional insured.
+                  Your insurance certificate must list this entity as an {copy.interestPhrase}.
                 </p>
               </div>
 
@@ -169,9 +172,11 @@ export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSe
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="LIABILITY">General Liability</SelectItem>
-                    <SelectItem value="PROPERTY">Property Insurance</SelectItem>
-                    <SelectItem value="WORKERS_COMP">Workers Compensation</SelectItem>
+                    {copy.typeOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -285,8 +290,7 @@ export function InsuranceUploadSection({ leaseId, insurance }: InsuranceUploadSe
               <span className="font-medium text-red-800">Insurance Required</span>
             </div>
             <p className="text-sm text-red-700 mt-1">
-              Commercial tenants must maintain valid business liability insurance with
-              Himalayan Properties Property LLC listed as an additional insured.
+              {copy.requiredBody}
             </p>
           </div>
         )}

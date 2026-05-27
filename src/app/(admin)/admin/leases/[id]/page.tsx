@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { format, isBefore, addDays } from "date-fns";
+import { BENEFICIARY_NAME, insuranceCopy } from "@/lib/insurance";
 import {
   ArrowLeft,
   Building2,
@@ -89,6 +90,7 @@ interface Lease {
   depositDeductionNotes: string | null;
   documentUrl: string | null;
   status: string;
+  insuranceRequired?: boolean;
   notes: string | null;
   tenant: {
     id: string;
@@ -424,6 +426,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   const isCommercial = lease.leaseType === "COMMERCIAL";
+  const insuranceCopyText = insuranceCopy(lease.leaseType);
 
   return (
     <div className="space-y-6">
@@ -793,13 +796,16 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
               )}
             </CardContent>
           </Card>
+        </>
+      )}
 
-          {/* Insurance Records */}
+      {/* Insurance Records - all tenants (type-aware), unless exempted */}
+      {lease.insuranceRequired !== false && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-blue-600" />
-                Business Liability Insurance
+                {insuranceCopyText.sectionTitle}
               </CardTitle>
               <div className="flex items-center gap-2">
                 {lease.insurance.length === 0 && (
@@ -812,7 +818,15 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                     Request Insurance
                   </Button>
                 )}
-              <Dialog open={isInsuranceDialogOpen} onOpenChange={setIsInsuranceDialogOpen}>
+              <Dialog
+                open={isInsuranceDialogOpen}
+                onOpenChange={(open) => {
+                  if (open) {
+                    setInsuranceForm((f) => ({ ...f, insuranceType: insuranceCopyText.defaultInsuranceType }));
+                  }
+                  setIsInsuranceDialogOpen(open);
+                }}
+              >
                 <DialogTrigger asChild>
                   <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
                     <Plus className="h-4 w-4 mr-1" />
@@ -826,7 +840,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                   <form onSubmit={handleAddInsurance} className="space-y-4 mt-4">
                     <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
                       <p className="font-medium">Required Beneficiary:</p>
-                      <p>Himalayan Properties Property LLC</p>
+                      <p>{BENEFICIARY_NAME}</p>
                     </div>
                     <div className="space-y-2">
                       <Label>Insurance Type</Label>
@@ -838,9 +852,11 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="LIABILITY">General Liability</SelectItem>
-                          <SelectItem value="PROPERTY">Property Insurance</SelectItem>
-                          <SelectItem value="WORKERS_COMP">Workers Compensation</SelectItem>
+                          {insuranceCopyText.typeOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -931,7 +947,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                   <Shield className="h-12 w-12 text-slate-200 mx-auto mb-3" />
                   <p className="text-slate-500">No insurance records on file</p>
                   <p className="text-sm text-red-500 mt-2">
-                    Commercial tenants must provide proof of liability insurance
+                    {insuranceCopyText.requiredBody}
                   </p>
                 </div>
               ) : (
@@ -1036,7 +1052,6 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
               )}
             </CardContent>
           </Card>
-        </>
       )}
 
       {/* Lease Document */}

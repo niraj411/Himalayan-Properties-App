@@ -277,7 +277,7 @@ export default async function AdminDashboard() {
               <Shield className="h-5 w-5 text-blue-500" />
               Insurance Alerts
             </CardTitle>
-            <Link href="/admin/leases" className="text-sm text-blue-600 hover:text-blue-700">
+            <Link href="/admin/insurance" className="text-sm text-blue-600 hover:text-blue-700">
               View all
             </Link>
           </CardHeader>

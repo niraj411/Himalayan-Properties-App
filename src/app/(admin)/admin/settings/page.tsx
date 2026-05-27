@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, Building2, CreditCard, Mail, ExternalLink } from "lucide-react";
+import { Loader2, Building2, CreditCard, Mail, ExternalLink, Shield } from "lucide-react";
 
 interface Settings {
   id: string;
@@ -24,6 +24,8 @@ interface Settings {
   baselanePaymentLink: string | null;
   zillowUrl: string | null;
   emailNotificationsEnabled: boolean;
+  insuranceReminderEnabled: boolean;
+  insuranceReminderLeadDays: number;
 }
 
 export default function SettingsPage() {
@@ -42,6 +44,8 @@ export default function SettingsPage() {
     baselanePaymentLink: "",
     zillowUrl: "",
     emailNotificationsEnabled: false,
+    insuranceReminderEnabled: true,
+    insuranceReminderLeadDays: 30,
   });
 
   useEffect(() => {
@@ -63,6 +67,8 @@ export default function SettingsPage() {
             baselanePaymentLink: data.baselanePaymentLink || "",
             zillowUrl: data.zillowUrl || "",
             emailNotificationsEnabled: data.emailNotificationsEnabled || false,
+            insuranceReminderEnabled: data.insuranceReminderEnabled ?? true,
+            insuranceReminderLeadDays: data.insuranceReminderLeadDays ?? 30,
           });
         }
       } catch (error) {
@@ -321,6 +327,45 @@ export default function SettingsPage() {
               <Label htmlFor="emailNotificationsEnabled" className="cursor-pointer">
                 Enable automatic email notifications to tenants
               </Label>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Insurance Reminders */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-purple-600" />
+              <CardTitle>Insurance Reminders</CardTitle>
+            </div>
+            <CardDescription>
+              Automatically email tenants to renew insurance before it expires (runs daily).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="insuranceReminderEnabled"
+                checked={formData.insuranceReminderEnabled}
+                onChange={(e) => setFormData({ ...formData, insuranceReminderEnabled: e.target.checked })}
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              <Label htmlFor="insuranceReminderEnabled" className="cursor-pointer">
+                Enable automatic insurance renewal reminders
+              </Label>
+            </div>
+            <div className="space-y-2 max-w-xs">
+              <Label htmlFor="insuranceReminderLeadDays">Remind this many days before expiry</Label>
+              <Input
+                id="insuranceReminderLeadDays"
+                type="number"
+                min={1}
+                value={formData.insuranceReminderLeadDays}
+                onChange={(e) =>
+                  setFormData({ ...formData, insuranceReminderLeadDays: parseInt(e.target.value, 10) || 0 })
+                }
+              />
             </div>
           </CardContent>
         </Card>

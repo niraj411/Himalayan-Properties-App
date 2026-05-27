@@ -20,6 +20,7 @@ import {
   Calculator,
   Mail,
   BarChart3,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -29,6 +30,7 @@ const navigation = [
   { name: "Properties", href: "/admin/properties", icon: Home },
   { name: "Tenants", href: "/admin/tenants", icon: Users },
   { name: "Leases", href: "/admin/leases", icon: FileText },
+  { name: "Insurance", href: "/admin/insurance", icon: Shield },
   { name: "Applications", href: "/admin/applications", icon: ClipboardList },
   { name: "Maintenance", href: "/admin/maintenance", icon: Wrench },
   { name: "Payments", href: "/admin/payments", icon: CreditCard },

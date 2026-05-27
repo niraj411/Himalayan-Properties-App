@@ -96,6 +96,7 @@ model Lease {
   depositAmount Float?
   documentUrl   String?
   status        String   @default("ACTIVE") // ACTIVE, EXPIRED, TERMINATED
+  insuranceRequired Boolean @default(true) // soft flag; admins can exempt a lease from insurance tracking
   notes         String?
   depositPaidDate      DateTime?
   depositStatus        String?   // HELD, RETURNED, PARTIAL_RETURN
@@ -129,11 +130,12 @@ model LeaseEscalation {
   lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
 }
 
-// Insurance tracking for commercial tenants
+// Insurance tracking for all tenants (residential renters insurance + commercial liability)
 model InsuranceRecord {
   id                  String    @id @default(cuid())
   leaseId             String
-  insuranceType       String    @default("LIABILITY") // LIABILITY, PROPERTY, WORKERS_COMP
+  insuranceType       String    @default("LIABILITY") // RENTERS, LIABILITY, PROPERTY, WORKERS_COMP
+  interestType        String    @default("ADDITIONAL_INTEREST") // ADDITIONAL_INTEREST (residential) or ADDITIONAL_INSURED (commercial)
   carrier             String?
   policyNumber        String?
   coverageAmount      Float?
@@ -254,6 +256,8 @@ model Settings {
   baselanePaymentLink String?
   zillowUrl           String?
   emailNotificationsEnabled Boolean @default(false)
+  insuranceReminderEnabled  Boolean @default(true)
+  insuranceReminderLeadDays Int     @default(30)
 }
 
 // QuickBooks Integration

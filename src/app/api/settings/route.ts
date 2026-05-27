@@ -41,6 +41,8 @@ export async function PUT(request: Request) {
       baselanePaymentLink,
       zillowUrl,
       emailNotificationsEnabled,
+      insuranceReminderEnabled,
+      insuranceReminderLeadDays,
     } = data;
 
     const settingsData = {
@@ -56,6 +58,10 @@ export async function PUT(request: Request) {
       baselanePaymentLink,
       zillowUrl,
       emailNotificationsEnabled,
+      ...(insuranceReminderEnabled !== undefined && { insuranceReminderEnabled }),
+      ...(insuranceReminderLeadDays !== undefined && {
+        insuranceReminderLeadDays: parseInt(String(insuranceReminderLeadDays), 10) || 30,
+      }),
     };
 
     let settings = await db.settings.findFirst();

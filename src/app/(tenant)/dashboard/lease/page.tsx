@@ -262,10 +262,11 @@ export default async function TenantLeasePage() {
             </CardContent>
           </Card>
 
-          {/* Insurance Section - Commercial Only */}
-          {activeLease.leaseType === "COMMERCIAL" && (
+          {/* Insurance Section - all tenants (type-aware), unless exempted */}
+          {activeLease.insuranceRequired !== false && (
             <InsuranceUploadSection
               leaseId={activeLease.id}
+              leaseType={activeLease.leaseType}
               insurance={activeLease.insurance}
             />
           )}

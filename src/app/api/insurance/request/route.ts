@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sendTenantEmail } from "@/lib/email";
+import { insuranceCopy } from "@/lib/insurance";
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,11 +29,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Lease not found" }, { status: 404 });
     }
 
+    const copy = insuranceCopy(lease.leaseType);
     await sendTenantEmail({
       tenantName: lease.tenant.user.name,
       tenantEmail: lease.tenant.user.email,
-      subject: "Action Required: Upload Your Liability Insurance Certificate",
-      body: `As part of your commercial lease at ${lease.unit.property.name} - Unit #${lease.unit.unitNumber}, you are required to maintain valid liability insurance with Himalayan Properties Property LLC listed as an additional insured.\n\nPlease log in to your tenant portal and upload your current certificate of insurance at your earliest convenience.\n\nIf you have any questions, please don't hesitate to reach out.`,
+      subject: copy.requestSubject,
+      body: copy.requestBody(lease.unit.property.name, lease.unit.unitNumber),
     });
 
     return NextResponse.json({ success: true });

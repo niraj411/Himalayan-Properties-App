@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sendTenantEmail } from "@/lib/email";
+import { insuranceCopy } from "@/lib/insurance";
 import { format } from "date-fns";
 
 export async function GET(
@@ -103,6 +104,12 @@ export async function PATCH(
         }),
         ...(body.effectiveDate && { effectiveDate: new Date(body.effectiveDate) }),
         ...(body.expirationDate && { expirationDate: new Date(body.expirationDate) }),
+        // A renewed expiration date re-arms the reminder (unless this call is the manual
+        // "Send Reminder" action, which sets reminderSent explicitly).
+        ...(body.expirationDate && body.reminderSent === undefined && {
+          reminderSent: false,
+          reminderSentAt: null,
+        }),
         ...(body.documentUrl !== undefined && { documentUrl: body.documentUrl }),
         ...(body.verified !== undefined && {
           verified: body.verified,
@@ -125,11 +132,12 @@ export async function PATCH(
       try {
         const tenant = insurance.lease.tenant;
         const expDate = format(new Date(insurance.expirationDate), "MMMM d, yyyy");
+        const copy = insuranceCopy(insurance.lease.leaseType);
         await sendTenantEmail({
           tenantName: tenant.user.name,
           tenantEmail: tenant.user.email,
-          subject: "Action Required: Insurance Certificate Renewal",
-          body: `Your liability insurance certificate on file expires on ${expDate}.\n\nPlease upload a renewed certificate through your tenant portal or email it to us as soon as possible to remain in compliance with your lease terms.\n\nIf you have already renewed, please disregard this message.`,
+          subject: copy.renewalSubject,
+          body: copy.renewalBody(expDate),
         });
       } catch (emailErr) {
         console.error("Failed to send insurance reminder email:", emailErr);

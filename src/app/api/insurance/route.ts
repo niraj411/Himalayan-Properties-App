@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { BENEFICIARY_NAME, insuranceCopy } from "@/lib/insurance";
 
 export async function GET(request: NextRequest) {
   try {
@@ -100,17 +101,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Server is authoritative for type-aware fields — derive from the lease's type.
+    const lease = await db.lease.findUnique({
+      where: { id: leaseId },
+      select: { leaseType: true },
+    });
+    const copy = insuranceCopy(lease?.leaseType);
+
     const insurance = await db.insuranceRecord.create({
       data: {
         leaseId,
-        insuranceType: insuranceType || "LIABILITY",
+        insuranceType: insuranceType || copy.defaultInsuranceType,
+        interestType: copy.interestType,
         carrier,
         policyNumber,
         coverageAmount: coverageAmount ? parseFloat(coverageAmount) : null,
         effectiveDate: new Date(effectiveDate),
         expirationDate: new Date(expirationDate),
         documentUrl,
-        beneficiaryName: "Himalayan Properties Property LLC",
+        beneficiaryName: BENEFICIARY_NAME,
       },
     });
 
