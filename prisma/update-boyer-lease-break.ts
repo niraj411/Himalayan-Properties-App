@@ -5,21 +5,34 @@ const db = new PrismaClient();
 /**
  * Darin Boyer (3174 W Center Ave, Unit A) — early lease break.
  *
- * He moved in 2026-05-07 and is terminating early via a signed lease-break
- * addendum, vacating 2026-05-31. Settlement:
- *   1) $4,287.50 security deposit — APPLIED to the lease break (non-refundable).
- *   2) $2,000 lease-break fee — PAID.
- *   3) $149 final utility reimbursement + move-out cleaning (kitchen/bathroom),
- *      combined — DUE 2026-06-15 (he said he'll pay on the 15th).
+ * Moved in 2026-05-07, terminating early via a signed lease-break addendum,
+ * vacating 2026-05-31. The addendum sets the break fee at 3 months' rent.
  *
- * All of his lease records are KEPT (lease is marked TERMINATED, not deleted).
- * Unit A is returned to the market: VACANT @ $2,500/mo.
+ * Numbers (rent confirmed from the lease: $2,485/mo = $2,450 base + $35 pet):
+ *   Lease-break fee (addendum): 3 x $2,485 = $7,455.00
+ *   Paid:  deposit $4,287.50 (APPLIED to break, non-refundable)
+ *        + cash    $2,000.00
+ *        = $6,287.50 applied  ->  remaining break-fee balance $1,167.50
+ *   Plus final utility reimbursement + move-out cleaning (kitchen/bathroom): $149.00
+ *   TOTAL DUE 2026-06-15: $1,316.50  ($1,167.50 fee balance + $149 utility/cleaning)
  *
- * Idempotent — safe to re-run.
+ * All lease records are KEPT (lease marked TERMINATED, not deleted).
+ * Unit A returns to the market: VACANT @ $2,500/mo.
+ *
+ * Idempotent — safe to re-run (overwrites prior break values).
  */
 async function main() {
   const TERMINATION_DATE = new Date("2026-05-31");
   const FINAL_PAYMENT_DUE = new Date("2026-06-15");
+
+  const MONTHLY_RENT = 2485;
+  const BREAK_FEE = MONTHLY_RENT * 3; // 7455
+  const DEPOSIT = 4287.5;
+  const CASH_PAID = 2000;
+  const APPLIED = DEPOSIT + CASH_PAID; // 6287.50
+  const FEE_BALANCE = BREAK_FEE - APPLIED; // 1167.50
+  const UTIL_CLEANING = 149;
+  const TOTAL_DUE = FEE_BALANCE + UTIL_CLEANING; // 1316.50
 
   const tenant = await db.tenant.findFirst({
     where: { user: { email: "darinboyer2000@gmail.com" } },
@@ -34,21 +47,27 @@ async function main() {
   });
   if (!lease) throw new Error("Could not find Darin's lease.");
 
-  // Preserve the original lease detail notes; prepend the lease-break summary.
+  const usd = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Preserve the original lease detail notes; (re)prepend the lease-break summary.
+  const SEP = "----------------------------------------";
+  const sepIdx = lease.notes ? lease.notes.indexOf(SEP) : -1;
+  const originalNotes =
+    sepIdx >= 0 ? lease.notes!.slice(sepIdx + SEP.length).replace(/^\n+/, "") : lease.notes ?? "";
+
   const breakHeader = [
     "*** LEASE BREAK ADDENDUM — effective 2026-05-31 ***",
     "Tenant terminated the lease early via signed lease-break addendum. Original term: 2026-05-07 to 2027-04-30. Vacate/move-out date: 2026-05-31. Unit A returned to market @ $2,500/mo.",
+    `Lease-break fee per addendum: $${usd(BREAK_FEE)} = 3 months' rent @ $${usd(MONTHLY_RENT)}/mo.`,
     "Settlement:",
-    "  - Security deposit $4,287.50: APPLIED to the lease break (non-refundable per addendum). Tenant receives nothing back.",
-    "  - Lease-break fee $2,000.00: PAID.",
-    "  - Final utility reimbursement + move-out cleaning (kitchen/bathroom), combined $149.00: DUE 2026-06-15 (tenant said he will pay on the 15th).",
+    `  - Security deposit $${usd(DEPOSIT)}: APPLIED to the break fee (non-refundable per addendum).`,
+    `  - Cash payment $${usd(CASH_PAID)}: PAID toward break fee.`,
+    `  - => $${usd(APPLIED)} applied; remaining break-fee balance $${usd(FEE_BALANCE)}.`,
+    `  - Final utility reimbursement + move-out cleaning (kitchen/bathroom), combined: $${usd(UTIL_CLEANING)}.`,
+    `  - TOTAL DUE 2026-06-15: $${usd(TOTAL_DUE)} ($${usd(FEE_BALANCE)} remaining fee + $${usd(UTIL_CLEANING)} utility/cleaning). Tenant said he will pay on the 15th.`,
     "Records retained below — original lease terms unchanged.",
-    "----------------------------------------",
+    SEP,
   ].join("\n");
-
-  const newNotes = lease.notes?.startsWith("*** LEASE BREAK")
-    ? lease.notes // already applied
-    : `${breakHeader}\n${lease.notes ?? ""}`;
 
   await db.lease.update({
     where: { id: lease.id },
@@ -58,9 +77,8 @@ async function main() {
       depositStatus: "APPLIED_TO_BREAK",
       depositReturnDate: TERMINATION_DATE,
       depositReturnAmount: 0,
-      depositDeductionNotes:
-        "Full $4,287.50 security deposit applied to the lease-break settlement (non-refundable per lease-break addendum). $0 returned to tenant.",
-      notes: newNotes,
+      depositDeductionNotes: `Full $${usd(DEPOSIT)} security deposit applied to the lease-break fee (3 months' rent = $${usd(BREAK_FEE)}) per signed addendum. Non-refundable; $0 returned to tenant.`,
+      notes: `${breakHeader}\n${originalNotes}`,
     },
   });
 
@@ -76,49 +94,51 @@ async function main() {
     data: { status: "VACANT", rent: 2500 },
   });
 
-  // Record the $2,000 lease-break fee (already paid). Idempotent on reference.
-  const existingFee = await db.payment.findFirst({
-    where: { leaseId: lease.id, reference: "Lease-break fee" },
+  // Record the $2,000 cash payment toward the break fee (already paid).
+  // Idempotent: update any prior "Lease-break" payment rather than duplicating.
+  const feePayment = await db.payment.findFirst({
+    where: { leaseId: lease.id, reference: { contains: "Lease-break" } },
   });
-  if (!existingFee) {
-    await db.payment.create({
-      data: {
-        leaseId: lease.id,
-        amount: 2000,
-        date: TERMINATION_DATE,
-        method: "OTHER",
-        reference: "Lease-break fee",
-        notes:
-          "Lease-break / early-termination fee per signed addendum. Paid by Darin Boyer (in addition to the $4,287.50 deposit applied to the break).",
-      },
-    });
+  const feeData = {
+    leaseId: lease.id,
+    amount: CASH_PAID,
+    date: TERMINATION_DATE,
+    method: "OTHER",
+    reference: "Lease-break fee (partial)",
+    notes: `Cash payment toward the $${usd(BREAK_FEE)} lease-break fee (3 months' rent per addendum). With the $${usd(DEPOSIT)} deposit applied, $${usd(APPLIED)} of the fee is covered; $${usd(FEE_BALANCE)} remains.`,
+  };
+  if (feePayment) {
+    await db.payment.update({ where: { id: feePayment.id }, data: feeData });
+  } else {
+    await db.payment.create({ data: feeData });
   }
 
-  // Backstop reminder for the $149 final payment due 2026-06-15.
+  // Reminder for the remaining balance due 2026-06-15.
   const admin = await db.user.findFirst({ where: { role: "ADMIN" } });
   if (admin) {
+    const reminderData = {
+      userId: admin.id,
+      type: "RENT_DUE",
+      title: `Darin Boyer — $${usd(TOTAL_DUE)} lease-break balance due`,
+      message: `Remaining break-fee balance $${usd(FEE_BALANCE)} + utility/move-out cleaning $${usd(UTIL_CLEANING)} = $${usd(TOTAL_DUE)}. Due 2026-06-15 per tenant.`,
+      dueDate: FINAL_PAYMENT_DUE,
+      entityId: lease.id,
+    };
     const existingReminder = await db.reminder.findFirst({
       where: { entityId: lease.id, type: "RENT_DUE", userId: admin.id },
     });
-    if (!existingReminder) {
-      await db.reminder.create({
-        data: {
-          userId: admin.id,
-          type: "RENT_DUE",
-          title: "Darin Boyer — $149 lease-break balance due",
-          message:
-            "Final utility reimbursement + move-out cleaning (kitchen/bathroom), combined $149.00. Due 2026-06-15 per tenant.",
-          dueDate: FINAL_PAYMENT_DUE,
-          entityId: lease.id,
-        },
-      });
+    if (existingReminder) {
+      await db.reminder.update({ where: { id: existingReminder.id }, data: reminderData });
+    } else {
+      await db.reminder.create({ data: reminderData });
     }
   }
 
-  console.log("Done — Darin Boyer lease break applied.");
+  console.log("Done — Darin Boyer lease break (corrected) applied.");
   console.log(`  Lease ${lease.id}: TERMINATED, ends ${TERMINATION_DATE.toDateString()}`);
   console.log(`  Unit ${tenant.unitId}: VACANT @ $2,500/mo (re-listed)`);
-  console.log("  $2,000 lease-break fee recorded as paid; $149 due 2026-06-15 (reminder set).");
+  console.log(`  Break fee $${usd(BREAK_FEE)} (3 x $${usd(MONTHLY_RENT)}); applied $${usd(APPLIED)} (deposit + $2,000 cash).`);
+  console.log(`  Remaining: $${usd(FEE_BALANCE)} fee + $${usd(UTIL_CLEANING)} util/clean = $${usd(TOTAL_DUE)} due 2026-06-15.`);
 }
 
 main()
