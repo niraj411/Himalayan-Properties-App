@@ -60,7 +60,7 @@ async function main() {
     "Tenant terminated the lease early via signed lease-break addendum. Original term: 2026-05-07 to 2027-04-30. Vacate/move-out date: 2026-05-31. Unit A returned to market @ $2,500/mo.",
     `Lease-break fee per addendum: $${usd(BREAK_FEE)} = 3 months' rent @ $${usd(MONTHLY_RENT)}/mo.`,
     "Settlement:",
-    `  - Security deposit $${usd(DEPOSIT)}: APPLIED to the break fee (non-refundable per addendum).`,
+    `  - Security deposit $${usd(DEPOSIT)}: APPLIED to the break fee by mutual agreement of Landlord & Tenant. NOTE: Addendum A §6 bars using the deposit toward the break fee; applying it is an agreed deviation from that written term. Non-refundable; $0 returned.`,
     `  - Cash payment $${usd(CASH_PAID)}: PAID toward break fee.`,
     `  - => $${usd(APPLIED)} applied; remaining break-fee balance $${usd(FEE_BALANCE)}.`,
     `  - Final utility reimbursement + move-out cleaning (kitchen/bathroom), combined: $${usd(UTIL_CLEANING)}.`,
@@ -77,7 +77,7 @@ async function main() {
       depositStatus: "APPLIED_TO_BREAK",
       depositReturnDate: TERMINATION_DATE,
       depositReturnAmount: 0,
-      depositDeductionNotes: `Full $${usd(DEPOSIT)} security deposit applied to the lease-break fee (3 months' rent = $${usd(BREAK_FEE)}) per signed addendum. Non-refundable; $0 returned to tenant.`,
+      depositDeductionNotes: `Full $${usd(DEPOSIT)} security deposit applied to the lease-break fee (3 months' rent = $${usd(BREAK_FEE)}) by mutual agreement of Landlord & Tenant. NOTE: Addendum A §6 bars applying the deposit to the break fee; this is an agreed deviation from that written term. Non-refundable; $0 returned to tenant.`,
       notes: `${breakHeader}\n${originalNotes}`,
     },
   });
