@@ -22,6 +22,7 @@ export async function GET(
         payments: { orderBy: { date: "desc" } },
         escalations: { orderBy: { effectiveDate: "asc" } },
         insurance: { orderBy: { expirationDate: "asc" } },
+        charges: { orderBy: [{ status: "asc" }, { dueDate: "asc" }] },
       },
     });
 

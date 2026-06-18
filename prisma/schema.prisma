@@ -112,6 +112,29 @@ model Lease {
   payments    Payment[]
   escalations LeaseEscalation[]
   insurance   InsuranceRecord[]
+  charges     Charge[]
+}
+
+// One-off / outstanding charges billed to a lease (rent owed, late fees,
+// utilities, final move-out invoices). Source of truth for balances is
+// Baselane (no API), so these are entered/maintained here by admins.
+model Charge {
+  id        String    @id @default(cuid())
+  leaseId   String
+  kind      String    @default("OTHER") // RENT, LATE_FEE, UTILITY, FINAL, CLEANING, DEPOSIT, OTHER
+  label     String
+  amount    Float
+  dueDate   DateTime?
+  status    String    @default("OPEN") // OPEN, PAID, WAIVED
+  source    String?   // e.g. "Baselane #1341810"
+  notes     String?
+  paidDate  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+
+  @@index([leaseId, status])
 }
 
 // Lease escalations for commercial properties
