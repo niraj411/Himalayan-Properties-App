@@ -19,6 +19,8 @@ import {
   Plug,
   User,
   LifeBuoy,
+  Receipt,
+  Bell,
 } from "lucide-react";
 
 // Declarative information architecture for both portals. The SidebarNav engine
@@ -79,6 +81,7 @@ export const adminNavConfig: NavConfig = {
       items: [
         { name: "Rent Roll", href: "/admin/rent-roll", icon: BarChart3 },
         { name: "Payments", href: "/admin/payments", icon: CreditCard },
+        { name: "Outstanding", href: "/admin/charges", icon: Receipt },
         { name: "Accounting", href: "/admin/accounting", icon: Calculator },
       ],
     },
@@ -88,6 +91,7 @@ export const adminNavConfig: NavConfig = {
       icon: Megaphone,
       items: [
         { name: "Maintenance", href: "/admin/maintenance", icon: Wrench },
+        { name: "Notices", href: "/admin/notices", icon: Bell },
         { name: "Messages", href: "/admin/messages", icon: Mail },
       ],
     },
