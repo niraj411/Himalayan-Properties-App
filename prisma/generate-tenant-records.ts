@@ -27,6 +27,7 @@ async function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
   const tenants = await db.tenant.findMany({
+    where: { user: { role: "TENANT" } },
     include: {
       user: true,
       unit: { include: { property: true } },
@@ -89,10 +90,10 @@ async function main() {
       `lease_type: ${activeLease?.leaseType ?? "—"}`,
       `lease_start: ${fmtDate(activeLease?.startDate)}`,
       `lease_end: ${fmtDate(activeLease?.endDate)}`,
-      `monthly_base: ${base ?? ""}`,
-      `monthly_nnn: ${nnn ?? ""}`,
-      `monthly_total: ${total ?? ""}`,
-      `deposit: ${activeLease?.depositAmount ?? ""}`,
+      `monthly_base: ${base != null ? base.toFixed(2) : ""}`,
+      `monthly_nnn: ${nnn != null ? nnn.toFixed(2) : ""}`,
+      `monthly_total: ${total != null ? total.toFixed(2) : ""}`,
+      `deposit: ${activeLease?.depositAmount != null ? activeLease.depositAmount.toFixed(2) : ""}`,
       `insurance_required: ${activeLease?.insuranceRequired ?? false}`,
       `insurance_on_file: ${insOnFile}`,
       `outstanding_balance: ${outstanding.toFixed(2)}`,
