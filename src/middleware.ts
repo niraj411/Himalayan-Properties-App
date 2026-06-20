@@ -38,6 +38,7 @@ export default withAuth(
           pathname.startsWith("/api/register") ||
           pathname.startsWith("/api/listings") ||
           pathname.startsWith("/api/cron") || // guarded by its own CRON_SECRET bearer token
+          pathname.startsWith("/api/agent") || // guarded by its own AGENT_API_TOKEN bearer token
           pathname.startsWith("/uploads")
         ) {
           return true;
