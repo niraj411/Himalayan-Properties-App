@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import ChargesSection, { type Charge } from "./charges-section";
+import NoticesSection from "./notices-section";
 import { format, isBefore, addDays } from "date-fns";
 import { BENEFICIARY_NAME, insuranceCopy } from "@/lib/insurance";
 import {
@@ -1096,6 +1097,9 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* Charges & outstanding */}
       <ChargesSection leaseId={lease.id} charges={lease.charges ?? []} onChanged={fetchLease} />
+
+      {/* Notices */}
+      <NoticesSection leaseId={lease.id} />
 
       {/* Notes */}
       {lease.notes && (

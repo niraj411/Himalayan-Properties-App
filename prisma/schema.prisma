@@ -114,6 +114,30 @@ model Lease {
   escalations LeaseEscalation[]
   insurance   InsuranceRecord[]
   charges     Charge[]
+  notices     Notice[]
+}
+
+// Outbound notices (late/demand/eviction) emailed to tenants through the app.
+// Each send is logged here so it's viewable, auditable, and re-sendable.
+model Notice {
+  id        String   @id @default(cuid())
+  leaseId   String
+  type      String   // LATE, DEMAND, CO_DEMAND, CUSTOM
+  subject   String
+  body      String   // rendered plain text (what was emailed)
+  toEmail   String
+  ccEmails  String?  // comma-separated
+  replyTo   String?
+  amountDue Float?   // snapshot of open-charge balance at send time
+  status    String   @default("SENT") // SENT, FAILED
+  messageId String?  // SMTP message id
+  errorText String?
+  sentById  String?
+  sentAt    DateTime @default(now())
+
+  lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+
+  @@index([leaseId, sentAt])
 }
 
 // One-off / outstanding charges billed to a lease (rent owed, late fees,
