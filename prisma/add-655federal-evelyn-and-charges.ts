@@ -117,8 +117,10 @@ async function main() {
   // Evelyn's outstanding (Baselane invoice #1341810, due 2026-06-01; late fee added 2026-06-06)
   await upsertCharge({ leaseId: lease.id, kind: "RENT", label: "Rent (Invoice #1341810)", amount: 3257.34, dueDate: new Date("2026-06-01"), source: "Baselane #1341810" });
   await upsertCharge({ leaseId: lease.id, kind: "LATE_FEE", label: "Late fee", amount: 40.0, dueDate: new Date("2026-06-06"), source: "Baselane #1341810" });
+  // Flat $100 late charge assessed with the June 2026 non-payment notice (Lease §4; owner chose flat $100 over $50/day on 2026-06-19)
+  await upsertCharge({ leaseId: lease.id, kind: "LATE_FEE", label: "Late charge (June 2026 non-payment notice, Lease §4)", amount: 100.0, dueDate: new Date("2026-06-19"), source: "Notice 2026-06-19" });
 
-  console.log(`Evelyn: user ${user.id}, lease ${lease.id}. Base $${BASE} + NNN $${NNN} = $${TOTAL}/mo. 2 charges ($3,297.34 past due).`);
+  console.log(`Evelyn: user ${user.id}, lease ${lease.id}. Base $${BASE} + NNN $${NNN} = $${TOTAL}/mo. 3 charges ($3,397.34 past due: $3,257.34 rent + $40 + $100 late).`);
 
   // ---- Darin Boyer final invoice (existing TERMINATED lease @ 3174 W Center Ave Unit A) ----
   const darin = await db.user.findUnique({ where: { email: "darinboyer2000@gmail.com" } });
