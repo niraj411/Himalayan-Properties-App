@@ -40,8 +40,8 @@ async function main() {
 
   // Authoritative values from the SIGNED Unit A lease (Lease Date Feb 8, 2026).
   const BASE = 2184.00;   // Yr1 base rent ($26.00/sf); Yr2 (2/1/2027-2/29/2028) = $2,271.36 ($27.04/sf)
-  const NNN = 1071.18;    // CAM/NNN per lease: $12.75/sf ($1,071.18/mo), Q1-annual reconciliation
-  const TOTAL = +(BASE + NNN).toFixed(2); // 3255.18 recurring monthly (base + CAM); used for Unit.rent
+  const NNN = 1074.53;    // CAM/NNN = 2025 reconciled actual share $12,894.32/yr / 12 (lease estimate was $12.75/sf = $1,071.18/mo)
+  const TOTAL = +(BASE + NNN).toFixed(2); // 3258.53 recurring monthly (base + CAM); used for Unit.rent
   const DEPOSIT = 6510.36; // 2x (base + CAM) = 2 x 3255.18, due 2026-02-08
   const tempPassword = await bcrypt.hash("changeme123", 10);
 
@@ -98,7 +98,7 @@ async function main() {
       "Co-tenant: Fabian Octavio Fiero Vasquez. Guarantor: Elizabeth Mendoza Herrera (520 Utica St, Denver CO 80204).",
       "  All three signed the Lease Guaranty (jointly/severally liable). No portal accounts for co-tenant/guarantor (no emails on file).",
       "Possession & Commencement 2026-02-08; 2-yr term; Termination 2028-02-01.",
-      "Total $3,255.18/mo = Base Rent $2,184.00 (Yr1 @ $26.00/sf) + CAM/NNN $1,071.18/mo ($12.75/sf, Q1-annual reconciliation).",
+      "Total $3,258.53/mo = Base Rent $2,184.00 (Yr1 @ $26.00/sf) + CAM/NNN $1,074.53/mo (2025 reconciled actual share $12,894.32/yr; lease estimate $12.75/sf = $1,071.18).",
       "Base Rent schedule, 4% annual: Yr1 (2/8/2026-1/31/2027) $2,184.00 | Yr2 (2/1/2027-2/29/2028) $2,271.36 (per month).",
       "Security deposit $6,510.36 held = 2x (base + CAM), due 2026-02-08.",
       "Option: two 5-yr renewals at FMV (>= 3% over prior rent) on 120 days' notice.",

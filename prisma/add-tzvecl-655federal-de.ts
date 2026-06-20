@@ -20,8 +20,8 @@ async function main() {
   if (!unit) throw new Error(`Could not find unit 'D&E' on property ${property.id}.`);
 
   const BASE_RENT = 4347.08;        // monthly Base Rent as of Effective Date (monthlyRent = base)
-  const NNN = 1922.48;              // NNN/CAM per 2025 reconciliation: 2018 sf x $11.432/sf / 12 (~= assignment's $1,920.58 op-costs)
-  const TOTAL = +(BASE_RENT + NNN).toFixed(2); // 6269.56 full monthly (base + NNN); used for Unit.rent
+  const NNN = 2149.05;              // NNN/CAM = 2025 reconciled actual share $25,788.64/yr / 12 (40% of building; assignment estimate was $1,920.58)
+  const TOTAL = +(BASE_RENT + NNN).toFixed(2); // 6496.13 full monthly (base + NNN); used for Unit.rent
   const DEPOSIT = 6000.0;           // security deposit on file, assumed by assignee
 
   const tempPassword = await bcrypt.hash("changeme123", 10);
@@ -78,7 +78,7 @@ async function main() {
       "  230 Kings Highway East, Suite 333, Haddonfield, NJ 08033).",
       "Assignment & Assumption of Lease, Effective Date 2025-12-05: original 2022 lease (tenant ABC Eye Care,",
       "  PLLC / Dr. Matthew Asman) assigned to TZVECL. Original Lease dated 2022-06-01; current term expires 2029-09-30.",
-      "Total $6,269.56/mo = Base Rent $4,347.08 + NNN/CAM $1,922.48/mo (2018 sf @ $11.432/sf per 2025 reconciliation;",
+      "Total $6,496.13/mo = Base Rent $4,347.08 + NNN/CAM $2,149.05/mo (2025 reconciled actual share $25,788.64/yr, 40% of building;",
       "  ~= the assignment's stated RE Taxes/Operating Costs of $1,920.58).",
       "Security deposit $6,000.00 held (assumed by assignee).",
       "Guarantor: TZVECL Holdings, LLC (Brad Messinger), guaranty commences 2027-10-01; prior guarantor",

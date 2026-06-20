@@ -18,8 +18,8 @@ async function main() {
   if (!unit) throw new Error(`Could not find unit 'B' on property ${property.id}.`);
 
   const BASE_RENT_YR1 = 2121.0; // $25.25/sf x 1008 sf = $25,452/yr (Yr1: Oct 2025 - Sep 2026). monthlyRent = base.
-  const NNN = 961.24;           // NNN/CAM per 2025 reconciliation: 1009 sf x $11.432/sf / 12
-  const TOTAL = +(BASE_RENT_YR1 + NNN).toFixed(2); // 3082.24 full monthly (base + NNN); used for Unit.rent
+  const NNN = 1074.53;          // NNN/CAM = 2025 reconciled actual share $12,894.32/yr / 12 (lease estimate was $11.432/sf = $961/mo)
+  const TOTAL = +(BASE_RENT_YR1 + NNN).toFixed(2); // 3195.53 full monthly (base + NNN); used for Unit.rent
   const DEPOSIT = 6000.0;       // due 2025-09-12
 
   const tempPassword = await bcrypt.hash("changeme123", 10);
@@ -78,7 +78,7 @@ async function main() {
       "655 S Federal Blvd, Unit B, Denver CO 80219. Commercial bakery, +/- 1008 sf (Tenant's proportional share +/-20%).",
       "Tenant: Kenia's Bakery (contact: Kenia Tiscareno; keniatiscareno123@gmail.com; 720-940-6231 / 720-624-9271).",
       "Possession 2025-09-12 (no rent until commencement); Commencement 2025-10-01; 5-yr term; Termination 2030-09-30.",
-      "Total $3,082.24/mo = Base Rent $2,121.00 (Yr1 @ $25.25/sf) + NNN/CAM $961.24/mo (1009 sf @ $11.432/sf per 2025 reconciliation).",
+      "Total $3,195.53/mo = Base Rent $2,121.00 (Yr1 @ $25.25/sf) + NNN/CAM $1,074.53/mo (2025 reconciled actual share $12,894.32/yr; lease estimate $11.432/sf = $961/mo).",
       "Base Rent schedule, 4% annual increases: Yr1 $2,121 | Yr2 $2,184 | Yr3 $2,250 | Yr4 $2,317 | Yr5 $2,386 (per month).",
       "Security deposit $6,000.00 held (due 2025-09-12). No guarantor named.",
       "Late charge: $50/day or 12% interest (greater) after the 5th; $500 fee if 3-day notice posted. Electricity separately metered.",
