@@ -10,6 +10,7 @@ import {
   Wrench,
   CreditCard,
   FileText,
+  Plug,
   User,
   LogOut,
   Menu,
@@ -21,6 +22,7 @@ import { useState } from "react";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Maintenance", href: "/dashboard/maintenance", icon: Wrench },
+  { name: "Utilities", href: "/dashboard/utilities", icon: Plug },
   { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
   { name: "My Lease", href: "/dashboard/lease", icon: FileText },
   { name: "Profile", href: "/dashboard/profile", icon: User },

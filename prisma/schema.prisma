@@ -44,6 +44,7 @@ model Property {
 
   units        Unit[]
   applications Application[]
+  utilities    Utility[]
 }
 
 model Unit {
@@ -62,8 +63,37 @@ model Unit {
   tenants             Tenant[]
   leases              Lease[]
   maintenanceRequests MaintenanceRequest[]
+  utilities           Utility[]
 
   @@unique([propertyId, unitNumber])
+}
+
+// Per-property utility / service providers (trash, electric, water, HOA, etc.).
+// Primarily tenant-facing (onboarding directory + utility notices). Admin-only
+// fields (accountNumber, monthlyCost, dueDay, internalNotes) must never be sent
+// to tenants. unitId null = whole property; set = override for one unit.
+model Utility {
+  id            String   @id @default(cuid())
+  propertyId    String
+  unitId        String?  // null = whole property; set = specific-unit override
+  type          String   // TRASH, ELECTRIC, WATER, SEWER, GAS, HOA, INTERNET, OTHER
+  providerName  String
+  phone         String?
+  website       String?
+  accountNumber String?  // ADMIN-ONLY
+  monthlyCost   Float?   // ADMIN-ONLY
+  dueDay        Int?     // ADMIN-ONLY (1-31); reserved for future reminders
+  tenantNotes   String?  // TENANT-VISIBLE (trash schedule, can codes, setup steps)
+  internalNotes String?  // ADMIN-ONLY
+  tenantVisible Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  unit     Unit?    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
 }
 
 model Tenant {

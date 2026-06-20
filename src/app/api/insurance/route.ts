@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const leaseId = searchParams.get("leaseId");
     const expiringSoon = searchParams.get("expiringSoon");
 
-    let where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = {};
 
     if (leaseId) {
       where.leaseId = leaseId;

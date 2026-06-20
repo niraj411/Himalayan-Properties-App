@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import UtilitiesSection from "./utilities-section";
 import {
   Dialog,
   DialogContent,
@@ -701,6 +702,11 @@ export default function PropertyDetailPage({
           )}
         </CardContent>
       </Card>
+
+      <UtilitiesSection
+        propertyId={property.id}
+        units={property.units.map((u) => ({ id: u.id, unitNumber: u.unitNumber }))}
+      />
     </div>
   );
 }
