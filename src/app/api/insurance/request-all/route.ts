@@ -37,12 +37,17 @@ export async function POST() {
         continue;
       }
       const copy = insuranceCopy(lease.leaseType);
+      const body = copy.requestBody(lease.unit.property.name, lease.unit.unitNumber);
       try {
         await sendTenantEmail({
           tenantName: lease.tenant.user.name,
           tenantEmail: lease.tenant.user.email,
           subject: copy.requestSubject,
-          body: copy.requestBody(lease.unit.property.name, lease.unit.unitNumber),
+          body,
+        });
+        // Log the sent request so it's viewable in Admin -> Messages.
+        await db.message.create({
+          data: { fromId: session.user.id, toId: lease.tenant.userId, subject: copy.requestSubject, body },
         });
         requested++;
       } catch (err) {
