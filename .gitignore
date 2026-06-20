@@ -52,3 +52,6 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Generated tenant record .md files (contain PII/financials; regenerate via prisma/generate-tenant-records.ts)
+tenant-records/
