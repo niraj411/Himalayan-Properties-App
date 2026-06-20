@@ -2,24 +2,16 @@ import { PrismaClient } from "@prisma/client";
 
 const db = new PrismaClient();
 
-// One-time backfill: record the past-due rent notice that was emailed to Evelyn
-// (Unit A) on 2026-06-19 into the Message log, so there is a viewable record in
-// Admin -> Messages. Idempotent: matched by (toId, subject). The proper Notices
-// feature will auto-log future notices; this captures the one sent via script.
-async function main() {
-  const admin =
-    (await db.user.findUnique({ where: { email: "niraj411@gmail.com" } })) ||
-    (await db.user.findFirst({ where: { role: "ADMIN" }, orderBy: { createdAt: "asc" } }));
-  if (!admin) throw new Error("No admin user found.");
+// One-time backfill: record the past-due rent notice emailed to Evelyn (Unit A)
+// on 2026-06-19 into BOTH the Message log (Admin -> Messages) and the per-lease
+// Notice history (the Notices feature). Idempotent: Message matched by (toId,
+// subject); Notice matched by (leaseId, subject). Future notices auto-log via the
+// Notices feature; this captures the one originally sent via script.
+const SUBJECT = "Notice of Past-Due Rent and Demand for Payment — 655 S. Federal Blvd., Unit A";
+const SENT_AT = new Date("2026-06-19T17:00:00.000Z");
+const ORIG_MESSAGE_ID = "9f661c01-6154-179f-ae0d-5f9c93b7ec1e@himalayanprop.cloud";
 
-  const evelyn = await db.user.findUnique({ where: { email: "yriannaortega9@gmail.com" } });
-  if (!evelyn) throw new Error("Evelyn user not found.");
-
-  const subject = "Notice of Past-Due Rent and Demand for Payment — 655 S. Federal Blvd., Unit A";
-
-  const body = `[Sent 2026-06-19 — To: yriannaortega9@gmail.com | CC: arrazololaw@gmail.com (attorney) | Reply-To: niraj411@gmail.com]
-
-HIMALAYAN HOLDING PROPERTY LLC
+const NOTICE_BODY = `HIMALAYAN HOLDING PROPERTY LLC
 884 Dakota Lane, Erie, CO 80516
 
 June 19, 2026
@@ -56,15 +48,59 @@ Sincerely,
 Himalayan Holding Property LLC
 By: ____________________________, General Manager`;
 
-  const sentAt = new Date("2026-06-19T17:00:00.000Z");
+const MESSAGE_BODY =
+  `[Sent 2026-06-19 — To: yriannaortega9@gmail.com | CC: arrazololaw@gmail.com (attorney) | Reply-To: niraj411@gmail.com]\n\n` +
+  NOTICE_BODY;
 
-  const existing = await db.message.findFirst({ where: { toId: evelyn.id, subject } });
-  if (existing) {
-    await db.message.update({ where: { id: existing.id }, data: { fromId: admin.id, body, sentAt } });
-    console.log(`Updated existing Message ${existing.id} (Evelyn past-due notice).`);
+async function main() {
+  const admin =
+    (await db.user.findUnique({ where: { email: "niraj411@gmail.com" } })) ||
+    (await db.user.findFirst({ where: { role: "ADMIN" }, orderBy: { createdAt: "asc" } }));
+  if (!admin) throw new Error("No admin user found.");
+
+  const evelyn = await db.user.findUnique({ where: { email: "yriannaortega9@gmail.com" } });
+  if (!evelyn) throw new Error("Evelyn user not found.");
+
+  // 1) Message log (Admin -> Messages)
+  const existingMsg = await db.message.findFirst({ where: { toId: evelyn.id, subject: SUBJECT } });
+  if (existingMsg) {
+    await db.message.update({ where: { id: existingMsg.id }, data: { fromId: admin.id, body: MESSAGE_BODY, sentAt: SENT_AT } });
+    console.log(`Message: updated ${existingMsg.id}.`);
   } else {
-    const m = await db.message.create({ data: { fromId: admin.id, toId: evelyn.id, subject, body, sentAt } });
-    console.log(`Created Message ${m.id} (Evelyn past-due notice, ${admin.email} -> ${evelyn.email}).`);
+    const m = await db.message.create({ data: { fromId: admin.id, toId: evelyn.id, subject: SUBJECT, body: MESSAGE_BODY, sentAt: SENT_AT } });
+    console.log(`Message: created ${m.id}.`);
+  }
+
+  // 2) Notice history on the lease (Notices feature)
+  const tenant = await db.tenant.findUnique({ where: { userId: evelyn.id } });
+  const lease = tenant
+    ? await db.lease.findFirst({ where: { tenantId: tenant.id, status: "ACTIVE" }, orderBy: { createdAt: "desc" } })
+    : null;
+  if (!lease) {
+    console.log("Notice: no active lease for Evelyn — skipped.");
+    return;
+  }
+  const noticeData = {
+    leaseId: lease.id,
+    type: "LATE",
+    subject: SUBJECT,
+    body: NOTICE_BODY,
+    toEmail: "yriannaortega9@gmail.com",
+    ccEmails: "arrazololaw@gmail.com",
+    replyTo: "niraj411@gmail.com",
+    amountDue: 3397.34,
+    status: "SENT",
+    messageId: ORIG_MESSAGE_ID,
+    sentById: admin.id,
+    sentAt: SENT_AT,
+  };
+  const existingNotice = await db.notice.findFirst({ where: { leaseId: lease.id, subject: SUBJECT } });
+  if (existingNotice) {
+    await db.notice.update({ where: { id: existingNotice.id }, data: noticeData });
+    console.log(`Notice: updated ${existingNotice.id} on lease ${lease.id}.`);
+  } else {
+    const n = await db.notice.create({ data: noticeData });
+    console.log(`Notice: created ${n.id} on lease ${lease.id}.`);
   }
 }
 
