@@ -93,6 +93,7 @@ model Lease {
   startDate     DateTime
   endDate       DateTime
   monthlyRent   Float
+  nnnMonthly    Float?   // NNN/CAM additional rent per month (triple-net commercial leases); base rent is monthlyRent
   depositAmount Float?
   documentUrl   String?
   status        String   @default("ACTIVE") // ACTIVE, EXPIRED, TERMINATED

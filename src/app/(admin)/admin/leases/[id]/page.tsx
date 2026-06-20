@@ -83,6 +83,7 @@ interface Lease {
   startDate: string;
   endDate: string;
   monthlyRent: number;
+  nnnMonthly: number | null;
   depositAmount: number | null;
   depositPaidDate: string | null;
   depositStatus: string | null;
@@ -480,10 +481,24 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                 <DollarSign className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Monthly Rent</p>
-                <p className="text-xl font-bold text-slate-900">
-                  ${lease.monthlyRent.toLocaleString()}
-                </p>
+                {lease.nnnMonthly ? (
+                  <>
+                    <p className="text-sm text-slate-500">Monthly Rent (Base + NNN)</p>
+                    <p className="text-xl font-bold text-slate-900">
+                      ${(lease.monthlyRent + lease.nnnMonthly).toLocaleString()}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Base ${lease.monthlyRent.toLocaleString()} + NNN/CAM ${lease.nnnMonthly.toLocaleString()}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-slate-500">Monthly Rent</p>
+                    <p className="text-xl font-bold text-slate-900">
+                      ${lease.monthlyRent.toLocaleString()}
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </CardContent>

@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    const { tenantId, unitId, startDate, endDate, monthlyRent, depositAmount, documentUrl, notes, leaseType } = data;
+    const { tenantId, unitId, startDate, endDate, monthlyRent, nnnMonthly, depositAmount, documentUrl, notes, leaseType } = data;
 
     if (!tenantId || !unitId || !startDate || !endDate || !monthlyRent) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -57,6 +57,7 @@ export async function POST(request: Request) {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         monthlyRent: parseFloat(monthlyRent),
+        nnnMonthly: nnnMonthly ? parseFloat(nnnMonthly) : null,
         depositAmount: depositAmount ? parseFloat(depositAmount) : null,
         documentUrl,
         notes,
@@ -90,7 +91,11 @@ export async function POST(request: Request) {
         tenantName: tenantUser.name,
         tenantEmail: tenantUser.email,
         subject: "Your Lease is Ready",
-        body: `Your lease for ${unitInfo} has been set up.\n\nLease period: ${new Date(startDate).toLocaleDateString()} – ${new Date(endDate).toLocaleDateString()}\nMonthly rent: $${parseFloat(monthlyRent).toLocaleString()}\n\nPlease log in to your tenant portal to review your lease details.`,
+        body: `Your lease for ${unitInfo} has been set up.\n\nLease period: ${new Date(startDate).toLocaleDateString()} – ${new Date(endDate).toLocaleDateString()}\n${
+          nnnMonthly
+            ? `Base rent: $${parseFloat(monthlyRent).toLocaleString()}\nNNN/CAM: $${parseFloat(nnnMonthly).toLocaleString()}\nTotal monthly: $${(parseFloat(monthlyRent) + parseFloat(nnnMonthly)).toLocaleString()}`
+            : `Monthly rent: $${parseFloat(monthlyRent).toLocaleString()}`
+        }\n\nPlease log in to your tenant portal to review your lease details.`,
       });
     } catch (emailErr) {
       console.error("Failed to send lease email:", emailErr);

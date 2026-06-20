@@ -155,11 +155,16 @@ export default async function TenantLeasePage() {
                 <div className="p-4 border border-slate-200 rounded-lg">
                   <div className="flex items-center gap-2 text-slate-500 mb-1">
                     <DollarSign className="h-4 w-4" />
-                    <span className="text-sm">Monthly Rent</span>
+                    <span className="text-sm">{activeLease.nnnMonthly ? "Monthly Rent (Base + NNN)" : "Monthly Rent"}</span>
                   </div>
                   <p className="font-semibold text-slate-900">
-                    ${activeLease.monthlyRent.toLocaleString()}
+                    ${((activeLease.monthlyRent ?? 0) + (activeLease.nnnMonthly ?? 0)).toLocaleString()}
                   </p>
+                  {activeLease.nnnMonthly ? (
+                    <p className="text-xs text-slate-500 mt-1">
+                      Base ${activeLease.monthlyRent.toLocaleString()} + NNN/CAM ${activeLease.nnnMonthly.toLocaleString()}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="p-4 border border-slate-200 rounded-lg">
                   <div className="flex items-center gap-2 text-slate-500 mb-1">

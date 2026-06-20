@@ -62,6 +62,7 @@ interface Lease {
   startDate: string;
   endDate: string;
   monthlyRent: number;
+  nnnMonthly: number | null;
   depositAmount: number | null;
   documentUrl: string | null;
   status: string;
@@ -106,6 +107,7 @@ export default function LeasesPage() {
     startDate: "",
     endDate: "",
     monthlyRent: "",
+    nnnMonthly: "",
     depositAmount: "",
     documentUrl: "",
     notes: "",
@@ -174,6 +176,7 @@ export default function LeasesPage() {
       startDate: "",
       endDate: "",
       monthlyRent: "",
+      nnnMonthly: "",
       depositAmount: "",
       documentUrl: "",
       notes: "",
@@ -190,6 +193,7 @@ export default function LeasesPage() {
       startDate: format(new Date(lease.startDate), "yyyy-MM-dd"),
       endDate: format(new Date(lease.endDate), "yyyy-MM-dd"),
       monthlyRent: lease.monthlyRent.toString(),
+      nnnMonthly: lease.nnnMonthly?.toString() || "",
       depositAmount: lease.depositAmount?.toString() || "",
       documentUrl: lease.documentUrl || "",
       notes: lease.notes || "",
@@ -341,7 +345,7 @@ export default function LeasesPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="monthlyRent">Monthly Rent ($)</Label>
+                  <Label htmlFor="monthlyRent">Base Rent ($/mo)</Label>
                   <Input
                     id="monthlyRent"
                     type="number"
@@ -351,6 +355,19 @@ export default function LeasesPage() {
                     required
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nnnMonthly">NNN/CAM ($/mo)</Label>
+                  <Input
+                    id="nnnMonthly"
+                    type="number"
+                    step="0.01"
+                    placeholder="optional (commercial NNN)"
+                    value={formData.nnnMonthly}
+                    onChange={(e) => setFormData({ ...formData, nnnMonthly: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="depositAmount">Security Deposit ($)</Label>
                   <Input
@@ -521,8 +538,13 @@ export default function LeasesPage() {
                       <TableCell>
                         <div className="flex items-center">
                           <DollarSign className="h-4 w-4 text-slate-400" />
-                          {lease.monthlyRent.toLocaleString()}/mo
+                          {((lease.monthlyRent ?? 0) + (lease.nnnMonthly ?? 0)).toLocaleString()}/mo
                         </div>
+                        {lease.nnnMonthly ? (
+                          <div className="text-xs text-slate-400 pl-4">
+                            base ${lease.monthlyRent.toLocaleString()} + NNN ${lease.nnnMonthly.toLocaleString()}
+                          </div>
+                        ) : null}
                       </TableCell>
                       <TableCell>
                         <Badge

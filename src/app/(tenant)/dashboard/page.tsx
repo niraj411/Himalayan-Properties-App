@@ -119,8 +119,13 @@ export default async function TenantDashboard() {
                 <div className="text-right">
                   <p className="text-blue-100 text-sm">Monthly Rent</p>
                   <p className="text-3xl font-bold">
-                    ${activeLease.monthlyRent.toLocaleString()}
+                    ${((activeLease.monthlyRent ?? 0) + (activeLease.nnnMonthly ?? 0)).toLocaleString()}
                   </p>
+                  {activeLease.nnnMonthly ? (
+                    <p className="text-blue-100 text-xs mt-1">
+                      base ${activeLease.monthlyRent.toLocaleString()} + NNN ${activeLease.nnnMonthly.toLocaleString()}
+                    </p>
+                  ) : null}
                 </div>
               )}
             </div>

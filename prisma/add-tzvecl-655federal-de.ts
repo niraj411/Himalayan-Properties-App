@@ -19,9 +19,9 @@ async function main() {
   });
   if (!unit) throw new Error(`Could not find unit 'D&E' on property ${property.id}.`);
 
-  const BASE_RENT = 4347.08;        // monthly Base Rent as of Effective Date
-  const TAXES_OPCOSTS = 1920.58;    // monthly Real Estate Taxes + Operating Costs
-  const RENT = +(BASE_RENT + TAXES_OPCOSTS).toFixed(2); // 6267.66 total monthly
+  const BASE_RENT = 4347.08;        // monthly Base Rent as of Effective Date (monthlyRent = base)
+  const NNN = 1922.48;              // NNN/CAM per 2025 reconciliation: 2018 sf x $11.432/sf / 12 (~= assignment's $1,920.58 op-costs)
+  const TOTAL = +(BASE_RENT + NNN).toFixed(2); // 6269.56 full monthly (base + NNN); used for Unit.rent
   const DEPOSIT = 6000.0;           // security deposit on file, assumed by assignee
 
   const tempPassword = await bcrypt.hash("changeme123", 10);
@@ -56,7 +56,7 @@ async function main() {
 
   await db.unit.update({
     where: { id: unit.id },
-    data: { rent: RENT, status: "OCCUPIED" },
+    data: { rent: TOTAL, status: "OCCUPIED" },
   });
 
   const leaseData = {
@@ -65,7 +65,8 @@ async function main() {
     leaseType: "COMMERCIAL",
     startDate: new Date("2025-12-05"), // assignment Effective Date (TZVECL became tenant)
     endDate: new Date("2029-09-30"),   // current term expiration per Landlord Estoppel
-    monthlyRent: RENT,
+    monthlyRent: BASE_RENT, // base rent only; NNN/CAM tracked separately
+    nnnMonthly: NNN,
     depositAmount: DEPOSIT,
     depositStatus: "HELD",
     documentUrl: "/api/files/Lease-TZVECL-655Federal-DandE-Assignment.pdf",
@@ -77,7 +78,8 @@ async function main() {
       "  230 Kings Highway East, Suite 333, Haddonfield, NJ 08033).",
       "Assignment & Assumption of Lease, Effective Date 2025-12-05: original 2022 lease (tenant ABC Eye Care,",
       "  PLLC / Dr. Matthew Asman) assigned to TZVECL. Original Lease dated 2022-06-01; current term expires 2029-09-30.",
-      "Rent $6,267.66/mo = Base Rent $4,347.08 + RE Taxes/Operating Costs $1,920.58 (as of Effective Date).",
+      "Total $6,269.56/mo = Base Rent $4,347.08 + NNN/CAM $1,922.48/mo (2018 sf @ $11.432/sf per 2025 reconciliation;",
+      "  ~= the assignment's stated RE Taxes/Operating Costs of $1,920.58).",
       "Security deposit $6,000.00 held (assumed by assignee).",
       "Guarantor: TZVECL Holdings, LLC (Brad Messinger), guaranty commences 2027-10-01; prior guarantor",
       "  Dr. Matthew Asman released as of 2027-09-30.",
@@ -94,7 +96,7 @@ async function main() {
 
   console.log(
     `TZVECL: user ${user.id}, tenant ${tenant.id}, lease ${lease.id} @ Unit D&E. ` +
-      `Rent $${RENT}/mo, deposit $${DEPOSIT} HELD, term 2025-12-05 -> 2029-09-30.`
+      `Base $${BASE_RENT}/mo + NNN $${NNN}/mo = $${TOTAL}/mo total, deposit $${DEPOSIT} HELD, term 2025-12-05 -> 2029-09-30.`
   );
 }
 

@@ -50,7 +50,7 @@ export async function PUT(
     const { id } = await params;
     const data = await request.json();
     const {
-      startDate, endDate, monthlyRent, depositAmount, documentUrl, notes, status, leaseType,
+      startDate, endDate, monthlyRent, nnnMonthly, depositAmount, documentUrl, notes, status, leaseType,
       depositPaidDate, depositStatus, depositReturnDate, depositReturnAmount, depositDeductionNotes,
     } = data;
 
@@ -60,6 +60,7 @@ export async function PUT(
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
         monthlyRent: monthlyRent ? parseFloat(monthlyRent) : undefined,
+        nnnMonthly: nnnMonthly !== undefined ? (nnnMonthly ? parseFloat(nnnMonthly) : null) : undefined,
         depositAmount: depositAmount !== undefined ? (depositAmount ? parseFloat(depositAmount) : null) : undefined,
         documentUrl,
         notes,

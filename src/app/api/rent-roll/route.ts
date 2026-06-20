@@ -65,7 +65,9 @@ export async function GET() {
 
       const unitData = property.units.map((unit) => {
         const activeLease = unit.leases[0] || null;
-        const rent = activeLease?.monthlyRent ?? unit.rent;
+        const base = activeLease?.monthlyRent ?? unit.rent;
+        const nnn = activeLease?.nnnMonthly ?? 0;
+        const rent = base + nnn;
         const leasePayment = activeLease ? paymentsByLease.get(activeLease.id) : null;
         const paidThisMonth = leasePayment ? leasePayment.total >= rent * 0.9 : false;
 
