@@ -5,12 +5,37 @@ import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
 
 // GET /api/notices?leaseId=... -> notices for a lease, newest first (admin)
+// GET /api/notices?scope=tenant -> notices sent to the caller (tenant), safe fields
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { searchParams } = new URL(request.url);
+  const scope = searchParams.get("scope");
+
+  // Tenant-facing: only the caller's own SENT notices; no internal fields.
+  if (scope === "tenant") {
+    const tenant = await db.tenant.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+    if (!tenant) return NextResponse.json([]);
+    const leases = await db.lease.findMany({
+      where: { OR: [{ tenantId: tenant.id }, { coTenants: { some: { id: tenant.id } } }] },
+      select: { id: true },
+    });
+    const notices = await db.notice.findMany({
+      where: { leaseId: { in: leases.map((l) => l.id) }, status: "SENT" },
+      select: { id: true, type: true, subject: true, body: true, amountDue: true, sentAt: true },
+      orderBy: { sentAt: "desc" },
+    });
+    return NextResponse.json(notices);
+  }
+
+  if (session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const leaseId = searchParams.get("leaseId") ?? undefined;
   const notices = await db.notice.findMany({
     where: leaseId ? { leaseId } : undefined,

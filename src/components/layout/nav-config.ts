@@ -115,13 +115,17 @@ export const tenantNavConfig: NavConfig = {
       items: [
         { name: "My Lease", href: "/dashboard/lease", icon: FileText },
         { name: "Utilities", href: "/dashboard/utilities", icon: Plug },
+        { name: "Notices", href: "/dashboard/notices", icon: Bell },
       ],
     },
     {
       id: "money",
       label: "Money",
       icon: Wallet,
-      items: [{ name: "Payments", href: "/dashboard/payments", icon: CreditCard }],
+      items: [
+        { name: "Payments", href: "/dashboard/payments", icon: CreditCard },
+        { name: "Balance", href: "/dashboard/balance", icon: Receipt },
+      ],
     },
     {
       id: "requests",
