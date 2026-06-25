@@ -55,3 +55,9 @@ next-env.d.ts
 
 # Generated tenant record .md files (contain PII/financials; regenerate via prisma/generate-tenant-records.ts)
 tenant-records/
+
+# Playwright MCP diagnostics (local only)
+.playwright-mcp/
+/listing-*.png
+/lightbox-*.png
+/gallery-*.png
