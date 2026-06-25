@@ -51,7 +51,6 @@ import {
   Trash2,
   ExternalLink,
   FileText,
-  Upload,
 } from "lucide-react";
 
 interface Escalation {

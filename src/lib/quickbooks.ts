@@ -152,7 +152,7 @@ export async function getProfitAndLoss(startDate: string, endDate: string) {
 }
 
 // Get balance sheet
-export async function getBalanceSheet(asOfDate: string) {
+export async function getBalanceSheet() {
   const data = await makeQBRequest(
     `reports/BalanceSheet?date_macro=Today`
   );
@@ -188,6 +188,7 @@ export async function createPaymentReceipt(payment: {
     "query?query=select * from Account where AccountType = 'Income' MAXRESULTS 1"
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const incomeAccountId = accountQuery.QueryResponse.Account?.[0]?.Id || "1";
 
   // Create sales receipt (simpler than invoice for rent payments)

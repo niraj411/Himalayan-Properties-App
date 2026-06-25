@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { format, differenceInDays, isBefore, addDays } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import {
   FileText,
   Calendar,
@@ -14,8 +14,6 @@ import {
   ExternalLink,
   AlertTriangle,
   Building2,
-  Shield,
-  Check,
   TrendingUp,
 } from "lucide-react";
 import { InsuranceUploadSection } from "./insurance-upload";

@@ -27,7 +27,7 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { isItemActive, isGroupActive, findActiveGroupId } from "@/lib/nav";
-import type { NavConfig, NavGroup, NavItem } from "@/components/layout/nav-config";
+import type { NavConfig, NavItem } from "@/components/layout/nav-config";
 
 const COLLAPSE_KEY = "hp-nav-collapsed";
 
@@ -52,16 +52,22 @@ export function SidebarNav({
   );
 
   // Restore collapse preference after mount (avoid SSR hydration mismatch).
+  // The post-mount flag is the sanctioned SSR pattern; the rule's general
+  // caution about cascading renders doesn't apply to a one-shot mount signal.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     if (typeof window !== "undefined" && window.localStorage.getItem(COLLAPSE_KEY) === "1") {
       setCollapsed(true);
     }
   }, []);
 
-  // Keep the active group expanded as the route changes.
+  // Keep the active group expanded as the route changes. This syncs nav UI to
+  // the current route (an external signal), and must accumulate with the user's
+  // manually-opened groups, so it can't be derived purely during render.
   useEffect(() => {
     const id = findActiveGroupId(pathname, config.groups);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (id) setOpenGroups((prev) => new Set(prev).add(id));
   }, [pathname, config.groups]);
 

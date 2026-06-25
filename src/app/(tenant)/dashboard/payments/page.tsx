@@ -43,7 +43,7 @@ interface Settings {
 }
 
 export default function TenantPaymentsPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);

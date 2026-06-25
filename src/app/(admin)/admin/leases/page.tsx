@@ -43,7 +43,6 @@ import {
   Calendar,
   DollarSign,
   AlertTriangle,
-  ExternalLink,
   Eye,
   Building2,
   Home,

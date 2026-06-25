@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Loader2, Building2, Home, Store, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Loader2, Home, Store, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface UnitRow {
   id: string;
@@ -61,7 +61,7 @@ export default function RentRollPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-[#4f17ce]" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -74,35 +74,35 @@ export default function RentRollPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#1b1c1e]" style={{ letterSpacing: "-0.02em" }}>
+        <h1 className="text-2xl font-bold text-on-surface" style={{ letterSpacing: "-0.02em" }}>
           Rent Roll
         </h1>
-        <p className="text-slate-500 mt-1">{monthLabel} — Portfolio financial snapshot</p>
+        <p className="text-muted-foreground mt-1">{monthLabel} — Portfolio financial snapshot</p>
       </div>
 
       {/* Summary banner */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#4f17ce] to-[#673de6] p-6 text-white">
+      <div className="rounded-xl bg-gradient-to-br from-primary to-primary-container p-6 text-white">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div>
-            <p className="text-purple-200 text-sm mb-1">Expected Rent</p>
+            <p className="text-white/80 text-sm mb-1">Expected Rent</p>
             <p className="text-3xl font-bold" style={{ letterSpacing: "-0.02em" }}>
               ${data.summary.totalExpected.toLocaleString()}
             </p>
           </div>
           <div>
-            <p className="text-purple-200 text-sm mb-1">Collected</p>
+            <p className="text-white/80 text-sm mb-1">Collected</p>
             <p className="text-3xl font-bold" style={{ letterSpacing: "-0.02em" }}>
               ${data.summary.totalCollected.toLocaleString()}
             </p>
           </div>
           <div>
-            <p className="text-purple-200 text-sm mb-1">Total Mortgage</p>
+            <p className="text-white/80 text-sm mb-1">Total Mortgage</p>
             <p className="text-3xl font-bold" style={{ letterSpacing: "-0.02em" }}>
               ${data.summary.totalMortgage.toLocaleString()}
             </p>
           </div>
           <div>
-            <p className="text-purple-200 text-sm mb-1">Net Income</p>
+            <p className="text-white/80 text-sm mb-1">Net Income</p>
             <p
               className={`text-3xl font-bold ${data.summary.netIncome < 0 ? "text-red-300" : "text-white"}`}
               style={{ letterSpacing: "-0.02em" }}
@@ -115,12 +115,12 @@ export default function RentRollPage() {
 
       {/* Per-property sections */}
       {data.properties.map((property) => (
-        <div key={property.id} className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 40px 40px -10px rgba(27,28,30,0.06)" }}>
+        <div key={property.id} className="bg-card rounded-xl overflow-hidden shadow-sm">
           {/* Property header */}
-          <div className="p-6 bg-[#f5f3f5]">
+          <div className="p-6 bg-muted/50">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div className="flex items-start gap-4">
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${property.type === "COMMERCIAL" ? "bg-purple-100" : "bg-blue-100"}`}>
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${property.type === "COMMERCIAL" ? "bg-purple-100" : "bg-primary/10"}`}>
                   {property.type === "COMMERCIAL" ? (
                     <Store className="h-5 w-5 text-purple-600" />
                   ) : (
@@ -128,10 +128,10 @@ export default function RentRollPage() {
                   )}
                 </div>
                 <div>
-                  <h2 className="font-semibold text-[#1b1c1e] text-lg" style={{ letterSpacing: "-0.01em" }}>
+                  <h2 className="font-semibold text-on-surface text-lg" style={{ letterSpacing: "-0.01em" }}>
                     {property.name}
                   </h2>
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     {property.address}, {property.city}, {property.state} &nbsp;·&nbsp; {property.occupiedUnits}/{property.totalUnits} occupied
                   </p>
                 </div>
@@ -140,31 +140,31 @@ export default function RentRollPage() {
               {/* Financials */}
               <div className="flex flex-wrap gap-4 text-right">
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Expected</p>
-                  <p className="font-semibold text-[#1b1c1e]">${property.expectedRent.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Expected</p>
+                  <p className="font-semibold text-on-surface">${property.expectedRent.toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Collected</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Collected</p>
                   <p className={`font-semibold ${property.collectedRent >= property.expectedRent ? "text-green-600" : "text-amber-600"}`}>
                     ${property.collectedRent.toLocaleString()}
                   </p>
                 </div>
                 {property.mortgageMonthlyPayment > 0 && (
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">
+                    <p className="text-xs text-muted-foreground mb-0.5">
                       Mortgage{property.mortgageLender ? ` · ${property.mortgageLender}` : ""}
                     </p>
-                    <p className="font-semibold text-slate-600">
+                    <p className="font-semibold text-muted-foreground">
                       -${property.mortgageMonthlyPayment.toLocaleString()}
-                      {property.mortgageDueDay ? <span className="font-normal text-slate-400 text-xs"> due {property.mortgageDueDay}{ordinal(property.mortgageDueDay)}</span> : ""}
+                      {property.mortgageDueDay ? <span className="font-normal text-muted-foreground text-xs"> due {property.mortgageDueDay}{ordinal(property.mortgageDueDay)}</span> : ""}
                     </p>
                     {property.mortgageBalance && (
-                      <p className="text-xs text-slate-400">${property.mortgageBalance.toLocaleString()} remaining</p>
+                      <p className="text-xs text-muted-foreground">${property.mortgageBalance.toLocaleString()} remaining</p>
                     )}
                   </div>
                 )}
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Net</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Net</p>
                   <p className={`font-bold ${property.netIncome >= 0 ? "text-green-600" : "text-red-600"}`}>
                     ${property.netIncome.toLocaleString()}
                   </p>
@@ -174,17 +174,17 @@ export default function RentRollPage() {
           </div>
 
           {/* Units */}
-          <div className="divide-y divide-[#cac3d8]/15">
+          <div className="divide-y divide-outline-variant/15">
             {property.units.map((unit, i) => (
               <div
                 key={unit.id}
-                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 ${i % 2 === 0 ? "bg-white" : "bg-[#faf9fb]"}`}
+                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 ${i % 2 === 0 ? "bg-card" : "bg-muted/30"}`}
               >
                 <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium text-[#1b1c1e] w-16">#{unit.unitNumber}</span>
+                  <span className="text-sm font-medium text-on-surface w-16">#{unit.unitNumber}</span>
                   <div>
-                    <p className="text-sm text-[#1b1c1e]">{unit.tenantName || <span className="text-slate-400">Vacant</span>}</p>
-                    <p className="text-xs text-slate-400">${unit.rent.toLocaleString()}/mo</p>
+                    <p className="text-sm text-on-surface">{unit.tenantName || <span className="text-muted-foreground">Vacant</span>}</p>
+                    <p className="text-xs text-muted-foreground">${unit.rent.toLocaleString()}/mo</p>
                   </div>
                 </div>
 
@@ -192,15 +192,15 @@ export default function RentRollPage() {
                   {unit.status === "OCCUPIED" && unit.leaseId ? (
                     <>
                       <div>
-                        <p className="text-xs text-slate-400 mb-0.5">Paid this month</p>
-                        <p className="text-sm font-medium text-[#1b1c1e]">
+                        <p className="text-xs text-muted-foreground mb-0.5">Paid this month</p>
+                        <p className="text-sm font-medium text-on-surface">
                           {unit.paidAmount > 0 ? `$${unit.paidAmount.toLocaleString()}` : "—"}
                         </p>
                       </div>
                       {unit.lastPaymentDate && (
                         <div>
-                          <p className="text-xs text-slate-400 mb-0.5">Last payment</p>
-                          <p className="text-sm text-slate-600">
+                          <p className="text-xs text-muted-foreground mb-0.5">Last payment</p>
+                          <p className="text-sm text-muted-foreground">
                             {format(new Date(unit.lastPaymentDate), "MMM d")}
                           </p>
                         </div>
@@ -214,7 +214,7 @@ export default function RentRollPage() {
                       </div>
                     </>
                   ) : (
-                    <span className="text-xs px-2.5 py-1 bg-[#f5f3f5] rounded-lg text-slate-500">
+                    <span className="text-xs px-2.5 py-1 bg-muted/50 rounded-lg text-muted-foreground">
                       {unit.status}
                     </span>
                   )}
@@ -225,9 +225,9 @@ export default function RentRollPage() {
 
           {/* Variance row */}
           {property.expectedRent > 0 && (
-            <div className="px-6 py-3 bg-[#e9e8ea] flex items-center justify-end gap-2">
+            <div className="px-6 py-3 bg-muted flex items-center justify-end gap-2">
               {property.variance === 0 ? (
-                <Minus className="h-4 w-4 text-slate-500" />
+                <Minus className="h-4 w-4 text-muted-foreground" />
               ) : property.variance > 0 ? (
                 <TrendingUp className="h-4 w-4 text-green-600" />
               ) : (
