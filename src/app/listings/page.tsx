@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { db } from "@/lib/db";
 import { Building2, Home, Store, MapPin, ArrowRight } from "lucide-react";
 
@@ -96,7 +97,13 @@ export default async function ListingsPage() {
                   {/* Photo */}
                   <div className="relative h-48 bg-[#f5f3f5]">
                     {listing.imageUrl ? (
-                      <img src={listing.imageUrl} alt={listing.name} className="w-full h-full object-cover" />
+                      <Image
+                        src={listing.imageUrl}
+                        alt={listing.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         {listing.type === "COMMERCIAL" ? (

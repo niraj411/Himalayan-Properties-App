@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -386,7 +387,9 @@ export default function PropertiesPage() {
               <div className="space-y-2">
                 <Label>Main Photo (Optional)</Label>
                 {formData.imageUrl && (
-                  <img src={formData.imageUrl} alt="Current" className="w-full h-32 object-cover rounded-xl mb-2" />
+                  <div className="relative w-full h-32 rounded-xl overflow-hidden mb-2">
+                    <Image src={formData.imageUrl} alt="Current" fill sizes="(max-width: 768px) 100vw, 480px" className="object-cover" />
+                  </div>
                 )}
                 <input
                   type="file"

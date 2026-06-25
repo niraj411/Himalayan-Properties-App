@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 export default function PhotoGallery({ photos, name }: { photos: string[]; name: string }) {
@@ -53,7 +54,14 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          <img src={photos[active]} alt={name} className="w-full h-full object-cover" />
+          <Image
+            src={photos[active]}
+            alt={name}
+            fill
+            sizes="(max-width: 1024px) 100vw, 66vw"
+            className="object-cover"
+            priority
+          />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-2xl" />
           {photos.length > 1 && (
             <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2.5 py-1 rounded-lg">
@@ -68,11 +76,11 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
               <button
                 key={i}
                 onClick={() => setActive(i)}
-                className={`flex-shrink-0 h-16 w-24 rounded-xl overflow-hidden bg-[#f5f3f5] transition-all ${
+                className={`relative flex-shrink-0 h-16 w-24 rounded-xl overflow-hidden bg-[#f5f3f5] transition-all ${
                   i === active ? "ring-2 ring-[#4f17ce] ring-offset-1" : "opacity-60 hover:opacity-100"
                 }`}
               >
-                <img src={photo} alt={`${name} ${i + 1}`} className="w-full h-full object-cover" />
+                <Image src={photo} alt={`${name} ${i + 1}`} fill sizes="96px" className="object-cover" />
               </button>
             ))}
           </div>
@@ -100,6 +108,8 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
             onTouchEnd={onTouchEnd}
             onClick={() => setLightbox(false)}
           >
+            {/* On-demand full-size view; raw img keeps object-contain + click-outside-to-close behavior */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={photos[active]}
               alt={name}

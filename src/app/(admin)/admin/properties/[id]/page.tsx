@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -441,7 +442,7 @@ export default function PropertyDetailPage({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {allPhotos.map((photo, i) => (
                   <div key={i} className="relative group rounded-xl overflow-hidden h-28 bg-[#f5f3f5]">
-                    <img src={photo} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                    <Image src={photo} alt={`Photo ${i + 1}`} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover" />
                     {i === 0 && (
                       <span className="absolute top-1.5 left-1.5 text-xs px-2 py-0.5 bg-black/60 text-white rounded-lg">Main</span>
                     )}
