@@ -51,13 +51,64 @@ export async function PUT(
 
     const { id } = await params;
     const data = await request.json();
-    const { status, priority, notes } = data;
+    const { status, priority, notes, contractor, repairCost, paymentMethod, paymentAccount } = data;
+
+    // Load existing request so we can detect the transition into COMPLETED
+    const existing = await db.maintenanceRequest.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ error: "Request not found" }, { status: 404 });
+    }
+
+    const cost =
+      repairCost === undefined || repairCost === null || repairCost === ""
+        ? null
+        : Number(repairCost);
+    if (cost !== null && (isNaN(cost) || cost < 0)) {
+      return NextResponse.json({ error: "Invalid repair cost" }, { status: 400 });
+    }
 
     const updateData: Record<string, unknown> = {};
     if (status) updateData.status = status;
     if (priority) updateData.priority = priority;
     if (notes !== undefined) updateData.notes = notes;
-    if (status === "COMPLETED") updateData.completedAt = new Date();
+    if (contractor !== undefined) updateData.contractor = contractor || null;
+    if (repairCost !== undefined) updateData.repairCost = cost;
+    if (paymentMethod !== undefined) updateData.paymentMethod = paymentMethod || null;
+    if (paymentAccount !== undefined) updateData.paymentAccount = paymentAccount || null;
+    if (status === "COMPLETED" && !existing.completedAt) updateData.completedAt = new Date();
+
+    // When a request is completed with a cost, log it as a PAID maintenance
+    // charge against the tenant's active lease — but only once (guard on chargeId).
+    if (status === "COMPLETED" && cost && cost > 0 && !existing.chargeId) {
+      const lease = await db.lease.findFirst({
+        where: { unitId: existing.unitId, tenantId: existing.tenantId, status: "ACTIVE" },
+        orderBy: { startDate: "desc" },
+      });
+      // Fall back to the most recent lease on the unit if no active tenant match
+      const targetLease =
+        lease ||
+        (await db.lease.findFirst({
+          where: { unitId: existing.unitId },
+          orderBy: { startDate: "desc" },
+        }));
+
+      if (targetLease) {
+        const labelContractor = (contractor ?? existing.contractor) || "";
+        const charge = await db.charge.create({
+          data: {
+            leaseId: targetLease.id,
+            kind: "MAINTENANCE",
+            amount: cost,
+            label: labelContractor ? `${existing.title} — ${labelContractor}` : existing.title,
+            status: "PAID",
+            source: (paymentMethod ?? existing.paymentMethod) || null,
+            notes: (notes ?? existing.notes) || null,
+            paidDate: new Date(),
+          },
+        });
+        updateData.chargeId = charge.id;
+      }
+    }
 
     const maintenanceRequest = await db.maintenanceRequest.update({
       where: { id },

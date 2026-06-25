@@ -283,6 +283,11 @@ model MaintenanceRequest {
   status      String   @default("OPEN") // OPEN, IN_PROGRESS, COMPLETED, CANCELLED
   imageUrls   String?  // JSON array of image URLs
   notes       String?
+  contractor    String?  // who did the work
+  repairCost    Float?   // total cost billed when completed
+  paymentMethod String?  // VENMO, CHECK, CASH, OTHER — how the contractor was paid
+  paymentAccount String? // account/reference (e.g. Venmo handle, check #)
+  chargeId      String?  // Charge created from this repair, if any (prevents duplicates)
   completedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

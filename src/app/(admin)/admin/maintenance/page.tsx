@@ -27,9 +27,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Wrench, Loader2, MoreVertical, CheckCircle, Trash2, Clock, AlertTriangle } from "lucide-react";
+import { Wrench, Loader2, MoreVertical, CheckCircle, Trash2, Clock, AlertTriangle, Plus, DollarSign } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,10 @@ interface MaintenanceRequest {
   priority: string;
   status: string;
   notes: string | null;
+  contractor: string | null;
+  repairCost: number | null;
+  paymentMethod: string | null;
+  paymentAccount: string | null;
   createdAt: string;
   completedAt: string | null;
   tenant: {
@@ -56,16 +61,46 @@ interface MaintenanceRequest {
   };
 }
 
+interface TenantOption {
+  id: string;
+  unitId: string | null;
+  user: { name: string };
+  unit: { unitNumber: string; property: { name: string } } | null;
+}
+
+const STATUS_FILTERS = [
+  { key: "ALL", label: "All" },
+  { key: "OPEN", label: "Open" },
+  { key: "IN_PROGRESS", label: "In Progress" },
+  { key: "COMPLETED", label: "Completed" },
+] as const;
+
 export default function MaintenancePage() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [selectedRequest, setSelectedRequest] = useState<MaintenanceRequest | null>(null);
   const [updateFormData, setUpdateFormData] = useState({
     status: "",
     priority: "",
     notes: "",
+    contractor: "",
+    repairCost: "",
+    paymentMethod: "",
+    paymentAccount: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Admin "New Request" form
+  const [createOpen, setCreateOpen] = useState(false);
+  const [tenants, setTenants] = useState<TenantOption[]>([]);
+  const [createFormData, setCreateFormData] = useState({
+    tenantId: "",
+    title: "",
+    description: "",
+    category: "",
+    priority: "MEDIUM",
+  });
 
   const fetchRequests = async () => {
     try {
@@ -84,6 +119,58 @@ export default function MaintenancePage() {
   useEffect(() => {
     fetchRequests();
   }, []);
+
+  const openCreateDialog = async () => {
+    setCreateFormData({ tenantId: "", title: "", description: "", category: "", priority: "MEDIUM" });
+    setCreateOpen(true);
+    if (tenants.length === 0) {
+      try {
+        const res = await fetch("/api/tenants");
+        if (res.ok) setTenants(await res.json());
+      } catch {
+        toast.error("Failed to load tenants");
+      }
+    }
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const tenant = tenants.find((t) => t.id === createFormData.tenantId);
+    if (!tenant) {
+      toast.error("Select a tenant");
+      return;
+    }
+    if (!tenant.unitId) {
+      toast.error("That tenant is not assigned to a unit");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/maintenance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tenantId: tenant.id,
+          unitId: tenant.unitId,
+          title: createFormData.title,
+          description: createFormData.description,
+          category: createFormData.category || null,
+          priority: createFormData.priority,
+        }),
+      });
+      if (response.ok) {
+        toast.success("Request created");
+        setCreateOpen(false);
+        fetchRequests();
+      } else {
+        toast.error("Failed to create request");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,8 +220,20 @@ export default function MaintenancePage() {
       status: request.status,
       priority: request.priority,
       notes: request.notes || "",
+      contractor: request.contractor || "",
+      repairCost: request.repairCost != null ? String(request.repairCost) : "",
+      paymentMethod: request.paymentMethod || "",
+      paymentAccount: request.paymentAccount || "",
     });
   };
+
+  const filteredRequests =
+    statusFilter === "ALL"
+      ? requests
+      : requests.filter((r) => r.status === statusFilter);
+
+  const statusCount = (key: string) =>
+    key === "ALL" ? requests.length : requests.filter((r) => r.status === key).length;
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
@@ -157,16 +256,41 @@ export default function MaintenancePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Maintenance Requests</h1>
-        <p className="text-slate-500 mt-1">Manage tenant maintenance requests</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Maintenance Requests</h1>
+          <p className="text-slate-500 mt-1">Manage tenant maintenance requests</p>
+        </div>
+        <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
+          <Plus className="h-4 w-4 mr-2" />
+          New Request
+        </Button>
       </div>
 
-      {requests.length === 0 ? (
+      <div className="flex flex-wrap gap-2">
+        {STATUS_FILTERS.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setStatusFilter(f.key)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              statusFilter === f.key
+                ? "bg-blue-600 text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            {f.label}
+            <span className="ml-1.5 opacity-70">{statusCount(f.key)}</span>
+          </button>
+        ))}
+      </div>
+
+      {filteredRequests.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Wrench className="h-12 w-12 text-slate-300 mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No maintenance requests</h3>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">
+              {statusFilter === "ALL" ? "No maintenance requests" : "No requests in this view"}
+            </h3>
             <p className="text-slate-500 text-center">All caught up! No pending requests.</p>
           </CardContent>
         </Card>
@@ -186,7 +310,7 @@ export default function MaintenancePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {requests.map((request) => (
+                {filteredRequests.map((request) => (
                   <TableRow key={request.id}>
                     <TableCell>
                       <div className="font-medium text-slate-900">{request.title}</div>
@@ -237,6 +361,13 @@ export default function MaintenancePage() {
                       >
                         {request.status === "IN_PROGRESS" ? "In Progress" : request.status}
                       </Badge>
+                      {request.repairCost != null && (
+                        <div className="flex items-center gap-0.5 text-xs text-slate-500 mt-1">
+                          <DollarSign className="h-3 w-3" />
+                          {request.repairCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          {request.contractor ? ` · ${request.contractor}` : ""}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="text-slate-500">
                       {format(new Date(request.createdAt), "MMM d, yyyy")}
@@ -316,6 +447,64 @@ export default function MaintenancePage() {
                 </div>
               </div>
               <div className="space-y-2">
+                <Label htmlFor="contractor">Contractor</Label>
+                <Input
+                  id="contractor"
+                  value={updateFormData.contractor}
+                  onChange={(e) => setUpdateFormData({ ...updateFormData, contractor: e.target.value })}
+                  placeholder="Who did the work (vendor / handyman)"
+                />
+              </div>
+
+              {updateFormData.status === "COMPLETED" && (
+                <div className="space-y-4 rounded-lg border border-green-100 bg-green-50/50 p-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="repairCost">Repair Cost ($)</Label>
+                      <Input
+                        id="repairCost"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={updateFormData.repairCost}
+                        onChange={(e) => setUpdateFormData({ ...updateFormData, repairCost: e.target.value })}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="paymentMethod">Paid Via</Label>
+                      <Select
+                        value={updateFormData.paymentMethod || undefined}
+                        onValueChange={(value) => setUpdateFormData({ ...updateFormData, paymentMethod: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Method" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="VENMO">Venmo</SelectItem>
+                          <SelectItem value="CHECK">Check</SelectItem>
+                          <SelectItem value="CASH">Cash</SelectItem>
+                          <SelectItem value="OTHER">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentAccount">Account / Reference</Label>
+                    <Input
+                      id="paymentAccount"
+                      value={updateFormData.paymentAccount}
+                      onChange={(e) => setUpdateFormData({ ...updateFormData, paymentAccount: e.target.value })}
+                      placeholder="Venmo handle, check #, etc."
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    Entering a cost logs a PAID maintenance charge on the tenant&apos;s lease ledger.
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-2">
                 <Label htmlFor="notes">Admin Notes</Label>
                 <Textarea
                   id="notes"
@@ -342,6 +531,108 @@ export default function MaintenancePage() {
               </div>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>New Maintenance Request</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreate} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="createTenant">Tenant / Unit</Label>
+              <Select
+                value={createFormData.tenantId || undefined}
+                onValueChange={(value) => setCreateFormData({ ...createFormData, tenantId: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select tenant" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tenants.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.user.name}
+                      {t.unit ? ` — ${t.unit.property.name} #${t.unit.unitNumber}` : " — (no unit)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="createTitle">Title</Label>
+              <Input
+                id="createTitle"
+                value={createFormData.title}
+                onChange={(e) => setCreateFormData({ ...createFormData, title: e.target.value })}
+                placeholder="e.g. Leaking kitchen faucet"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="createDescription">Description</Label>
+              <Textarea
+                id="createDescription"
+                value={createFormData.description}
+                onChange={(e) => setCreateFormData({ ...createFormData, description: e.target.value })}
+                placeholder="Describe the issue..."
+                rows={3}
+                required
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="createCategory">Category</Label>
+                <Select
+                  value={createFormData.category || undefined}
+                  onValueChange={(value) => setCreateFormData({ ...createFormData, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PLUMBING">Plumbing</SelectItem>
+                    <SelectItem value="ELECTRICAL">Electrical</SelectItem>
+                    <SelectItem value="HVAC">HVAC</SelectItem>
+                    <SelectItem value="APPLIANCE">Appliance</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="createPriority">Priority</Label>
+                <Select
+                  value={createFormData.priority}
+                  onValueChange={(value) => setCreateFormData({ ...createFormData, priority: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LOW">Low</SelectItem>
+                    <SelectItem value="MEDIUM">Medium</SelectItem>
+                    <SelectItem value="HIGH">High</SelectItem>
+                    <SelectItem value="EMERGENCY">Emergency</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Request"
+                )}
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
