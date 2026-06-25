@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
+import { openBalance } from "@/lib/ledger";
 
 // GET /api/notices?leaseId=... -> notices for a lease, newest first (admin)
 // GET /api/notices?scope=tenant -> notices sent to the caller (tenant), safe fields
@@ -56,9 +57,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  // Snapshot the current open-charge balance at send time.
+  // Snapshot the current open-charge balance at send time (remaining, net of
+  // any partial payments already allocated).
   const openCharges = await db.charge.findMany({ where: { leaseId, status: "OPEN" } });
-  const amountDue = openCharges.reduce((s, c) => s + c.amount, 0);
+  const amountDue = openBalance(openCharges);
 
   const ccList = ccEmails
     ? String(ccEmails).split(",").map((s) => s.trim()).filter(Boolean)

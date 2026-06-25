@@ -177,17 +177,19 @@ model Charge {
   id        String    @id @default(cuid())
   leaseId   String
   kind      String    @default("OTHER") // RENT, LATE_FEE, UTILITY, FINAL, CLEANING, DEPOSIT, OTHER
-  label     String
-  amount    Float
-  dueDate   DateTime?
-  status    String    @default("OPEN") // OPEN, PAID, WAIVED
-  source    String?   // e.g. "Baselane #1341810"
-  notes     String?
-  paidDate  DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  label      String
+  amount     Float
+  amountPaid Float     @default(0) // portion settled by allocated payments; remaining = amount - amountPaid
+  dueDate    DateTime?
+  status     String    @default("OPEN") // OPEN, PAID, WAIVED
+  source     String?   // e.g. "Baselane #1341810"
+  notes      String?
+  paidDate   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
-  lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  lease    Lease     @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  payments Payment[]
 
   @@index([leaseId, status])
 }
@@ -299,6 +301,7 @@ model MaintenanceRequest {
 model Payment {
   id        String   @id @default(cuid())
   leaseId   String
+  chargeId  String?  // charge this payment was allocated to settle, if any
   amount    Float
   date      DateTime
   method    String?  // BANK_TRANSFER, CHECK, CASH, OTHER
@@ -307,7 +310,8 @@ model Payment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  lease  Lease   @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  charge Charge? @relation(fields: [chargeId], references: [id], onDelete: SetNull)
 }
 
 model Reminder {

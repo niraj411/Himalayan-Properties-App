@@ -18,6 +18,8 @@ import { sendEmail, sendTenantEmail } from "@/lib/email";
 import { renderNotice, type NoticeType } from "@/lib/notices";
 import { insuranceCopy } from "@/lib/insurance";
 import { UTILITY_TYPES } from "@/lib/utilities";
+import { chargeRemaining, openBalance } from "@/lib/ledger";
+import { allocatePaymentToCharge } from "@/lib/ledger-db";
 
 const LANDLORD_NAME = "Himalayan Holding Property LLC";
 const LANDLORD_ADDRESS = "884 Dakota Lane, Erie, CO 80516";
@@ -165,15 +167,21 @@ async function recordPayment(p: Record<string, unknown>): Promise<AgentActionRes
   const amount = Number(p.amount);
   if (!isFinite(amount) || amount <= 0) throw new Error("A positive numeric amount is required.");
   const date = p.date ? new Date(p.date as string) : new Date();
-  const payment = await db.payment.create({
-    data: {
-      leaseId: lease.id,
-      amount,
-      date,
-      method: (p.method as string) || "OTHER",
-      reference: (p.reference as string) || null,
-      notes: (p.notes as string) || "Recorded via agent action",
-    },
+  const chargeId = (p.chargeId as string | undefined) || null;
+  const payment = await db.$transaction(async (tx) => {
+    const created = await tx.payment.create({
+      data: {
+        leaseId: lease.id,
+        chargeId,
+        amount,
+        date,
+        method: (p.method as string) || "OTHER",
+        reference: (p.reference as string) || null,
+        notes: (p.notes as string) || "Recorded via agent action",
+      },
+    });
+    if (chargeId) await allocatePaymentToCharge(tx, chargeId, lease.id, amount);
+    return created;
   });
   // Email the tenant a receipt (best-effort; never fails the action).
   try {
@@ -198,7 +206,9 @@ async function sendNotice(p: Record<string, unknown>): Promise<AgentActionResult
   if (!["LATE", "DEMAND", "CO_DEMAND"].includes(type)) {
     throw new Error(`Unsupported notice type "${p.type}". Use LATE, DEMAND, or CO_DEMAND.`);
   }
-  const openCharges = lease.charges.filter((c) => c.status === "OPEN").map((c) => ({ label: c.label, amount: c.amount }));
+  const openCharges = lease.charges
+    .filter((c) => c.status === "OPEN")
+    .map((c) => ({ label: c.label, amount: chargeRemaining(c) }));
   if (openCharges.length === 0) {
     throw new Error(`${lease.tenant.user.name} has no open charges — nothing to demand. Add a charge first.`);
   }
@@ -396,8 +406,8 @@ export async function getAgentContext() {
       leaseType: l.leaseType,
       baseRent: l.monthlyRent,
       nnn: l.nnnMonthly ?? null,
-      balance: open.reduce((s, c) => s + c.amount, 0),
-      openCharges: open.map((c) => ({ id: c.id, label: c.label, amount: c.amount })),
+      balance: openBalance(open),
+      openCharges: open.map((c) => ({ id: c.id, label: c.label, amount: chargeRemaining(c) })),
     };
   });
 

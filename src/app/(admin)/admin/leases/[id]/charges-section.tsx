@@ -32,12 +32,14 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Plus, DollarSign, Check, Trash2, RotateCcw, Ban } from "lucide-react";
+import { chargeRemaining, openBalance } from "@/lib/ledger";
 
 export interface Charge {
   id: string;
   kind: string;
   label: string;
   amount: number;
+  amountPaid: number;
   dueDate: string | null;
   status: string;
   source: string | null;
@@ -76,9 +78,7 @@ export default function ChargesSection({
     notes: "",
   });
 
-  const outstanding = charges
-    .filter((c) => c.status === "OPEN")
-    .reduce((s, c) => s + c.amount, 0);
+  const outstanding = openBalance(charges);
 
   const add = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -237,7 +237,12 @@ export default function ChargesSection({
                   <TableCell className="text-slate-600">
                     {c.dueDate ? format(new Date(c.dueDate), "MMM d, yyyy") : "-"}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">{money(c.amount)}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {money(c.status === "OPEN" ? chargeRemaining(c) : c.amount)}
+                    {c.amountPaid > 0 && c.amountPaid < c.amount && c.status === "OPEN" ? (
+                      <div className="text-xs text-slate-500">{money(c.amountPaid)} paid of {money(c.amount)}</div>
+                    ) : null}
+                  </TableCell>
                   <TableCell>{statusBadge(c.status)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">

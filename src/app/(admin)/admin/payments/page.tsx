@@ -33,6 +33,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Plus, CreditCard, Loader2, Trash2, DollarSign, Calculator } from "lucide-react";
+import { chargeRemaining } from "@/lib/ledger";
+
+interface OpenCharge {
+  id: string;
+  kind: string;
+  label: string;
+  amount: number;
+  amountPaid: number;
+  status: string;
+}
 
 interface Payment {
   id: string;
@@ -63,13 +73,17 @@ export default function PaymentsPage() {
   const [syncToQuickBooks, setSyncToQuickBooks] = useState(false);
   const [formData, setFormData] = useState({
     leaseId: "",
+    chargeId: "",
     amount: "",
     date: format(new Date(), "yyyy-MM-dd"),
     method: "BANK_TRANSFER",
     reference: "",
     notes: "",
   });
+  const [openCharges, setOpenCharges] = useState<OpenCharge[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const NONE_CHARGE = "__none__";
 
   const fetchData = async () => {
     try {
@@ -119,17 +133,19 @@ export default function PaymentsPage() {
         } else if (syncToQuickBooks && !result.qbSynced) {
           toast.success("Payment recorded (QuickBooks sync failed)");
         } else {
-          toast.success("Payment recorded");
+          toast.success(formData.chargeId ? "Payment recorded and applied to charge" : "Payment recorded");
         }
         setIsDialogOpen(false);
         setFormData({
           leaseId: "",
+          chargeId: "",
           amount: "",
           date: format(new Date(), "yyyy-MM-dd"),
           method: "BANK_TRANSFER",
           reference: "",
           notes: "",
         });
+        setOpenCharges([]);
         fetchData();
       } else {
         toast.error("Failed to record payment");
@@ -157,12 +173,39 @@ export default function PaymentsPage() {
     }
   };
 
-  const handleLeaseChange = (leaseId: string) => {
+  const handleLeaseChange = async (leaseId: string) => {
     const lease = leases.find((l) => l.id === leaseId);
     setFormData({
       ...formData,
       leaseId,
+      chargeId: "",
       amount: lease?.monthlyRent.toString() || "",
+    });
+    // Load this lease's open charges so the payment can settle a specific one.
+    try {
+      const res = await fetch(`/api/charges?leaseId=${leaseId}`);
+      if (res.ok) {
+        const charges: OpenCharge[] = await res.json();
+        setOpenCharges(charges.filter((c) => c.status === "OPEN"));
+      } else {
+        setOpenCharges([]);
+      }
+    } catch {
+      setOpenCharges([]);
+    }
+  };
+
+  const handleChargeChange = (value: string) => {
+    if (value === NONE_CHARGE) {
+      setFormData({ ...formData, chargeId: "" });
+      return;
+    }
+    const charge = openCharges.find((c) => c.id === value);
+    setFormData({
+      ...formData,
+      chargeId: value,
+      // Default the amount to the charge's remaining balance.
+      amount: charge ? String(chargeRemaining(charge)) : formData.amount,
     });
   };
 
@@ -221,6 +264,30 @@ export default function PaymentsPage() {
                   </SelectContent>
                 </Select>
               </div>
+              {formData.leaseId && openCharges.length > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="chargeId">Apply to charge (optional)</Label>
+                  <Select
+                    value={formData.chargeId || NONE_CHARGE}
+                    onValueChange={handleChargeChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE_CHARGE}>None — general payment</SelectItem>
+                      {openCharges.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.label} — {chargeRemaining(c).toLocaleString("en-US", { style: "currency", currency: "USD" })} due
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-500">
+                    Linking a payment to a charge marks it paid (or partially paid) automatically.
+                  </p>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="amount">Amount ($)</Label>

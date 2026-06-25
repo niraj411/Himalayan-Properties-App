@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { isConnected, createPaymentReceipt } from "@/lib/quickbooks";
 import { sendTenantEmail } from "@/lib/email";
+import { parseMoney } from "@/lib/ledger";
+import { allocatePaymentToCharge, leaseIdsForTenant } from "@/lib/ledger-db";
 
 export async function GET(request: Request) {
   try {
@@ -18,13 +20,13 @@ export async function GET(request: Request) {
     const where: Record<string, unknown> = {};
     if (leaseId) where.leaseId = leaseId;
 
-    // If tenant, only show their payments
-    if (session.user.role === "TENANT" && session.user.tenantId) {
-      const leases = await db.lease.findMany({
-        where: { tenantId: session.user.tenantId },
-        select: { id: true },
-      });
-      where.leaseId = { in: leases.map(l => l.id) };
+    // If tenant, only ever show their own payments. Fail closed: a tenant with
+    // no linked tenant record sees nothing, never the full unscoped list.
+    if (session.user.role === "TENANT") {
+      if (!session.user.tenantId) {
+        return NextResponse.json([]);
+      }
+      where.leaseId = { in: await leaseIdsForTenant(session.user.tenantId) };
     }
 
     const payments = await db.payment.findMany({
@@ -55,29 +57,42 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    const { leaseId, amount, date, method, reference, notes, syncToQuickBooks } = data;
+    const { leaseId, amount, date, method, reference, notes, syncToQuickBooks, chargeId } = data;
 
-    if (!leaseId || !amount || !date) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const amt = parseMoney(amount);
+    if (!leaseId || amt === null || amt <= 0 || !date) {
+      return NextResponse.json(
+        { error: "leaseId, a positive amount, and date are required" },
+        { status: 400 }
+      );
     }
 
-    const payment = await db.payment.create({
-      data: {
-        leaseId,
-        amount: parseFloat(amount),
-        date: new Date(date),
-        method,
-        reference,
-        notes,
-      },
-      include: {
-        lease: {
-          include: {
-            tenant: { include: { user: true } },
-            unit: { include: { property: true } },
+    // Create the payment and, if it's allocated to a charge, settle that charge
+    // atomically so the two never drift out of sync.
+    const payment = await db.$transaction(async (tx) => {
+      const created = await tx.payment.create({
+        data: {
+          leaseId,
+          chargeId: chargeId || null,
+          amount: amt,
+          date: new Date(date),
+          method,
+          reference,
+          notes,
+        },
+        include: {
+          lease: {
+            include: {
+              tenant: { include: { user: true } },
+              unit: { include: { property: true } },
+            },
           },
         },
-      },
+      });
+      if (chargeId) {
+        await allocatePaymentToCharge(tx, chargeId, leaseId, amt);
+      }
+      return created;
     });
 
     // Sync to QuickBooks if requested and connected

@@ -5,6 +5,14 @@ import { db } from "@/lib/db";
 
 export async function GET() {
   try {
+    // Any authenticated user may read settings — tenants need the bank/check
+    // payment details and company contact to pay rent. No truly secret fields
+    // live on this model (QuickBooks OAuth tokens are stored separately).
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     let settings = await db.settings.findFirst();
 
     if (!settings) {

@@ -15,6 +15,7 @@ import {
 import { Receipt } from "lucide-react";
 import { format, isBefore } from "date-fns";
 import Link from "next/link";
+import { chargeRemaining, openBalance } from "@/lib/ledger";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
@@ -33,7 +34,7 @@ async function getOutstanding() {
     },
     orderBy: [{ dueDate: "asc" }],
   });
-  const total = charges.reduce((s, c) => s + c.amount, 0);
+  const total = openBalance(charges);
   const tenants = new Set(charges.map((c) => c.lease.tenantId)).size;
   return { charges, total, tenants };
 }
@@ -104,7 +105,12 @@ export default async function OutstandingPage() {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right font-medium text-on-surface">{money(c.amount)}</TableCell>
+                      <TableCell className="text-right font-medium text-on-surface">
+                        {money(chargeRemaining(c))}
+                        {c.amountPaid > 0 && c.amountPaid < c.amount ? (
+                          <span className="block text-xs text-muted-foreground">of {money(c.amount)}</span>
+                        ) : null}
+                      </TableCell>
                     </TableRow>
                   );
                 })}

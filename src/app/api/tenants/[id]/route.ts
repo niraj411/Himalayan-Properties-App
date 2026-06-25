@@ -118,11 +118,24 @@ export async function DELETE(
     const { id } = await params;
     const tenant = await db.tenant.findUnique({
       where: { id },
-      include: { unit: true },
+      include: { unit: true, _count: { select: { leases: true } } },
     });
 
     if (!tenant) {
       return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
+    }
+
+    // Refuse to delete a tenant who still has leases: Lease → Charge/Payment/
+    // Notice/Insurance all cascade, so deleting would irreversibly wipe their
+    // entire financial and audit history. Require the leases be removed first.
+    if (tenant._count.leases > 0) {
+      return NextResponse.json(
+        {
+          error:
+            "This tenant has lease history with associated charges and payments. Remove or reassign their leases before deleting to avoid destroying financial records.",
+        },
+        { status: 409 }
+      );
     }
 
     // Free up unit

@@ -84,7 +84,8 @@ export async function PATCH(
     }
 
     // Verify access for non-admin users
-    if (session.user.role !== "ADMIN") {
+    const isAdmin = session.user.role === "ADMIN";
+    if (!isAdmin) {
       const tenant = await db.tenant.findUnique({
         where: { userId: session.user.id },
       });
@@ -111,11 +112,13 @@ export async function PATCH(
           reminderSentAt: null,
         }),
         ...(body.documentUrl !== undefined && { documentUrl: body.documentUrl }),
-        ...(body.verified !== undefined && {
+        // verified and reminderSent are admin-only compliance flags. A tenant must
+        // not be able to self-attest insurance compliance or fire reminder emails.
+        ...(isAdmin && body.verified !== undefined && {
           verified: body.verified,
           verifiedAt: body.verified ? new Date() : null,
         }),
-        ...(body.reminderSent !== undefined && {
+        ...(isAdmin && body.reminderSent !== undefined && {
           reminderSent: body.reminderSent,
           reminderSentAt: body.reminderSent ? new Date() : null,
         }),
@@ -127,8 +130,8 @@ export async function PATCH(
       },
     });
 
-    // Send reminder email if reminderSent was just set to true
-    if (body.reminderSent === true) {
+    // Send reminder email if reminderSent was just set to true (admin only)
+    if (isAdmin && body.reminderSent === true) {
       try {
         const tenant = insurance.lease.tenant;
         const expDate = format(new Date(insurance.expirationDate), "MMMM d, yyyy");

@@ -78,45 +78,50 @@ export async function PUT(
     if (status === "COMPLETED" && !existing.completedAt) updateData.completedAt = new Date();
 
     // When a request is completed with a cost, log it as a PAID maintenance
-    // charge against the tenant's active lease — but only once (guard on chargeId).
-    if (status === "COMPLETED" && cost && cost > 0 && !existing.chargeId) {
-      const lease = await db.lease.findFirst({
-        where: { unitId: existing.unitId, tenantId: existing.tenantId, status: "ACTIVE" },
-        orderBy: { startDate: "desc" },
-      });
-      // Fall back to the most recent lease on the unit if no active tenant match
-      const targetLease =
-        lease ||
-        (await db.lease.findFirst({
-          where: { unitId: existing.unitId },
+    // charge against the tenant's active lease — but only once (guard on
+    // chargeId). The charge creation and the request update run in one
+    // transaction so we never create a charge without linking it back.
+    const maintenanceRequest = await db.$transaction(async (tx) => {
+      if (status === "COMPLETED" && cost && cost > 0 && !existing.chargeId) {
+        const lease = await tx.lease.findFirst({
+          where: { unitId: existing.unitId, tenantId: existing.tenantId, status: "ACTIVE" },
           orderBy: { startDate: "desc" },
-        }));
-
-      if (targetLease) {
-        const labelContractor = (contractor ?? existing.contractor) || "";
-        const charge = await db.charge.create({
-          data: {
-            leaseId: targetLease.id,
-            kind: "MAINTENANCE",
-            amount: cost,
-            label: labelContractor ? `${existing.title} — ${labelContractor}` : existing.title,
-            status: "PAID",
-            source: (paymentMethod ?? existing.paymentMethod) || null,
-            notes: (notes ?? existing.notes) || null,
-            paidDate: new Date(),
-          },
         });
-        updateData.chargeId = charge.id;
-      }
-    }
+        // Fall back to the most recent lease on the unit if no active tenant match
+        const targetLease =
+          lease ||
+          (await tx.lease.findFirst({
+            where: { unitId: existing.unitId },
+            orderBy: { startDate: "desc" },
+          }));
 
-    const maintenanceRequest = await db.maintenanceRequest.update({
-      where: { id },
-      data: updateData,
-      include: {
-        tenant: { include: { user: true } },
-        unit: { include: { property: true } },
-      },
+        if (targetLease) {
+          const labelContractor = (contractor ?? existing.contractor) || "";
+          const charge = await tx.charge.create({
+            data: {
+              leaseId: targetLease.id,
+              kind: "MAINTENANCE",
+              amount: cost,
+              amountPaid: cost,
+              label: labelContractor ? `${existing.title} — ${labelContractor}` : existing.title,
+              status: "PAID",
+              source: (paymentMethod ?? existing.paymentMethod) || null,
+              notes: (notes ?? existing.notes) || null,
+              paidDate: new Date(),
+            },
+          });
+          updateData.chargeId = charge.id;
+        }
+      }
+
+      return tx.maintenanceRequest.update({
+        where: { id },
+        data: updateData,
+        include: {
+          tenant: { include: { user: true } },
+          unit: { include: { property: true } },
+        },
+      });
     });
 
     // Email tenant on status change

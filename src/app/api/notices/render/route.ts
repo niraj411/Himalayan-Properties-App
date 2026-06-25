@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { renderNotice, type NoticeType, type NoticeContext } from "@/lib/notices";
+import { chargeRemaining } from "@/lib/ledger";
 
 const LANDLORD_NAME = "Himalayan Holding Property LLC";
 const LANDLORD_ADDRESS = "884 Dakota Lane, Erie, CO 80516";
@@ -31,7 +32,10 @@ export async function POST(request: Request) {
 
   const p = lease.unit.property;
   const premises = `${p.address}, Unit ${lease.unit.unitNumber}, ${p.city}, ${p.state} ${p.zip}`;
-  const openCharges = lease.charges.map((c) => ({ label: c.label, amount: c.amount }));
+  const openCharges = lease.charges.map((c) => ({
+    label: c.label,
+    amount: chargeRemaining(c),
+  }));
   const totalDue = openCharges.reduce((s, c) => s + c.amount, 0);
   const todayStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
   const commencementDate = lease.startDate

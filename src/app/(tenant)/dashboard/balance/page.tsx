@@ -7,12 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, Receipt, CreditCard } from "lucide-react";
+import { chargeRemaining } from "@/lib/ledger";
 
 interface Charge {
   id: string;
   kind: string;
   label: string;
   amount: number;
+  amountPaid: number;
   dueDate: string | null;
   status: string;
   paidDate: string | null;
@@ -126,7 +128,14 @@ function ChargeTable({ title, rows, muted }: { title: string; rows: Charge[]; mu
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`font-semibold ${muted ? "text-muted-foreground" : "text-on-surface"}`}>{money(c.amount)}</span>
+                <div className="text-right">
+                  <span className={`font-semibold ${muted ? "text-muted-foreground" : "text-on-surface"}`}>
+                    {money(c.status === "OPEN" ? chargeRemaining(c) : c.amount)}
+                  </span>
+                  {c.status === "OPEN" && c.amountPaid > 0 && c.amountPaid < c.amount ? (
+                    <p className="text-xs text-muted-foreground">{money(c.amountPaid)} paid of {money(c.amount)}</p>
+                  ) : null}
+                </div>
                 <StatusBadge status={c.status} />
               </div>
             </div>
