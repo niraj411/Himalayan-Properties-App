@@ -108,7 +108,7 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -125,7 +125,7 @@ export default function SettingsPage() {
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-blue-600" />
+              <Building2 className="h-5 w-5 text-primary" />
               <CardTitle>Company Information</CardTitle>
             </div>
             <CardDescription>Your business details shown to tenants</CardDescription>
@@ -202,7 +202,7 @@ export default function SettingsPage() {
                     href={formData.baselanePaymentLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-3 py-2 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50"
+                    className="flex items-center gap-1 px-3 py-2 text-sm text-primary border border-blue-200 rounded-md hover:bg-blue-50"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>
@@ -290,7 +290,7 @@ export default function SettingsPage() {
                     href={formData.zillowUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-3 py-2 text-sm text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50"
+                    className="flex items-center gap-1 px-3 py-2 text-sm text-primary border border-blue-200 rounded-md hover:bg-blue-50"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>

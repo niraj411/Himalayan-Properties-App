@@ -124,7 +124,7 @@ export default function RentRollPage() {
                   {property.type === "COMMERCIAL" ? (
                     <Store className="h-5 w-5 text-purple-600" />
                   ) : (
-                    <Home className="h-5 w-5 text-blue-600" />
+                    <Home className="h-5 w-5 text-primary" />
                   )}
                 </div>
                 <div>

@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import { format } from "date-fns";
 import {
   ClipboardList,
@@ -114,7 +115,7 @@ export default function ApplicationsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this application?")) return;
+    if (!(await confirmDialog({ title: "Delete application?", description: "This permanently deletes the application.", confirmText: "Delete", destructive: true }))) return;
 
     try {
       const response = await fetch(`/api/applications/${id}`, { method: "DELETE" });
@@ -132,7 +133,7 @@ export default function ApplicationsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -277,7 +278,7 @@ export default function ApplicationsPage() {
                     {selectedApplication.applicationType === "COMMERCIAL" ? (
                       <Store className="h-5 w-5 text-purple-600" />
                     ) : (
-                      <User className="h-5 w-5 text-blue-600" />
+                      <User className="h-5 w-5 text-primary" />
                     )}
                   </div>
                   <div>

@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import { format } from "date-fns";
 import { Wrench, Loader2, MoreVertical, CheckCircle, Trash2, Clock, AlertTriangle, Plus, DollarSign } from "lucide-react";
 import {
@@ -199,7 +200,7 @@ export default function MaintenancePage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this request?")) return;
+    if (!(await confirmDialog({ title: "Delete request?", description: "This permanently deletes the maintenance request.", confirmText: "Delete", destructive: true }))) return;
 
     try {
       const response = await fetch(`/api/maintenance/${id}`, { method: "DELETE" });
@@ -249,7 +250,7 @@ export default function MaintenancePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -274,7 +275,7 @@ export default function MaintenancePage() {
             onClick={() => setStatusFilter(f.key)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               statusFilter === f.key
-                ? "bg-blue-600 text-white"
+                ? "bg-primary text-white"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >

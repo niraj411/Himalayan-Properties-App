@@ -106,7 +106,7 @@ export default async function AdminDashboard() {
       value: data.propertiesCount,
       icon: Building2,
       href: "/admin/properties",
-      color: "text-blue-600",
+      color: "text-primary",
       bgColor: "bg-blue-50",
     },
     {
@@ -190,7 +190,7 @@ export default async function AdminDashboard() {
               <Calendar className="h-5 w-5 text-orange-500" />
               Expiring Leases
             </CardTitle>
-            <Link href="/admin/leases" className="text-sm text-blue-600 hover:text-blue-700">
+            <Link href="/admin/leases" className="text-sm text-primary hover:text-blue-700">
               View all
             </Link>
           </CardHeader>
@@ -230,7 +230,7 @@ export default async function AdminDashboard() {
               <Wrench className="h-5 w-5 text-red-500" />
               Open Maintenance Requests
             </CardTitle>
-            <Link href="/admin/maintenance" className="text-sm text-blue-600 hover:text-blue-700">
+            <Link href="/admin/maintenance" className="text-sm text-primary hover:text-blue-700">
               View all
             </Link>
           </CardHeader>
@@ -277,7 +277,7 @@ export default async function AdminDashboard() {
               <Shield className="h-5 w-5 text-blue-500" />
               Insurance Alerts
             </CardTitle>
-            <Link href="/admin/insurance" className="text-sm text-blue-600 hover:text-blue-700">
+            <Link href="/admin/insurance" className="text-sm text-primary hover:text-blue-700">
               View all
             </Link>
           </CardHeader>

@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import {
   ArrowLeft,
   Plus,
@@ -200,7 +201,7 @@ export default function PropertyDetailPage({
   };
 
   const handleDeleteUnit = async (unitId: string) => {
-    if (!confirm("Are you sure you want to delete this unit?")) return;
+    if (!(await confirmDialog({ title: "Delete unit?", description: "This permanently deletes the unit.", confirmText: "Delete", destructive: true }))) return;
 
     try {
       const response = await fetch(`/api/units/${unitId}`, {
@@ -275,7 +276,7 @@ export default function PropertyDetailPage({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -309,7 +310,7 @@ export default function PropertyDetailPage({
             {property.type === "COMMERCIAL" ? (
               <Building2 className="h-7 w-7 text-purple-600" />
             ) : (
-              <Home className="h-7 w-7 text-blue-600" />
+              <Home className="h-7 w-7 text-primary" />
             )}
           </div>
           <div>

@@ -139,7 +139,7 @@ export function InsuranceUploadSection({ leaseId, leaseType, insurance }: Insura
     <Card className="border-0 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-blue-600" />
+          <Shield className="h-5 w-5 text-primary" />
           {copy.sectionTitle}
         </CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -157,7 +157,7 @@ export function InsuranceUploadSection({ leaseId, leaseType, insurance }: Insura
               <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
                 <p className="font-medium">Required Beneficiary:</p>
                 <p className="font-bold">{BENEFICIARY_NAME}</p>
-                <p className="text-xs mt-1 text-blue-600">
+                <p className="text-xs mt-1 text-primary">
                   Your insurance certificate must list this entity as an {copy.interestPhrase}.
                 </p>
               </div>
@@ -382,7 +382,7 @@ export function InsuranceUploadSection({ leaseId, leaseType, insurance }: Insura
                         href={ins.documentUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700"
+                        className="text-primary hover:text-blue-700"
                       >
                         <Button size="sm" variant="outline">
                           <ExternalLink className="h-4 w-4 mr-1" />

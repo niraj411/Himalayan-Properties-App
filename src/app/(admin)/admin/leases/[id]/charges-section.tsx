@@ -30,6 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import { format } from "date-fns";
 import { Plus, DollarSign, Check, Trash2, RotateCcw, Ban } from "lucide-react";
 import { chargeRemaining, openBalance } from "@/lib/ledger";
@@ -117,7 +118,7 @@ export default function ChargesSection({
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this charge?")) return;
+    if (!(await confirmDialog({ title: "Delete charge?", description: "This permanently deletes the charge.", confirmText: "Delete", destructive: true }))) return;
     try {
       const res = await fetch(`/api/charges/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();

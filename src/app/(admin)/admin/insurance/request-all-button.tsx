@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import { Loader2, Send } from "lucide-react";
 
 export function RequestAllButton({ nonCompliantCount }: { nonCompliantCount: number }) {
@@ -15,7 +16,7 @@ export function RequestAllButton({ nonCompliantCount }: { nonCompliantCount: num
       toast.info("All tenants have valid insurance on file");
       return;
     }
-    if (!confirm(`Email ${nonCompliantCount} tenant(s) missing valid insurance?`)) return;
+    if (!(await confirmDialog({ title: "Email tenants?", description: `Email ${nonCompliantCount} tenant(s) missing valid insurance?`, confirmText: "Send emails", destructive: false }))) return;
 
     setIsSending(true);
     try {

@@ -59,10 +59,10 @@ export default function HomePage() {
       {/* Hero */}
       <section className="py-20 px-4 bg-gradient-to-br from-slate-50 to-white">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-blue-600 font-medium mb-3 text-sm">North Denver Metro Area</p>
+          <p className="text-primary font-medium mb-3 text-sm">North Denver Metro Area</p>
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
             Building Community Through
-            <span className="text-blue-600"> Quality Real Estate</span>
+            <span className="text-primary"> Quality Real Estate</span>
           </h1>
           <p className="mt-5 text-lg text-slate-600 max-w-2xl mx-auto">
             Himalayan Properties is a family-owned investment firm focused on residential and
@@ -98,28 +98,28 @@ export default function HomePage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <div className="p-5 bg-blue-50 rounded-xl">
-              <Heart className="h-7 w-7 text-blue-600 mb-3" />
+              <Heart className="h-7 w-7 text-primary mb-3" />
               <h3 className="font-semibold text-slate-900 mb-2">Family-Focused</h3>
               <p className="text-sm text-slate-600">
                 Strong families build strong communities. We prioritize housing that supports family life.
               </p>
             </div>
             <div className="p-5 bg-slate-50 rounded-xl">
-              <GraduationCap className="h-7 w-7 text-blue-600 mb-3" />
+              <GraduationCap className="h-7 w-7 text-primary mb-3" />
               <h3 className="font-semibold text-slate-900 mb-2">Education-Forward</h3>
               <p className="text-sm text-slate-600">
                 We invest in areas with excellent schools that prepare residents for success.
               </p>
             </div>
             <div className="p-5 bg-slate-50 rounded-xl">
-              <Users className="h-7 w-7 text-blue-600 mb-3" />
+              <Users className="h-7 w-7 text-primary mb-3" />
               <h3 className="font-semibold text-slate-900 mb-2">Community Partners</h3>
               <p className="text-sm text-slate-600">
                 We are active members of every neighborhood where we own property.
               </p>
             </div>
             <div className="p-5 bg-blue-50 rounded-xl">
-              <Leaf className="h-7 w-7 text-blue-600 mb-3" />
+              <Leaf className="h-7 w-7 text-primary mb-3" />
               <h3 className="font-semibold text-slate-900 mb-2">Long-Term Vision</h3>
               <p className="text-sm text-slate-600">
                 We build lasting value that benefits future generations, not quick profits.
@@ -153,7 +153,7 @@ export default function HomePage() {
             {/* Residential */}
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                <Home className="h-6 w-6 text-blue-600" />
+                <Home className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-3">Residential</h3>
               <p className="text-slate-600 text-sm mb-4">
@@ -162,15 +162,15 @@ export default function HomePage() {
               </p>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2 text-slate-600">
-                  <MapPin className="h-4 w-4 text-blue-600" />
+                  <MapPin className="h-4 w-4 text-primary" />
                   Erie, Lafayette, and surrounding areas
                 </li>
                 <li className="flex items-center gap-2 text-slate-600">
-                  <CheckCircle className="h-4 w-4 text-blue-600" />
+                  <CheckCircle className="h-4 w-4 text-primary" />
                   Well-maintained properties
                 </li>
                 <li className="flex items-center gap-2 text-slate-600">
-                  <Shield className="h-4 w-4 text-blue-600" />
+                  <Shield className="h-4 w-4 text-primary" />
                   Safe, family-friendly neighborhoods
                 </li>
               </ul>
@@ -253,7 +253,7 @@ export default function HomePage() {
                 className="p-5 rounded-xl bg-slate-50"
               >
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                  <feature.icon className="h-5 w-5 text-blue-600" />
+                  <feature.icon className="h-5 w-5 text-primary" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-1">
                   {feature.title}

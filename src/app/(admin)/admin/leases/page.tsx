@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import { format, isBefore, addDays } from "date-fns";
 import {
   Plus,
@@ -203,7 +204,7 @@ export default function LeasesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this lease?")) return;
+    if (!(await confirmDialog({ title: "Delete lease?", description: "This permanently deletes the lease and its charges, payments, and notices.", confirmText: "Delete", destructive: true }))) return;
 
     try {
       const response = await fetch(`/api/leases/${id}`, { method: "DELETE" });
@@ -236,7 +237,7 @@ export default function LeasesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }

@@ -30,6 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import { format } from "date-fns";
 import { FileWarning, Send, Eye, RotateCw } from "lucide-react";
 
@@ -168,7 +169,7 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
   };
 
   const resend = async (id: string) => {
-    if (!confirm("Re-send this notice to the same recipients?")) return;
+    if (!(await confirmDialog({ title: "Re-send notice?", description: "This re-sends the notice email to the same recipients.", confirmText: "Re-send", destructive: false }))) return;
     try {
       const res = await fetch(`/api/notices/${id}/resend`, { method: "POST" });
       const notice = await res.json();

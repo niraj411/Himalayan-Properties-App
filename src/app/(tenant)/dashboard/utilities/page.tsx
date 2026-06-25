@@ -49,7 +49,7 @@ export default function TenantUtilitiesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function TenantUtilitiesPage() {
                 <CardContent className="p-5 space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
-                      <Icon className="h-5 w-5 text-blue-600" />
+                      <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-slate-900">
@@ -100,14 +100,14 @@ export default function TenantUtilitiesPage() {
                     <div className="space-y-2">
                       {utility.phone && (
                         <a href={`tel:${utility.phone}`}
-                           className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700">
+                           className="flex items-center gap-2 text-sm text-primary hover:text-blue-700">
                           <Phone className="h-4 w-4 shrink-0" />
                           <span>{utility.phone}</span>
                         </a>
                       )}
                       {utility.website && (
                         <a href={utility.website} target="_blank" rel="noopener noreferrer"
-                           className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 break-all">
+                           className="flex items-center gap-2 text-sm text-primary hover:text-blue-700 break-all">
                           <ExternalLink className="h-4 w-4 shrink-0" />
                           <span>{utility.website}</span>
                         </a>

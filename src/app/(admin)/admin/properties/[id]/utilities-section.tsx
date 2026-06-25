@@ -29,6 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import { Plus, Plug, Pencil, Trash2 } from "lucide-react";
 import { UTILITY_TYPES, utilityTypeLabel } from "@/lib/utilities";
 
@@ -157,7 +158,7 @@ export default function UtilitiesSection({
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Delete this utility?")) return;
+    if (!(await confirmDialog({ title: "Delete utility?", description: "This permanently deletes the utility record.", confirmText: "Delete", destructive: true }))) return;
     try {
       const res = await fetch(`/api/utilities/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();

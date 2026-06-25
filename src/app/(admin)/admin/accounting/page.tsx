@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import { format } from "date-fns";
 import {
   Calculator,
@@ -155,7 +156,7 @@ function AccountingContent() {
   };
 
   const disconnectQuickBooks = async () => {
-    if (!confirm("Are you sure you want to disconnect QuickBooks?")) return;
+    if (!(await confirmDialog({ title: "Disconnect QuickBooks?", description: "This will disconnect the QuickBooks integration.", confirmText: "Disconnect", destructive: true }))) return;
 
     try {
       const response = await fetch("/api/quickbooks/disconnect", { method: "POST" });
@@ -175,7 +176,7 @@ function AccountingContent() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -329,7 +330,7 @@ function AccountingContent() {
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-blue-600" />
+                    <DollarSign className="h-6 w-6 text-primary" />
                   </div>
                 </div>
               </CardContent>
@@ -341,7 +342,7 @@ function AccountingContent() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold">Recent Transactions</CardTitle>
-                <Button variant="ghost" size="sm" className="text-blue-600">
+                <Button variant="ghost" size="sm" className="text-primary">
                   View All
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
@@ -411,7 +412,7 @@ function AccountingContent() {
                 </Button>
                 <Button variant="outline" className="justify-start h-auto py-3" asChild>
                   <a href="/admin/payments">
-                    <DollarSign className="h-5 w-5 mr-3 text-blue-600" />
+                    <DollarSign className="h-5 w-5 mr-3 text-primary" />
                     <div className="text-left">
                       <p className="font-medium">Record Payment</p>
                       <p className="text-xs text-slate-500">Add and sync payments</p>

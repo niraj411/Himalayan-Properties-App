@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import { format } from "date-fns";
 import { Plus, CreditCard, Loader2, Trash2, DollarSign, Calculator } from "lucide-react";
 import { chargeRemaining } from "@/lib/ledger";
@@ -158,7 +159,7 @@ export default function PaymentsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this payment record?")) return;
+    if (!(await confirmDialog({ title: "Delete payment?", description: "This permanently deletes this payment record.", confirmText: "Delete", destructive: true }))) return;
 
     try {
       const response = await fetch(`/api/payments/${id}`, { method: "DELETE" });
@@ -225,7 +226,7 @@ export default function PaymentsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }

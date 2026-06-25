@@ -83,7 +83,7 @@ export default function TenantPaymentsPage() {
   if (status === "loading" || isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -97,7 +97,7 @@ export default function TenantPaymentsPage() {
 
       {/* Baselane Online Payment */}
       {baselaneLink ? (
-        <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-primary to-primary-container text-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -106,12 +106,12 @@ export default function TenantPaymentsPage() {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold">Pay Rent Online</h2>
-                  <p className="text-blue-100">Securely pay via Baselane</p>
+                  <p className="text-white/80">Securely pay via Baselane</p>
                 </div>
               </div>
               <Button
                 asChild
-                className="bg-white text-blue-600 hover:bg-blue-50"
+                className="bg-white text-primary hover:bg-white/90"
               >
                 <a href={baselaneLink} target="_blank" rel="noopener noreferrer">
                   Pay Now <ExternalLink className="h-4 w-4 ml-1" />
@@ -144,7 +144,7 @@ export default function TenantPaymentsPage() {
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Building className="h-5 w-5 text-blue-600" />
+              <Building className="h-5 w-5 text-primary" />
               Bank Transfer
             </CardTitle>
           </CardHeader>

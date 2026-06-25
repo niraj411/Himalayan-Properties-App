@@ -29,6 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import {
   Plus,
   Users,
@@ -173,7 +174,7 @@ export default function TenantsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this tenant?")) return;
+    if (!(await confirmDialog({ title: "Delete tenant?", description: "This permanently deletes the tenant.", confirmText: "Delete", destructive: true }))) return;
 
     try {
       const response = await fetch(`/api/tenants/${id}`, { method: "DELETE" });
@@ -202,7 +203,7 @@ export default function TenantsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }

@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import {
   Plus,
   Building2,
@@ -198,7 +199,7 @@ export default function PropertiesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this property?")) return;
+    if (!(await confirmDialog({ title: "Delete property?", description: "This permanently deletes the property and its units.", confirmText: "Delete", destructive: true }))) return;
 
     try {
       const response = await fetch(`/api/properties/${id}`, {
@@ -240,7 +241,7 @@ export default function PropertiesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -510,11 +511,11 @@ export default function PropertiesPage() {
                           className={`h-5 w-5 ${
                             property.type === "COMMERCIAL"
                               ? "text-purple-600"
-                              : "text-blue-600"
+                              : "text-primary"
                           }`}
                         />
                       ) : (
-                        <Home className="h-5 w-5 text-blue-600" />
+                        <Home className="h-5 w-5 text-primary" />
                       )}
                     </div>
                     <DropdownMenu>
@@ -540,7 +541,7 @@ export default function PropertiesPage() {
                   </div>
 
                   <Link href={`/admin/properties/${property.id}`}>
-                    <h3 className="font-semibold text-slate-900 hover:text-blue-600 transition-colors">
+                    <h3 className="font-semibold text-slate-900 hover:text-primary transition-colors">
                       {property.name}
                     </h3>
                   </Link>

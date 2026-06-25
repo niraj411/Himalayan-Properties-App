@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { confirmDialog } from "@/components/ui/confirm";
 import ChargesSection, { type Charge } from "./charges-section";
 import NoticesSection from "./notices-section";
 import { format, isBefore, addDays } from "date-fns";
@@ -258,7 +259,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
   };
 
   const handleDeleteEscalation = async (escalationId: string) => {
-    if (!confirm("Delete this escalation?")) return;
+    if (!(await confirmDialog({ title: "Delete escalation?", description: "This removes the scheduled rent escalation.", confirmText: "Delete", destructive: true }))) return;
 
     try {
       const response = await fetch(`/api/escalations/${escalationId}`, {
@@ -376,7 +377,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
   };
 
   const handleDeleteInsurance = async (insuranceId: string) => {
-    if (!confirm("Delete this insurance record?")) return;
+    if (!(await confirmDialog({ title: "Delete insurance record?", description: "This permanently deletes the insurance record.", confirmText: "Delete", destructive: true }))) return;
 
     try {
       const response = await fetch(`/api/insurance/${insuranceId}`, {
@@ -410,7 +411,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -479,7 +480,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-50 rounded-lg">
-                <DollarSign className="h-5 w-5 text-blue-600" />
+                <DollarSign className="h-5 w-5 text-primary" />
               </div>
               <div>
                 {lease.nnnMonthly ? (
@@ -822,7 +823,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-blue-600" />
+                <Shield className="h-5 w-5 text-primary" />
                 {insuranceCopyText.sectionTitle}
               </CardTitle>
               <div className="flex items-center gap-2">
@@ -1086,7 +1087,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
               href={lease.documentUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+              className="flex items-center gap-2 text-primary hover:text-blue-700"
             >
               <ExternalLink className="h-4 w-4" />
               View Lease Document

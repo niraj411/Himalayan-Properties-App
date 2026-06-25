@@ -204,7 +204,7 @@ export default function ApplyPage() {
               {applicationType === "RESIDENTIAL" && (
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="flex items-start gap-3">
-                    <ExternalLink className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <ExternalLink className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="font-medium text-blue-900 text-sm">Residential Applications</p>
                       <p className="text-blue-700 text-sm mt-1">
@@ -214,7 +214,7 @@ export default function ApplyPage() {
                         href={zillowUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm mt-2"
+                        className="inline-flex items-center gap-1 text-primary hover:text-blue-700 font-medium text-sm mt-2"
                       >
                         Apply on Zillow
                         <ExternalLink className="h-3 w-3" />
@@ -487,7 +487,7 @@ export default function ApplyPage() {
 
         <p className="text-center text-xs text-slate-500 mt-4">
           Already a tenant?{" "}
-          <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+          <Link href="/login" className="text-primary hover:text-blue-700 font-medium">
             Sign in here
           </Link>
         </p>

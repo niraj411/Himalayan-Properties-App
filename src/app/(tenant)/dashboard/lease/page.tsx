@@ -72,8 +72,8 @@ export default async function TenantLeasePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">My Lease</h1>
-        <p className="text-slate-500 mt-1">View your lease agreement details</p>
+        <h1 className="text-2xl font-bold text-on-surface">My Lease</h1>
+        <p className="text-muted-foreground mt-1">View your lease agreement details</p>
       </div>
 
       {activeLease ? (
@@ -104,7 +104,7 @@ export default async function TenantLeasePage() {
                 {activeLease.leaseType === "COMMERCIAL" ? (
                   <Building2 className="h-5 w-5 text-purple-600" />
                 ) : (
-                  <FileText className="h-5 w-5 text-blue-600" />
+                  <FileText className="h-5 w-5 text-primary" />
                 )}
                 Active Lease
                 {activeLease.leaseType === "COMMERCIAL" && (
@@ -117,15 +117,15 @@ export default async function TenantLeasePage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Property Info */}
-              <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-lg">
+              <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-xl">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Home className="h-6 w-6 text-blue-600" />
+                  <Home className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900">
+                  <h3 className="font-semibold text-on-surface">
                     {activeLease.unit.property.name} - Unit #{activeLease.unit.unitNumber}
                   </h3>
-                  <p className="text-slate-500">
+                  <p className="text-muted-foreground">
                     {activeLease.unit.property.address}, {activeLease.unit.property.city},{" "}
                     {activeLease.unit.property.state} {activeLease.unit.property.zip}
                   </p>
@@ -134,44 +134,44 @@ export default async function TenantLeasePage() {
 
               {/* Lease Details */}
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 border border-slate-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-slate-500 mb-1">
+                <div className="p-4 bg-muted/50 rounded-xl">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <Calendar className="h-4 w-4" />
                     <span className="text-sm">Start Date</span>
                   </div>
-                  <p className="font-semibold text-slate-900">
+                  <p className="font-semibold text-on-surface">
                     {format(new Date(activeLease.startDate), "MMMM d, yyyy")}
                   </p>
                 </div>
-                <div className="p-4 border border-slate-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-slate-500 mb-1">
+                <div className="p-4 bg-muted/50 rounded-xl">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <Calendar className="h-4 w-4" />
                     <span className="text-sm">End Date</span>
                   </div>
-                  <p className="font-semibold text-slate-900">
+                  <p className="font-semibold text-on-surface">
                     {format(new Date(activeLease.endDate), "MMMM d, yyyy")}
                   </p>
                 </div>
-                <div className="p-4 border border-slate-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-slate-500 mb-1">
+                <div className="p-4 bg-muted/50 rounded-xl">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <DollarSign className="h-4 w-4" />
                     <span className="text-sm">{activeLease.nnnMonthly ? "Monthly Rent (Base + NNN)" : "Monthly Rent"}</span>
                   </div>
-                  <p className="font-semibold text-slate-900">
+                  <p className="font-semibold text-on-surface">
                     ${((activeLease.monthlyRent ?? 0) + (activeLease.nnnMonthly ?? 0)).toLocaleString()}
                   </p>
                   {activeLease.nnnMonthly ? (
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Base ${activeLease.monthlyRent.toLocaleString()} + NNN/CAM ${activeLease.nnnMonthly.toLocaleString()}
                     </p>
                   ) : null}
                 </div>
-                <div className="p-4 border border-slate-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-slate-500 mb-1">
+                <div className="p-4 bg-muted/50 rounded-xl">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <DollarSign className="h-4 w-4" />
                     <span className="text-sm">Security Deposit</span>
                   </div>
-                  <p className="font-semibold text-slate-900">
+                  <p className="font-semibold text-on-surface">
                     {activeLease.depositAmount
                       ? `$${activeLease.depositAmount.toLocaleString()}`
                       : "-"}
@@ -180,7 +180,7 @@ export default async function TenantLeasePage() {
                     <p className={`text-xs mt-1 font-medium ${
                       activeLease.depositStatus === "RETURNED" ? "text-green-600" :
                       activeLease.depositStatus === "PARTIAL_RETURN" ? "text-amber-600" :
-                      "text-slate-500"
+                      "text-muted-foreground"
                     }`}>
                       {activeLease.depositStatus === "HELD" ? "Held" :
                        activeLease.depositStatus === "RETURNED" ? `Returned${activeLease.depositReturnDate ? ` ${format(new Date(activeLease.depositReturnDate), "MMM d, yyyy")}` : ""}` :
@@ -193,9 +193,9 @@ export default async function TenantLeasePage() {
 
               {/* Document Link */}
               {activeLease.documentUrl && (
-                <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
                   <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-slate-400" />
+                    <FileText className="h-5 w-5 text-muted-foreground" />
                     <span className="font-medium">Lease Document</span>
                   </div>
                   <Button variant="outline" asChild>
@@ -238,13 +238,13 @@ export default async function TenantLeasePage() {
 
               {/* Co-tenants (jointly & severally liable) */}
               {activeLease.coTenants && activeLease.coTenants.length > 1 && (
-                <div className="p-4 bg-slate-50 rounded-lg">
-                  <p className="text-sm font-medium text-slate-500 mb-2">
+                <div className="p-4 bg-muted/50 rounded-xl">
+                  <p className="text-sm font-medium text-muted-foreground mb-2">
                     Tenants on this lease (jointly & severally liable)
                   </p>
                   <ul className="space-y-1">
                     {activeLease.coTenants.map((ct) => (
-                      <li key={ct.id} className="text-slate-700 text-sm">
+                      <li key={ct.id} className="text-on-surface text-sm">
                         {ct.user.name}
                         {ct.id === activeLease.tenantId && (
                           <Badge variant="outline" className="ml-2 text-xs">
@@ -259,9 +259,9 @@ export default async function TenantLeasePage() {
 
               {/* Notes */}
               {activeLease.notes && (
-                <div className="p-4 bg-slate-50 rounded-lg">
-                  <p className="text-sm font-medium text-slate-500 mb-2">Notes</p>
-                  <p className="text-slate-700">{activeLease.notes}</p>
+                <div className="p-4 bg-muted/50 rounded-xl">
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Notes</p>
+                  <p className="text-on-surface">{activeLease.notes}</p>
                 </div>
               )}
             </CardContent>
@@ -279,9 +279,9 @@ export default async function TenantLeasePage() {
       ) : (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileText className="h-12 w-12 text-slate-300 mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No Active Lease</h3>
-            <p className="text-slate-500 text-center">
+            <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium text-on-surface mb-2">No Active Lease</h3>
+            <p className="text-muted-foreground text-center">
               You don&apos;t have an active lease at the moment.
               <br />
               Please contact your property manager for assistance.
@@ -301,13 +301,13 @@ export default async function TenantLeasePage() {
               {pastLeases.map((lease) => (
                 <div
                   key={lease.id}
-                  className="flex items-center justify-between p-4 border border-slate-200 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-muted/50 rounded-xl"
                 >
                   <div>
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium text-on-surface">
                       {lease.unit.property.name} - Unit #{lease.unit.unitNumber}
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                       {format(new Date(lease.startDate), "MMM yyyy")} -{" "}
                       {format(new Date(lease.endDate), "MMM yyyy")}
                     </p>
@@ -316,7 +316,7 @@ export default async function TenantLeasePage() {
                     className={
                       lease.status === "EXPIRED"
                         ? "bg-orange-50 text-orange-700"
-                        : "bg-slate-100 text-slate-600"
+                        : "bg-muted text-muted-foreground"
                     }
                   >
                     {lease.status}
