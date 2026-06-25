@@ -35,6 +35,8 @@ import { confirmDialog } from "@/components/ui/confirm";
 import { format } from "date-fns";
 import { Plus, CreditCard, Loader2, Trash2, DollarSign, Calculator } from "lucide-react";
 import { chargeRemaining } from "@/lib/ledger";
+import { ErrorState } from "@/components/ui/error-state";
+import { TableSkeleton } from "@/components/ui/skeletons";
 
 interface OpenCharge {
   id: string;
@@ -69,6 +71,7 @@ export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [leases, setLeases] = useState<Lease[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [qbConnected, setQbConnected] = useState(false);
   const [syncToQuickBooks, setSyncToQuickBooks] = useState(false);
@@ -87,6 +90,8 @@ export default function PaymentsPage() {
   const NONE_CHARGE = "__none__";
 
   const fetchData = async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const [paymentsRes, leasesRes, qbStatusRes] = await Promise.all([
         fetch("/api/payments"),
@@ -94,7 +99,8 @@ export default function PaymentsPage() {
         fetch("/api/quickbooks/status"),
       ]);
 
-      if (paymentsRes.ok) setPayments(await paymentsRes.json());
+      if (!paymentsRes.ok) throw new Error();
+      setPayments(await paymentsRes.json());
       if (leasesRes.ok) {
         const allLeases = await leasesRes.json();
         setLeases(allLeases.filter((l: Lease & { status: string }) => l.status === "ACTIVE"));
@@ -107,6 +113,7 @@ export default function PaymentsPage() {
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to load data");
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -225,8 +232,24 @@ export default function PaymentsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Payments</h1>
+          <p className="text-slate-500 mt-1">Record and track rent payments</p>
+        </div>
+        <TableSkeleton rows={6} cols={6} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Payments</h1>
+          <p className="text-slate-500 mt-1">Record and track rent payments</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchData} />
       </div>
     );
   }

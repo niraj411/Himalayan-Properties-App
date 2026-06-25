@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Loader2, Building2, CreditCard, Mail, ExternalLink, Shield } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Settings {
   id: string;
@@ -30,6 +32,7 @@ interface Settings {
 
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     companyName: "",
@@ -48,37 +51,37 @@ export default function SettingsPage() {
     insuranceReminderLeadDays: 30,
   });
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await fetch("/api/settings");
-        if (response.ok) {
-          const data: Settings = await response.json();
-          setFormData({
-            companyName: data.companyName || "",
-            companyEmail: data.companyEmail || "",
-            companyPhone: data.companyPhone || "",
-            companyAddress: data.companyAddress || "",
-            bankName: data.bankName || "",
-            bankRoutingNumber: data.bankRoutingNumber || "",
-            bankAccountNumber: data.bankAccountNumber || "",
-            checkMailingAddress: data.checkMailingAddress || "",
-            paymentInstructions: data.paymentInstructions || "",
-            baselanePaymentLink: data.baselanePaymentLink || "",
-            zillowUrl: data.zillowUrl || "",
-            emailNotificationsEnabled: data.emailNotificationsEnabled || false,
-            insuranceReminderEnabled: data.insuranceReminderEnabled ?? true,
-            insuranceReminderLeadDays: data.insuranceReminderLeadDays ?? 30,
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching settings:", error);
-        toast.error("Failed to load settings");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchSettings = async () => {
+    setIsLoading(true);
+    setError(false);
+    try {
+      const response = await fetch("/api/settings");
+      if (!response.ok) throw new Error();
+      const data: Settings = await response.json();
+      setFormData({
+        companyName: data.companyName || "",
+        companyEmail: data.companyEmail || "",
+        companyPhone: data.companyPhone || "",
+        companyAddress: data.companyAddress || "",
+        bankName: data.bankName || "",
+        bankRoutingNumber: data.bankRoutingNumber || "",
+        bankAccountNumber: data.bankAccountNumber || "",
+        checkMailingAddress: data.checkMailingAddress || "",
+        paymentInstructions: data.paymentInstructions || "",
+        baselanePaymentLink: data.baselanePaymentLink || "",
+        zillowUrl: data.zillowUrl || "",
+        emailNotificationsEnabled: data.emailNotificationsEnabled || false,
+        insuranceReminderEnabled: data.insuranceReminderEnabled ?? true,
+        insuranceReminderLeadDays: data.insuranceReminderLeadDays ?? 30,
+      });
+    } catch {
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchSettings();
   }, []);
 
@@ -107,8 +110,28 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6 max-w-3xl">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+          <p className="text-slate-500 mt-1">Manage your property management settings</p>
+        </div>
+        <div className="space-y-6">
+          <Skeleton className="h-44 w-full rounded-xl" />
+          <Skeleton className="h-72 w-full rounded-xl" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 max-w-3xl">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+          <p className="text-slate-500 mt-1">Manage your property management settings</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchSettings} />
       </div>
     );
   }

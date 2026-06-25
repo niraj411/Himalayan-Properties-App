@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
 import { utilityTypeLabel } from "@/lib/utilities";
 import {
-  Loader2, Plug, Trash2, Zap, Droplets, Waves, Flame, Home, Wifi,
+  Plug, Trash2, Zap, Droplets, Waves, Flame, Home, Wifi,
   Phone, ExternalLink,
 } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
+import { CardListSkeleton } from "@/components/ui/skeletons";
 
 interface Utility {
   id: string;
@@ -26,30 +27,51 @@ const TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 export default function TenantUtilitiesPage() {
   const [utilities, setUtilities] = useState<Utility[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const fetchUtilities = async () => {
+    setIsLoading(true);
+    setError(false);
+    try {
+      const response = await fetch("/api/utilities?scope=tenant");
+      if (!response.ok) throw new Error();
+      setUtilities(await response.json());
+    } catch (err) {
+      console.error("Error fetching utilities:", err);
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUtilities = async () => {
-      try {
-        const response = await fetch("/api/utilities?scope=tenant");
-        if (response.ok) {
-          setUtilities(await response.json());
-        } else {
-          toast.error("Failed to load utility info");
-        }
-      } catch (error) {
-        console.error("Error fetching utilities:", error);
-        toast.error("Failed to load utility info");
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchUtilities();
   }, []);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Utilities</h1>
+          <p className="text-slate-500 mt-1">
+            Service providers and important info for your home.
+          </p>
+        </div>
+        <CardListSkeleton count={4} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Utilities</h1>
+          <p className="text-slate-500 mt-1">
+            Service providers and important info for your home.
+          </p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchUtilities} />
       </div>
     );
   }

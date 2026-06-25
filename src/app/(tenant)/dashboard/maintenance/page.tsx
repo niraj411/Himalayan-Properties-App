@@ -24,6 +24,8 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Plus, Wrench, Loader2, AlertTriangle, Clock, CheckCircle } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
+import { TableSkeleton } from "@/components/ui/skeletons";
 
 interface MaintenanceRequest {
   id: string;
@@ -40,6 +42,7 @@ interface MaintenanceRequest {
 export default function TenantMaintenancePage() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -50,14 +53,15 @@ export default function TenantMaintenancePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchRequests = async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const response = await fetch("/api/maintenance");
-      if (response.ok) {
-        setRequests(await response.json());
-      }
-    } catch (error) {
-      console.error("Error fetching requests:", error);
-      toast.error("Failed to load requests");
+      if (!response.ok) throw new Error();
+      setRequests(await response.json());
+    } catch (err) {
+      console.error("Error fetching requests:", err);
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -112,8 +116,24 @@ export default function TenantMaintenancePage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Maintenance Requests</h1>
+          <p className="text-slate-500 mt-1">Submit and track maintenance requests</p>
+        </div>
+        <TableSkeleton rows={5} cols={4} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Maintenance Requests</h1>
+          <p className="text-slate-500 mt-1">Submit and track maintenance requests</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchRequests} />
       </div>
     );
   }

@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, User, Mail, Phone, Shield, Send } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/ui/error-state";
 
 interface TenantProfile {
   user: {
@@ -24,6 +26,7 @@ export default function TenantProfilePage() {
   const { data: session } = useSession();
   const [profile, setProfile] = useState<TenantProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [contactForm, setContactForm] = useState({ subject: "", message: "" });
@@ -34,34 +37,36 @@ export default function TenantProfilePage() {
     emergencyPhone: "",
   });
 
+  const fetchProfile = async () => {
+    if (!session?.user?.tenantId) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    setError(false);
+
+    try {
+      const response = await fetch(`/api/tenants/${session.user.tenantId}`);
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      setProfile(data);
+      setFormData({
+        name: data.user.name,
+        phone: data.user.phone || "",
+        emergencyContact: data.emergencyContact || "",
+        emergencyPhone: data.emergencyPhone || "",
+      });
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!session?.user?.tenantId) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/tenants/${session.user.tenantId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setProfile(data);
-          setFormData({
-            name: data.user.name,
-            phone: data.user.phone || "",
-            emergencyContact: data.emergencyContact || "",
-            emergencyPhone: data.emergencyPhone || "",
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        toast.error("Failed to load profile");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,8 +124,31 @@ export default function TenantProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6 max-w-2xl">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Profile</h1>
+          <p className="text-slate-500 mt-1">Manage your account information</p>
+        </div>
+        <Card className="border-0 shadow-sm">
+          <CardContent className="space-y-4 py-6">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 max-w-2xl">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Profile</h1>
+          <p className="text-slate-500 mt-1">Manage your account information</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchProfile} />
       </div>
     );
   }

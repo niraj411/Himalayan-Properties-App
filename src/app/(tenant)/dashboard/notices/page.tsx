@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { Loader2, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
+import { CardListSkeleton } from "@/components/ui/skeletons";
 
 interface Notice {
   id: string;
@@ -26,26 +27,47 @@ const fmtDate = (d: string) => new Date(d).toLocaleDateString("en-US", { month: 
 export default function TenantNoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
 
+  const load = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch("/api/notices?scope=tenant");
+      if (!res.ok) throw new Error();
+      setNotices(await res.json());
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/notices?scope=tenant");
-        if (res.ok) setNotices(await res.json());
-        else toast.error("Failed to load notices");
-      } catch {
-        toast.error("Failed to load notices");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    load();
   }, []);
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-on-surface">Notices</h1>
+          <p className="text-muted-foreground mt-1">Official letters from property management.</p>
+        </div>
+        <CardListSkeleton count={4} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-on-surface">Notices</h1>
+          <p className="text-muted-foreground mt-1">Official letters from property management.</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={load} />
       </div>
     );
   }
@@ -75,6 +97,7 @@ export default function TenantNoticesPage() {
                     type="button"
                     onClick={() => setOpenId(open ? null : n.id)}
                     aria-expanded={open}
+                    aria-controls={`notice-panel-${n.id}`}
                     className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left"
                   >
                     <div className="min-w-0">
@@ -91,7 +114,7 @@ export default function TenantNoticesPage() {
                     )}
                   </button>
                   {open && (
-                    <pre className="mx-5 mb-5 whitespace-pre-wrap rounded-xl bg-surface-container-low p-4 font-sans text-sm text-on-surface">
+                    <pre id={`notice-panel-${n.id}`} role="region" className="mx-5 mb-5 whitespace-pre-wrap rounded-xl bg-surface-container-low p-4 font-sans text-sm text-on-surface">
                       {n.body}
                     </pre>
                   )}

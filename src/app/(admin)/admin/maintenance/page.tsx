@@ -38,6 +38,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ErrorState } from "@/components/ui/error-state";
+import { TableSkeleton } from "@/components/ui/skeletons";
 
 interface MaintenanceRequest {
   id: string;
@@ -79,6 +81,7 @@ const STATUS_FILTERS = [
 export default function MaintenancePage() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [selectedRequest, setSelectedRequest] = useState<MaintenanceRequest | null>(null);
   const [updateFormData, setUpdateFormData] = useState({
@@ -104,14 +107,16 @@ export default function MaintenancePage() {
   });
 
   const fetchRequests = async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const response = await fetch("/api/maintenance");
-      if (response.ok) {
-        setRequests(await response.json());
-      }
+      if (!response.ok) throw new Error();
+      setRequests(await response.json());
     } catch (error) {
       console.error("Error fetching requests:", error);
       toast.error("Failed to load maintenance requests");
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -249,8 +254,24 @@ export default function MaintenancePage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Maintenance Requests</h1>
+          <p className="text-slate-500 mt-1">Manage tenant maintenance requests</p>
+        </div>
+        <TableSkeleton rows={6} cols={6} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Maintenance Requests</h1>
+          <p className="text-slate-500 mt-1">Manage tenant maintenance requests</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchRequests} />
       </div>
     );
   }
@@ -376,7 +397,7 @@ export default function MaintenancePage() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Request actions">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>

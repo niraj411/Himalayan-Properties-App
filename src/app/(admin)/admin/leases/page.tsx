@@ -55,6 +55,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ErrorState } from "@/components/ui/error-state";
+import { TableSkeleton } from "@/components/ui/skeletons";
 
 interface Lease {
   id: string;
@@ -98,6 +100,7 @@ export default function LeasesPage() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLease, setEditingLease] = useState<Lease | null>(null);
   const [formData, setFormData] = useState({
@@ -116,6 +119,8 @@ export default function LeasesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchData = async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const [leasesRes, tenantsRes, unitsRes] = await Promise.all([
         fetch("/api/leases"),
@@ -123,12 +128,12 @@ export default function LeasesPage() {
         fetch("/api/units"),
       ]);
 
-      if (leasesRes.ok) setLeases(await leasesRes.json());
+      if (!leasesRes.ok) throw new Error();
+      setLeases(await leasesRes.json());
       if (tenantsRes.ok) setTenants(await tenantsRes.json());
       if (unitsRes.ok) setUnits(await unitsRes.json());
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      toast.error("Failed to load data");
+    } catch {
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -235,8 +240,24 @@ export default function LeasesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Leases</h1>
+          <p className="text-slate-500 mt-1">Manage lease agreements</p>
+        </div>
+        <TableSkeleton rows={6} cols={7} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Leases</h1>
+          <p className="text-slate-500 mt-1">Manage lease agreements</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchData} />
       </div>
     );
   }

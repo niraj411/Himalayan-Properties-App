@@ -5,9 +5,10 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Loader2, Receipt, CreditCard } from "lucide-react";
+import { Receipt, CreditCard } from "lucide-react";
 import { chargeRemaining } from "@/lib/ledger";
+import { ErrorState } from "@/components/ui/error-state";
+import { TableSkeleton } from "@/components/ui/skeletons";
 
 interface Charge {
   id: string;
@@ -27,30 +28,48 @@ export default function TenantBalancePage() {
   const [charges, setCharges] = useState<Charge[]>([]);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await fetch("/api/charges?scope=tenant");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setCharges(data.charges ?? []);
+      setBalance(data.balance ?? 0);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/charges?scope=tenant");
-        if (res.ok) {
-          const data = await res.json();
-          setCharges(data.charges ?? []);
-          setBalance(data.balance ?? 0);
-        } else {
-          toast.error("Failed to load your balance");
-        }
-      } catch {
-        toast.error("Failed to load your balance");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    load();
   }, []);
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-on-surface">Balance</h1>
+          <p className="text-muted-foreground mt-1">Your current charges and account balance.</p>
+        </div>
+        <TableSkeleton rows={4} cols={3} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-on-surface">Balance</h1>
+          <p className="text-muted-foreground mt-1">Your current charges and account balance.</p>
+        </div>
+        <ErrorState message="We couldn't load your balance." onRetry={load} />
       </div>
     );
   }

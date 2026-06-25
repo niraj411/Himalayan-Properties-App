@@ -29,6 +29,8 @@ import {
   CheckCircle2,
   Building2,
 } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
+import { CardListSkeleton } from "@/components/ui/skeletons";
 
 interface QBStatus {
   connected: boolean;
@@ -72,6 +74,7 @@ function CallbackHandler({ onConnected }: { onConnected: () => void }) {
 function AccountingContent() {
   const [qbStatus, setQbStatus] = useState<QBStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<ReportSummary | null>(null);
@@ -114,17 +117,19 @@ function AccountingContent() {
   }, []);
 
   const checkQBStatus = useCallback(async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const response = await fetch("/api/quickbooks/status");
-      if (response.ok) {
-        const status = await response.json();
-        setQbStatus(status);
-        if (status.connected) {
-          loadReports();
-        }
+      if (!response.ok) throw new Error();
+      const status = await response.json();
+      setQbStatus(status);
+      if (status.connected) {
+        loadReports();
       }
     } catch (error) {
       console.error("Error checking QB status:", error);
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -175,8 +180,24 @@ function AccountingContent() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Accounting</h1>
+          <p className="text-slate-500 mt-1">QuickBooks integration and financial reports</p>
+        </div>
+        <CardListSkeleton count={3} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Accounting</h1>
+          <p className="text-slate-500 mt-1">QuickBooks integration and financial reports</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={checkQBStatus} />
       </div>
     );
   }

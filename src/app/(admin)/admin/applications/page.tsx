@@ -23,7 +23,6 @@ import { confirmDialog } from "@/components/ui/confirm";
 import { format } from "date-fns";
 import {
   ClipboardList,
-  Loader2,
   MoreVertical,
   CheckCircle,
   XCircle,
@@ -45,6 +44,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ErrorState } from "@/components/ui/error-state";
+import { TableSkeleton } from "@/components/ui/skeletons";
 
 interface Application {
   id: string;
@@ -74,17 +75,18 @@ interface Application {
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
 
   const fetchApplications = async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const response = await fetch("/api/applications");
-      if (response.ok) {
-        setApplications(await response.json());
-      }
-    } catch (error) {
-      console.error("Error fetching applications:", error);
-      toast.error("Failed to load applications");
+      if (!response.ok) throw new Error();
+      setApplications(await response.json());
+    } catch {
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -132,8 +134,24 @@ export default function ApplicationsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Applications</h1>
+          <p className="text-slate-500 mt-1">Review and manage rental applications</p>
+        </div>
+        <TableSkeleton rows={6} cols={6} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Applications</h1>
+          <p className="text-slate-500 mt-1">Review and manage rental applications</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchApplications} />
       </div>
     );
   }

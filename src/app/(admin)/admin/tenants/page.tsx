@@ -47,6 +47,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ErrorState } from "@/components/ui/error-state";
+import { TableSkeleton } from "@/components/ui/skeletons";
 
 interface Tenant {
   id: string;
@@ -79,6 +81,7 @@ export default function TenantsPage() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [vacantUnits, setVacantUnits] = useState<Unit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
   const [formData, setFormData] = useState({
@@ -93,17 +96,21 @@ export default function TenantsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchData = async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const [tenantsRes, unitsRes] = await Promise.all([
         fetch("/api/tenants"),
         fetch("/api/units?status=VACANT"),
       ]);
 
-      if (tenantsRes.ok) setTenants(await tenantsRes.json());
+      if (!tenantsRes.ok) throw new Error();
+      setTenants(await tenantsRes.json());
       if (unitsRes.ok) setVacantUnits(await unitsRes.json());
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to load data");
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -202,8 +209,24 @@ export default function TenantsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Tenants</h1>
+          <p className="text-slate-500 mt-1">Manage your property tenants</p>
+        </div>
+        <TableSkeleton rows={6} cols={5} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Tenants</h1>
+          <p className="text-slate-500 mt-1">Manage your property tenants</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchData} />
       </div>
     );
   }

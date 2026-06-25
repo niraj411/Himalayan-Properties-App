@@ -14,7 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { toast } from "sonner";
 import { format } from "date-fns";
 import {
   CreditCard,
@@ -22,9 +21,10 @@ import {
   DollarSign,
   Clock,
   AlertCircle,
-  Loader2,
   ExternalLink,
 } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
+import { TableSkeleton } from "@/components/ui/skeletons";
 
 interface Payment {
   id: string;
@@ -45,6 +45,7 @@ interface Settings {
 export default function TenantPaymentsPage() {
   const { status } = useSession();
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [baselaneLink, setBaselaneLink] = useState<string | null>(null);
@@ -59,6 +60,8 @@ export default function TenantPaymentsPage() {
   }, [status]);
 
   const fetchData = async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const [settingsRes, paymentsRes, baselaneRes] = await Promise.all([
         fetch("/api/settings"),
@@ -66,15 +69,17 @@ export default function TenantPaymentsPage() {
         fetch("/api/tenant-payments"),
       ]);
 
+      if (!paymentsRes.ok) throw new Error();
+
       if (settingsRes.ok) setSettings(await settingsRes.json());
       if (paymentsRes.ok) setPayments(await paymentsRes.json());
       if (baselaneRes.ok) {
         const { baselaneLink: link } = await baselaneRes.json();
         setBaselaneLink(link);
       }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      toast.error("Failed to load payment info");
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -82,8 +87,24 @@ export default function TenantPaymentsPage() {
 
   if (status === "loading" || isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Payments</h1>
+          <p className="text-slate-500 mt-1">View payment information and history</p>
+        </div>
+        <TableSkeleton rows={5} cols={4} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Payments</h1>
+          <p className="text-slate-500 mt-1">View payment information and history</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchData} />
       </div>
     );
   }

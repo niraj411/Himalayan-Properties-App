@@ -22,6 +22,8 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Mail, Send, Users, Loader2, Plus } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
+import { CardListSkeleton } from "@/components/ui/skeletons";
 
 interface Tenant {
   id: string;
@@ -42,6 +44,7 @@ export default function MessagesPage() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [form, setForm] = useState({
@@ -55,6 +58,8 @@ export default function MessagesPage() {
   }, []);
 
   const fetchData = async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const [tenantsRes, messagesRes] = await Promise.all([
         fetch("/api/tenants"),
@@ -64,11 +69,11 @@ export default function MessagesPage() {
         const data = await tenantsRes.json();
         setTenants(data.map((t: { user: Tenant }) => t.user).filter(Boolean));
       }
-      if (messagesRes.ok) {
-        setMessages(await messagesRes.json());
-      }
+      if (!messagesRes.ok) throw new Error();
+      setMessages(await messagesRes.json());
     } catch (error) {
       console.error("Error fetching data:", error);
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -112,8 +117,24 @@ export default function MessagesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
+          <p className="text-slate-500 mt-1">Send emails to tenants</p>
+        </div>
+        <CardListSkeleton count={4} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
+          <p className="text-slate-500 mt-1">Send emails to tenants</p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchData} />
       </div>
     );
   }

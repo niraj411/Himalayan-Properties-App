@@ -40,6 +40,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ErrorState } from "@/components/ui/error-state";
+import { CardListSkeleton } from "@/components/ui/skeletons";
 
 interface Property {
   id: string;
@@ -68,6 +70,7 @@ interface Property {
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [formData, setFormData] = useState({
@@ -90,15 +93,15 @@ export default function PropertiesPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchProperties = async () => {
+    setIsLoading(true);
+    setError(false);
     try {
       const response = await fetch("/api/properties");
-      if (response.ok) {
-        const data = await response.json();
-        setProperties(data);
-      }
-    } catch (error) {
-      console.error("Error fetching properties:", error);
-      toast.error("Failed to load properties");
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      setProperties(data);
+    } catch {
+      setError(true);
     } finally {
       setIsLoading(false);
     }
@@ -240,8 +243,28 @@ export default function PropertiesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Properties</h1>
+          <p className="text-slate-500 mt-1">
+            Manage your residential and commercial properties
+          </p>
+        </div>
+        <CardListSkeleton count={6} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Properties</h1>
+          <p className="text-slate-500 mt-1">
+            Manage your residential and commercial properties
+          </p>
+        </div>
+        <ErrorState message="We couldn't load this page." onRetry={fetchProperties} />
       </div>
     );
   }
@@ -520,7 +543,7 @@ export default function PropertiesPage() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Property actions">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
