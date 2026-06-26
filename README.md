@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+> **Developers & AI agents:** read [`AGENTS.md`](./AGENTS.md) first — it's the portable
+> project guide (stack, architecture, data model, conventions, deploy). Design system
+> lives in [`DESIGN.md`](./DESIGN.md).
+
 ## Getting Started
 
 First, run the development server:
