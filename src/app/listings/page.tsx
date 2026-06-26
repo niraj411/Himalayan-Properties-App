@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { db } from "@/lib/db";
 import { Building2, Home, Store, MapPin, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -25,143 +26,151 @@ export default async function ListingsPage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      {/* Glassmorphic nav */}
-      <nav className="sticky top-0 z-50 bg-surface/80 backdrop-blur-[16px] border-b border-outline-variant/15">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center">
-                <Building2 className="w-4 h-4 text-white" />
+      {/* Navigation (Glassmorphism, No borders) */}
+      <nav className="sticky top-0 bg-surface/80 backdrop-blur-xl z-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="flex items-center justify-between h-20">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-container rounded-2xl flex items-center justify-center shadow-ambient">
+                <Building2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="font-bold text-on-surface text-sm leading-none">Himalayan</p>
-                <p className="text-xs text-slate-500 leading-none mt-0.5">Properties</p>
+                <h1 className="font-bold text-on-surface text-lg leading-none">Himalayan</h1>
+                <p className="text-xs text-on-surface/60 leading-none mt-1 tracking-widest uppercase">Properties</p>
               </div>
             </Link>
-            <div className="flex items-center gap-3">
-              <Link href="/apply" className="text-sm text-slate-600 hover:text-primary transition-colors">
-                Apply
+            <div className="flex items-center gap-4">
+              <Link href="/apply">
+                <Button variant="ghost" className="text-primary hover:bg-surface-container-high rounded-xl font-medium">Apply</Button>
               </Link>
-              <Link href="/login" className="text-sm px-4 py-2 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl">
-                Tenant Sign In
+              <Link href="/login">
+                <Button className="bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient border-none hover:opacity-90 font-medium px-6">Tenant Sign In</Button>
               </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-10">
-        <p className="text-primary font-medium text-sm tracking-wide mb-3">North Denver Metro Area</p>
-        <h1 className="text-4xl md:text-5xl font-bold text-on-surface leading-tight" style={{ letterSpacing: "-0.02em" }}>
-          Available Properties
-        </h1>
-        <p className="mt-4 text-lg text-slate-500 max-w-xl leading-[1.5]">
-          Browse our available residential and commercial spaces in Erie, Lafayette, and surrounding communities.
-        </p>
-      </div>
-
-      {/* Listings */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        {listings.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-2xl">
-            <Building2 className="h-14 w-14 text-slate-200 mx-auto mb-5" />
-            <h2 className="text-xl font-semibold text-on-surface mb-2">No Vacancies Right Now</h2>
-            <p className="text-slate-500 mb-6 max-w-sm mx-auto leading-[1.5]">
-              All units are currently occupied. Submit a general inquiry and we&apos;ll reach out when something becomes available.
+      {/* Hero Section (Asymmetrical, Oversized Typography) */}
+      <section className="relative pt-12 pb-20 px-6 lg:px-12 overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-10">
+          <div className="w-full md:w-7/12 z-10">
+            <p className="text-primary font-semibold mb-4 tracking-widest uppercase text-sm">North Denver Metro Area</p>
+            <h1 className="text-5xl md:text-6xl lg:text-[4.5rem] font-bold text-on-surface tracking-tighter leading-[1.05] mb-6">
+              Available Properties
+            </h1>
+            <p className="text-xl text-on-surface/70 leading-relaxed max-w-lg">
+              Browse our curated selection of residential and commercial spaces designed for exceptional living and thriving businesses.
             </p>
-            <Link
-              href="/apply"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl text-sm font-medium"
-            >
-              Submit Inquiry
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {listings.map((listing) => {
-              const minRent = Math.min(...listing.units.map((u) => u.rent));
-              const maxRent = Math.max(...listing.units.map((u) => u.rent));
-              const rentRange =
-                minRent === maxRent
-                  ? `$${minRent.toLocaleString()}/mo`
-                  : `$${minRent.toLocaleString()}–$${maxRent.toLocaleString()}/mo`;
+        </div>
+      </section>
 
-              return (
-                <div
-                  key={listing.id}
-                  className="bg-white rounded-2xl overflow-hidden"
-                  style={{ boxShadow: "0 40px 40px -10px rgba(27,28,30,0.06)" }}
-                >
-                  {/* Photo */}
-                  <div className="relative h-48 bg-surface-container-low">
-                    {listing.imageUrl ? (
-                      <Image
-                        src={listing.imageUrl}
-                        alt={listing.name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        {listing.type === "COMMERCIAL" ? (
-                          <Store className="h-14 w-14 text-slate-300" />
-                        ) : (
-                          <Home className="h-14 w-14 text-slate-300" />
+      {/* Listings Section (Tonal Layering & Ambient Shadows) */}
+      <section className="py-20 px-6 lg:px-12 bg-surface-container-low relative">
+        <div className="max-w-7xl mx-auto">
+          {listings.length === 0 ? (
+            <div className="text-center py-24 bg-surface-container-lowest rounded-[2rem] shadow-ambient">
+              <div className="w-20 h-20 bg-surface-container-high rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Building2 className="h-10 w-10 text-primary" />
+              </div>
+              <h2 className="text-3xl font-bold text-on-surface tracking-tight mb-4">No Vacancies Right Now</h2>
+              <p className="text-on-surface/70 mb-8 max-w-md mx-auto leading-relaxed text-lg">
+                All units are currently occupied. Submit a general inquiry and we&apos;ll reach out when a sanctuary becomes available.
+              </p>
+              <Link href="/apply">
+                <Button size="lg" className="h-14 px-8 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient border-none hover:opacity-90 font-medium">
+                  Submit Inquiry
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {listings.map((listing) => {
+                const minRent = Math.min(...listing.units.map((u) => u.rent));
+                const maxRent = Math.max(...listing.units.map((u) => u.rent));
+                const rentRange =
+                  minRent === maxRent
+                    ? `$${minRent.toLocaleString()}/mo`
+                    : `$${minRent.toLocaleString()}–$${maxRent.toLocaleString()}/mo`;
+
+                return (
+                  <div
+                    key={listing.id}
+                    className="bg-surface-container-lowest rounded-[2rem] overflow-hidden shadow-ambient transition-all duration-300 hover:bg-surface-bright group flex flex-col"
+                  >
+                    {/* Photo */}
+                    <div className="relative h-56 w-full bg-surface-container-high">
+                      {listing.imageUrl ? (
+                        <Image
+                          src={listing.imageUrl}
+                          alt={listing.name}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          {listing.type === "COMMERCIAL" ? (
+                            <Store className="h-16 w-16 text-primary/40" />
+                          ) : (
+                            <Home className="h-16 w-16 text-primary/40" />
+                          )}
+                        </div>
+                      )}
+                      <div className="absolute top-4 left-4 z-10">
+                        <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-ambient backdrop-blur-md ${listing.type === "COMMERCIAL" ? "bg-surface/90 text-primary" : "bg-surface/90 text-primary"}`}>
+                          {listing.type === "COMMERCIAL" ? "Commercial" : "Residential"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-8 flex-1 flex flex-col">
+                      <h3 className="font-bold text-on-surface text-2xl tracking-tight mb-2">
+                        {listing.name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-on-surface/60 text-sm font-medium mb-6">
+                        <MapPin className="h-4 w-4 flex-shrink-0 text-primary" />
+                        {listing.address}, {listing.city}, {listing.state}
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-8">
+                        {listing.units.slice(0, 3).map((unit) => (
+                          <span key={unit.id} className="text-xs px-3 py-1.5 bg-surface-container-low rounded-lg text-on-surface/80 font-medium">
+                            Unit #{unit.unitNumber}
+                            {unit.bedrooms ? ` · ${unit.bedrooms}bd` : ""}
+                            {unit.bathrooms ? `/${unit.bathrooms}ba` : ""}
+                          </span>
+                        ))}
+                        {listing.units.length > 3 && (
+                          <span className="text-xs px-3 py-1.5 bg-surface-container-low rounded-lg text-on-surface/80 font-medium">
+                            +{listing.units.length - 3} more
+                          </span>
                         )}
                       </div>
-                    )}
-                    <div className="absolute top-3 left-3">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-lg ${listing.type === "COMMERCIAL" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary"}`}>
-                        {listing.type === "COMMERCIAL" ? "Commercial" : "Residential"}
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Content */}
-                  <div className="p-5">
-                    <h3 className="font-semibold text-on-surface text-lg leading-tight mb-1" style={{ letterSpacing: "-0.01em" }}>
-                      {listing.name}
-                    </h3>
-                    <div className="flex items-center gap-1 text-slate-500 text-sm mb-4">
-                      <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                      {listing.address}, {listing.city}, {listing.state}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {listing.units.slice(0, 3).map((unit) => (
-                        <span key={unit.id} className="text-xs px-2.5 py-1 bg-surface-container-low rounded-lg text-slate-600">
-                          Unit #{unit.unitNumber}
-                          {unit.bedrooms ? ` · ${unit.bedrooms}bd` : ""}
-                          {unit.bathrooms ? `/${unit.bathrooms}ba` : ""}
-                        </span>
-                      ))}
-                      {listing.units.length > 3 && (
-                        <span className="text-xs px-2.5 py-1 bg-surface-container-low rounded-lg text-slate-600">
-                          +{listing.units.length - 3} more
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-slate-400 mb-0.5">{listing.units.length} available</p>
-                        <p className="font-semibold text-on-surface">{rentRange}</p>
+                      <div className="mt-auto flex items-center justify-between pt-6 border-t border-outline-variant/20">
+                        <div>
+                          <p className="text-xs text-on-surface/50 font-bold uppercase tracking-wider mb-1">{listing.units.length} available</p>
+                          <p className="font-bold text-on-surface text-lg">{rentRange}</p>
+                        </div>
+                        <Link href={`/listings/${listing.id}`}>
+                          <Button variant="ghost" className="text-primary hover:bg-surface-container-high rounded-xl font-medium px-4">
+                            Details
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
                       </div>
-                      <Link href={`/listings/${listing.id}`} className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
-                        View Details
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
