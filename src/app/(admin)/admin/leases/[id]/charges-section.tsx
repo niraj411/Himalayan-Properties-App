@@ -54,7 +54,7 @@ const money = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
 function statusBadge(status: string) {
-  if (status === "PAID") return <Badge className="bg-emerald-600">Paid</Badge>;
+  if (status === "PAID") return <Badge className="bg-green-600">Paid</Badge>;
   if (status === "WAIVED") return <Badge variant="secondary">Waived</Badge>;
   return <Badge className="bg-amber-600">Open</Badge>;
 }
@@ -251,7 +251,7 @@ export default function ChargesSection({
                         <>
                           <Button size="sm" variant="ghost" title="Mark paid"
                             onClick={() => patch(c.id, { status: "PAID" }, "Marked paid")}>
-                            <Check className="h-4 w-4 text-emerald-600" />
+                            <Check className="h-4 w-4 text-green-600" />
                           </Button>
                           <Button size="sm" variant="ghost" title="Waive"
                             onClick={() => patch(c.id, { status: "WAIVED" }, "Waived")}>

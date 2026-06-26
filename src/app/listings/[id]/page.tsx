@@ -31,20 +31,20 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
   if (listing.units.length === 0) {
     return (
-      <div className="min-h-screen bg-[#faf9fb]">
-        <nav className="sticky top-0 z-50 bg-[#faf9fb]/80 backdrop-blur-[16px] border-b border-[#cac3d8]/15">
+      <div className="min-h-screen bg-surface">
+        <nav className="sticky top-0 z-50 bg-surface/80 backdrop-blur-[16px] border-b border-outline-variant/15">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-9 h-9 bg-gradient-to-br from-[#4f17ce] to-[#673de6] rounded-xl flex items-center justify-center">
+                <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center">
                   <Building2 className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <p className="font-bold text-[#1b1c1e] text-sm leading-none">Himalayan</p>
+                  <p className="font-bold text-on-surface text-sm leading-none">Himalayan</p>
                   <p className="text-xs text-slate-500 leading-none mt-0.5">Properties</p>
                 </div>
               </Link>
-              <Link href="/login" className="text-sm px-4 py-2 bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white rounded-xl">
+              <Link href="/login" className="text-sm px-4 py-2 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl">
                 Tenant Sign In
               </Link>
             </div>
@@ -53,24 +53,24 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
           <div className="flex items-center gap-2 text-sm text-slate-500 mb-8">
-            <Link href="/listings" className="flex items-center gap-1 hover:text-[#4f17ce] transition-colors">
+            <Link href="/listings" className="flex items-center gap-1 hover:text-primary transition-colors">
               <ArrowLeft className="h-4 w-4" />
               Available Properties
             </Link>
           </div>
 
           <div className="bg-white rounded-2xl p-10 max-w-xl mx-auto text-center" style={{ boxShadow: "0 40px 40px -10px rgba(27,28,30,0.06)" }}>
-            <div className="w-12 h-12 bg-[#f5f3f5] rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <div className="w-12 h-12 bg-surface-container-low rounded-2xl flex items-center justify-center mx-auto mb-5">
               {listing.type === "COMMERCIAL" ? (
                 <Store className="h-6 w-6 text-slate-400" />
               ) : (
                 <Home className="h-6 w-6 text-slate-400" />
               )}
             </div>
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-lg inline-block mb-4 ${listing.type === "COMMERCIAL" ? "bg-purple-50 text-purple-700" : "bg-blue-50 text-blue-700"}`}>
+            <span className={`text-xs font-medium px-2.5 py-1 rounded-lg inline-block mb-4 ${listing.type === "COMMERCIAL" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary"}`}>
               {listing.type === "COMMERCIAL" ? "Commercial" : "Residential"}
             </span>
-            <h1 className="text-2xl font-bold text-[#1b1c1e] mb-2" style={{ letterSpacing: "-0.02em" }}>
+            <h1 className="text-2xl font-bold text-on-surface mb-2" style={{ letterSpacing: "-0.02em" }}>
               Not currently for rent
             </h1>
             <p className="text-slate-500 leading-[1.5] mb-1">
@@ -79,7 +79,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             <p className="text-slate-500 leading-[1.5] mb-6">
               Check back later or browse other available properties.
             </p>
-            <Link href="/listings" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white rounded-xl text-sm font-medium">
+            <Link href="/listings" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl text-sm font-medium">
               View Available Properties
               <ChevronRight className="h-4 w-4" />
             </Link>
@@ -101,21 +101,21 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   const applyIsExternal = listing.type === "RESIDENTIAL" && !!listing.zillowUrl;
 
   return (
-    <div className="min-h-screen bg-[#faf9fb]">
+    <div className="min-h-screen bg-surface">
       {/* Glassmorphic nav */}
-      <nav className="sticky top-0 z-50 bg-[#faf9fb]/80 backdrop-blur-[16px] border-b border-[#cac3d8]/15">
+      <nav className="sticky top-0 z-50 bg-surface/80 backdrop-blur-[16px] border-b border-outline-variant/15">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-gradient-to-br from-[#4f17ce] to-[#673de6] rounded-xl flex items-center justify-center">
+              <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center">
                 <Building2 className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="font-bold text-[#1b1c1e] text-sm leading-none">Himalayan</p>
+                <p className="font-bold text-on-surface text-sm leading-none">Himalayan</p>
                 <p className="text-xs text-slate-500 leading-none mt-0.5">Properties</p>
               </div>
             </Link>
-            <Link href="/login" className="text-sm px-4 py-2 bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white rounded-xl">
+            <Link href="/login" className="text-sm px-4 py-2 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl">
               Tenant Sign In
             </Link>
           </div>
@@ -125,12 +125,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-slate-500 mb-8">
-          <Link href="/listings" className="flex items-center gap-1 hover:text-[#4f17ce] transition-colors">
+          <Link href="/listings" className="flex items-center gap-1 hover:text-primary transition-colors">
             <ArrowLeft className="h-4 w-4" />
             Available Properties
           </Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-[#1b1c1e]">{listing.name}</span>
+          <span className="text-on-surface">{listing.name}</span>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-10">
@@ -142,7 +142,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             {allPhotos.length > 0 ? (
               <PhotoGallery photos={allPhotos} name={listing.name} />
             ) : (
-              <div className="w-full h-72 rounded-2xl bg-[#f5f3f5] flex items-center justify-center">
+              <div className="w-full h-72 rounded-2xl bg-surface-container-low flex items-center justify-center">
                 {listing.type === "COMMERCIAL" ? (
                   <Store className="h-20 w-20 text-slate-200" />
                 ) : (
@@ -154,11 +154,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             {/* Property info */}
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-lg ${listing.type === "COMMERCIAL" ? "bg-purple-50 text-purple-700" : "bg-blue-50 text-blue-700"}`}>
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-lg ${listing.type === "COMMERCIAL" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary"}`}>
                   {listing.type === "COMMERCIAL" ? "Commercial" : "Residential"}
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-[#1b1c1e] mb-3" style={{ letterSpacing: "-0.02em" }}>
+              <h1 className="text-3xl md:text-4xl font-bold text-on-surface mb-3" style={{ letterSpacing: "-0.02em" }}>
                 {listing.name}
               </h1>
               <div className="flex items-center gap-1.5 text-slate-500">
@@ -172,7 +172,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
             {/* Available units */}
             <div>
-              <h2 className="text-xl font-semibold text-[#1b1c1e] mb-5" style={{ letterSpacing: "-0.01em" }}>
+              <h2 className="text-xl font-semibold text-on-surface mb-5" style={{ letterSpacing: "-0.01em" }}>
                 Available Units
               </h2>
               <div className="space-y-3">
@@ -183,11 +183,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                     style={{ boxShadow: "0 40px 40px -10px rgba(27,28,30,0.06)" }}
                   >
                     <div className="flex items-center gap-5">
-                      <div className="w-10 h-10 bg-[#f5f3f5] rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 bg-surface-container-low rounded-xl flex items-center justify-center flex-shrink-0">
                         <Home className="h-5 w-5 text-slate-400" />
                       </div>
                       <div>
-                        <p className="font-semibold text-[#1b1c1e]">Unit #{unit.unitNumber}</p>
+                        <p className="font-semibold text-on-surface">Unit #{unit.unitNumber}</p>
                         <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
                           {unit.bedrooms && (
                             <span className="flex items-center gap-1"><BedDouble className="h-3.5 w-3.5" />{unit.bedrooms} bed</span>
@@ -202,7 +202,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <p className="font-bold text-[#1b1c1e] text-lg">
+                      <p className="font-bold text-on-surface text-lg">
                         ${unit.rent.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span>
                       </p>
                       {applyIsExternal ? (
@@ -210,12 +210,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                           href={applyHref}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white text-sm font-medium rounded-xl"
+                          className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-primary to-primary-container text-white text-sm font-medium rounded-xl"
                         >
                           Apply on Zillow <ExternalLink className="h-3.5 w-3.5" />
                         </a>
                       ) : (
-                        <Link href={applyHref} className="px-4 py-2 bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white text-sm font-medium rounded-xl">
+                        <Link href={applyHref} className="px-4 py-2 bg-gradient-to-br from-primary to-primary-container text-white text-sm font-medium rounded-xl">
                           Apply
                         </Link>
                       )}
@@ -229,10 +229,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           {/* Right: Apply CTA sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl p-6 sticky top-24" style={{ boxShadow: "0 40px 40px -10px rgba(27,28,30,0.06)" }}>
-              <h3 className="font-semibold text-[#1b1c1e] mb-2">
+              <h3 className="font-semibold text-on-surface mb-2">
                 {listing.units.length} unit{listing.units.length !== 1 ? "s" : ""} available
               </h3>
-              <p className="text-2xl font-bold text-[#1b1c1e] mb-1">
+              <p className="text-2xl font-bold text-on-surface mb-1">
                 ${Math.min(...listing.units.map((u) => u.rent)).toLocaleString()}
                 <span className="text-base font-normal text-slate-400">/mo</span>
               </p>
@@ -246,16 +246,16 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                   href={applyHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white font-medium rounded-xl"
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-br from-primary to-primary-container text-white font-medium rounded-xl"
                 >
                   Apply on Zillow <ExternalLink className="h-4 w-4" />
                 </a>
               ) : (
-                <Link href={applyHref} className="flex items-center justify-center w-full py-3 bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white font-medium rounded-xl">
+                <Link href={applyHref} className="flex items-center justify-center w-full py-3 bg-gradient-to-br from-primary to-primary-container text-white font-medium rounded-xl">
                   Start Application
                 </Link>
               )}
-              <Link href="/listings" className="flex items-center justify-center w-full py-2.5 mt-3 bg-[#e9e8ea] text-[#1b1c1e] text-sm font-medium rounded-xl">
+              <Link href="/listings" className="flex items-center justify-center w-full py-2.5 mt-3 bg-surface-container-high text-on-surface text-sm font-medium rounded-xl">
                 View All Properties
               </Link>
             </div>

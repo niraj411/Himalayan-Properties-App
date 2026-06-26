@@ -39,7 +39,7 @@ export function RequestAllButton({ nonCompliantCount }: { nonCompliantCount: num
     <Button
       onClick={handleClick}
       disabled={isSending}
-      className="bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white rounded-xl hover:opacity-90"
+      className="text-white rounded-xl hover:opacity-90"
     >
       {isSending ? (
         <Loader2 className="h-4 w-4 mr-2 animate-spin" />

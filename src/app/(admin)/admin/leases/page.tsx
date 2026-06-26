@@ -271,7 +271,7 @@ export default function LeasesPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openNewDialog} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={openNewDialog} className="">
               <Plus className="h-4 w-4 mr-2" />
               Create Lease
             </Button>
@@ -441,7 +441,7 @@ export default function LeasesPage() {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                <Button type="submit" className="" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -465,7 +465,7 @@ export default function LeasesPage() {
             <FileText className="h-12 w-12 text-slate-300 mb-4" />
             <h3 className="text-lg font-medium text-slate-900 mb-2">No leases yet</h3>
             <p className="text-slate-500 text-center mb-4">Create your first lease agreement</p>
-            <Button onClick={openNewDialog} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={openNewDialog} className="">
               <Plus className="h-4 w-4 mr-2" />
               Create Lease
             </Button>
@@ -513,8 +513,8 @@ export default function LeasesPage() {
                           variant="outline"
                           className={
                             lease.leaseType === "COMMERCIAL"
-                              ? "bg-purple-50 text-purple-700 border-purple-200"
-                              : "bg-blue-50 text-blue-700 border-blue-200"
+                              ? "bg-primary/10 text-primary border-primary/20"
+                              : "bg-primary/10 text-primary border-primary/20"
                           }
                         >
                           {lease.leaseType === "COMMERCIAL" ? (
@@ -550,7 +550,7 @@ export default function LeasesPage() {
                           </span>
                         </div>
                         {(isExpiringSoon || isExpired) && (
-                          <div className="flex items-center gap-1 text-orange-600 text-sm mt-1">
+                          <div className="flex items-center gap-1 text-amber-600 text-sm mt-1">
                             <AlertTriangle className="h-3.5 w-3.5" />
                             {isExpired ? "Expired" : "Expiring soon"}
                           </div>
@@ -574,7 +574,7 @@ export default function LeasesPage() {
                             lease.status === "ACTIVE"
                               ? "bg-green-50 text-green-700"
                               : lease.status === "EXPIRED"
-                              ? "bg-orange-50 text-orange-700"
+                              ? "bg-amber-50 text-amber-700"
                               : "bg-slate-100 text-slate-600"
                           }
                         >

@@ -144,7 +144,7 @@ export function InsuranceUploadSection({ leaseId, leaseType, insurance }: Insura
         </CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+            <Button size="sm" className="">
               <Plus className="h-4 w-4 mr-1" />
               Upload Insurance
             </Button>
@@ -154,7 +154,7 @@ export function InsuranceUploadSection({ leaseId, leaseType, insurance }: Insura
               <DialogTitle>Submit Insurance Certificate</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+              <div className="p-3 bg-primary/10 rounded-lg text-sm text-primary">
                 <p className="font-medium">Required Beneficiary:</p>
                 <p className="font-bold">{BENEFICIARY_NAME}</p>
                 <p className="text-xs mt-1 text-primary">
@@ -263,7 +263,7 @@ export function InsuranceUploadSection({ leaseId, leaseType, insurance }: Insura
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                <Button type="submit" className="" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -296,12 +296,12 @@ export function InsuranceUploadSection({ leaseId, leaseType, insurance }: Insura
         )}
 
         {hasExpiredInsurance && (
-          <div className="mb-4 p-4 border border-orange-200 bg-orange-50 rounded-lg">
+          <div className="mb-4 p-4 border border-amber-200 bg-amber-50 rounded-lg">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
-              <span className="font-medium text-orange-800">Insurance Expired</span>
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <span className="font-medium text-amber-800">Insurance Expired</span>
             </div>
-            <p className="text-sm text-orange-700 mt-1">
+            <p className="text-sm text-amber-700 mt-1">
               Please upload a new certificate of insurance immediately.
             </p>
           </div>
@@ -382,7 +382,7 @@ export function InsuranceUploadSection({ leaseId, leaseType, insurance }: Insura
                         href={ins.documentUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary hover:text-blue-700"
+                        className="text-primary hover:text-primary"
                       >
                         <Button size="sm" variant="outline">
                           <ExternalLink className="h-4 w-4 mr-1" />

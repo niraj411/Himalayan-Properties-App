@@ -144,7 +144,7 @@ export default function ApplyPage() {
         {/* Header */}
         <div className="text-center mb-6">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div className="text-left">
@@ -187,9 +187,9 @@ export default function ApplyPage() {
                       <SelectItem key={property.id} value={property.id}>
                         <span className="flex items-center gap-2">
                           {property.type === "COMMERCIAL" ? (
-                            <Store className="h-4 w-4 text-purple-500" />
+                            <Store className="h-4 w-4 text-primary" />
                           ) : (
-                            <Home className="h-4 w-4 text-blue-500" />
+                            <Home className="h-4 w-4 text-primary" />
                           )}
                           {property.name} - {property.city}
                           <span className="text-xs text-slate-400">
@@ -204,19 +204,19 @@ export default function ApplyPage() {
 
               {/* Residential Notice */}
               {applicationType === "RESIDENTIAL" && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
                   <div className="flex items-start gap-3">
                     <ExternalLink className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-blue-900 text-sm">Residential Applications</p>
-                      <p className="text-blue-700 text-sm mt-1">
+                      <p className="font-medium text-primary text-sm">Residential Applications</p>
+                      <p className="text-primary text-sm mt-1">
                         For residential properties, we use Zillow for applications. Please apply through Zillow and reference this property in your application.
                       </p>
                       <a
                         href={zillowUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-primary hover:text-blue-700 font-medium text-sm mt-2"
+                        className="inline-flex items-center gap-1 text-primary hover:text-primary font-medium text-sm mt-2"
                       >
                         Apply on Zillow
                         <ExternalLink className="h-3 w-3" />
@@ -230,12 +230,12 @@ export default function ApplyPage() {
               {applicationType === "COMMERCIAL" && (
                 <>
                   {/* Commercial Notice */}
-                  <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                  <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
                     <div className="flex items-start gap-3">
-                      <Store className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                      <Store className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-purple-900 text-sm">Commercial Application</p>
-                        <p className="text-purple-700 text-sm mt-1">
+                        <p className="font-medium text-primary text-sm">Commercial Application</p>
+                        <p className="text-primary text-sm mt-1">
                           Commercial applications require 2 years of corporate tax returns and 3 months of bank statements.
                         </p>
                       </div>
@@ -389,7 +389,7 @@ export default function ApplyPage() {
 
                   <Button
                     type="submit"
-                    className="w-full h-10 bg-blue-600 hover:bg-blue-700"
+                    className="w-full h-10"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -469,7 +469,7 @@ export default function ApplyPage() {
 
                   <Button
                     type="submit"
-                    className="w-full h-10 bg-blue-600 hover:bg-blue-700"
+                    className="w-full h-10"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -489,7 +489,7 @@ export default function ApplyPage() {
 
         <p className="text-center text-xs text-slate-500 mt-4">
           Already a tenant?{" "}
-          <Link href="/login" className="text-primary hover:text-blue-700 font-medium">
+          <Link href="/login" className="text-primary hover:text-primary font-medium">
             Sign in here
           </Link>
         </p>

@@ -148,7 +148,7 @@ export default function MessagesPage() {
         </div>
         <Button
           onClick={() => setIsComposeOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700"
+          className=""
         >
           <Plus className="h-4 w-4 mr-2" />
           Compose
@@ -262,7 +262,7 @@ export default function MessagesPage() {
               <Button
                 onClick={handleSend}
                 disabled={isSending}
-                className="bg-blue-600 hover:bg-blue-700"
+                className=""
               >
                 {isSending ? (
                   <>

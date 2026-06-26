@@ -107,7 +107,7 @@ export default async function AdminDashboard() {
       icon: Building2,
       href: "/admin/properties",
       color: "text-primary",
-      bgColor: "bg-blue-50",
+      bgColor: "bg-primary/10",
     },
     {
       name: "Total Units",
@@ -123,16 +123,16 @@ export default async function AdminDashboard() {
       value: data.tenantsCount,
       icon: Users,
       href: "/admin/tenants",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
     {
       name: "Active Leases",
       value: data.activeLeasesCount,
       icon: FileText,
       href: "/admin/leases",
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
     },
     {
       name: "Open Requests",
@@ -148,8 +148,8 @@ export default async function AdminDashboard() {
       subtext: "pending",
       icon: DollarSign,
       href: "/admin/applications",
-      color: "text-teal-600",
-      bgColor: "bg-teal-50",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
   ];
 
@@ -187,10 +187,10 @@ export default async function AdminDashboard() {
         <Card className="border-0 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-orange-500" />
+              <Calendar className="h-5 w-5 text-amber-500" />
               Expiring Leases
             </CardTitle>
-            <Link href="/admin/leases" className="text-sm text-primary hover:text-blue-700">
+            <Link href="/admin/leases" className="text-sm text-primary hover:text-primary">
               View all
             </Link>
           </CardHeader>
@@ -230,7 +230,7 @@ export default async function AdminDashboard() {
               <Wrench className="h-5 w-5 text-red-500" />
               Open Maintenance Requests
             </CardTitle>
-            <Link href="/admin/maintenance" className="text-sm text-primary hover:text-blue-700">
+            <Link href="/admin/maintenance" className="text-sm text-primary hover:text-primary">
               View all
             </Link>
           </CardHeader>
@@ -274,10 +274,10 @@ export default async function AdminDashboard() {
         <Card className="border-0 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <Shield className="h-5 w-5 text-blue-500" />
+              <Shield className="h-5 w-5 text-primary" />
               Insurance Alerts
             </CardTitle>
-            <Link href="/admin/insurance" className="text-sm text-primary hover:text-blue-700">
+            <Link href="/admin/insurance" className="text-sm text-primary hover:text-primary">
               View all
             </Link>
           </CardHeader>

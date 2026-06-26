@@ -45,7 +45,7 @@ export default function LoginPage() {
   return (
     <Card className="shadow-xl border-0 bg-white">
       <CardHeader className="space-y-4 text-center pb-8">
-        <div className="mx-auto w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center">
+        <div className="mx-auto w-16 h-16 bg-primary rounded-2xl flex items-center justify-center">
           <Building2 className="w-8 h-8 text-white" />
         </div>
         <div>
@@ -87,7 +87,7 @@ export default function LoginPage() {
         <CardFooter className="flex flex-col space-y-4 pt-4">
           <Button
             type="submit"
-            className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+            className="w-full h-11 text-white font-medium"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -101,7 +101,7 @@ export default function LoginPage() {
           </Button>
           <p className="text-sm text-slate-500 text-center">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-primary hover:text-blue-700 font-medium">
+            <Link href="/register" className="text-primary hover:text-primary font-medium">
               Create one
             </Link>
           </p>

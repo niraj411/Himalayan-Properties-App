@@ -350,7 +350,7 @@ function AccountingContent() {
                       ${summary?.netIncome?.toLocaleString() || "0"}
                     </p>
                   </div>
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
                     <DollarSign className="h-6 w-6 text-primary" />
                   </div>
                 </div>

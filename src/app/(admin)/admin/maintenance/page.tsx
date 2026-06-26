@@ -246,7 +246,7 @@ export default function MaintenancePage() {
       case "EMERGENCY":
         return <AlertTriangle className="h-4 w-4 text-red-500" />;
       case "HIGH":
-        return <AlertTriangle className="h-4 w-4 text-orange-500" />;
+        return <AlertTriangle className="h-4 w-4 text-amber-500" />;
       default:
         return <Clock className="h-4 w-4 text-slate-400" />;
     }
@@ -283,7 +283,7 @@ export default function MaintenancePage() {
           <h1 className="text-2xl font-bold text-slate-900">Maintenance Requests</h1>
           <p className="text-slate-500 mt-1">Manage tenant maintenance requests</p>
         </div>
-        <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={openCreateDialog} className="">
           <Plus className="h-4 w-4 mr-2" />
           New Request
         </Button>
@@ -358,9 +358,9 @@ export default function MaintenancePage() {
                             request.priority === "EMERGENCY"
                               ? ""
                               : request.priority === "HIGH"
-                              ? "bg-orange-50 text-orange-700"
+                              ? "bg-amber-50 text-amber-700"
                               : request.priority === "MEDIUM"
-                              ? "bg-yellow-50 text-yellow-700"
+                              ? "bg-amber-50 text-amber-700"
                               : "bg-slate-100 text-slate-600"
                           }
                         >
@@ -373,9 +373,9 @@ export default function MaintenancePage() {
                         variant={request.status === "COMPLETED" ? "default" : "secondary"}
                         className={
                           request.status === "OPEN"
-                            ? "bg-blue-50 text-blue-700"
+                            ? "bg-primary/10 text-primary"
                             : request.status === "IN_PROGRESS"
-                            ? "bg-purple-50 text-purple-700"
+                            ? "bg-primary/10 text-primary"
                             : request.status === "COMPLETED"
                             ? "bg-green-50 text-green-700"
                             : "bg-slate-100 text-slate-600"
@@ -540,7 +540,7 @@ export default function MaintenancePage() {
                 <Button type="button" variant="outline" onClick={() => setSelectedRequest(null)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                <Button type="submit" className="" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -643,7 +643,7 @@ export default function MaintenancePage() {
               <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+              <Button type="submit" className="" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />

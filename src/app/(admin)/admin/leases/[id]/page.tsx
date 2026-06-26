@@ -450,8 +450,8 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
               variant="outline"
               className={
                 isCommercial
-                  ? "bg-purple-50 text-purple-700 border-purple-200"
-                  : "bg-blue-50 text-blue-700 border-blue-200"
+                  ? "bg-primary/10 text-primary border-primary/20"
+                  : "bg-primary/10 text-primary border-primary/20"
               }
             >
               {isCommercial ? <Building2 className="h-3 w-3 mr-1" /> : <Home className="h-3 w-3 mr-1" />}
@@ -478,7 +478,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
+              <div className="p-2 bg-primary/10 rounded-lg">
                 <DollarSign className="h-5 w-5 text-primary" />
               </div>
               <div>
@@ -522,8 +522,8 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-50 rounded-lg">
-                <Calendar className="h-5 w-5 text-orange-600" />
+              <div className="p-2 bg-amber-50 rounded-lg">
+                <Calendar className="h-5 w-5 text-amber-600" />
               </div>
               <div>
                 <p className="text-sm text-slate-500">End Date</p>
@@ -537,8 +537,8 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-50 rounded-lg">
-                <FileText className="h-5 w-5 text-purple-600" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <FileText className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-slate-500">Deposit</p>
@@ -556,7 +556,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-purple-600" />
+              <DollarSign className="h-5 w-5 text-primary" />
               Security Deposit
             </CardTitle>
           </CardHeader>
@@ -623,7 +623,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
               <Button
                 onClick={handleSaveDeposit}
                 disabled={isSavingDeposit}
-                className="bg-blue-600 hover:bg-blue-700"
+                className=""
               >
                 {isSavingDeposit ? (
                   <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>
@@ -646,7 +646,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
               </CardTitle>
               <Dialog open={isEscalationDialogOpen} onOpenChange={setIsEscalationDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <Button size="sm" className="">
                     <Plus className="h-4 w-4 mr-1" />
                     Add Escalation
                   </Button>
@@ -727,7 +727,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                       <Button type="button" variant="outline" onClick={() => setIsEscalationDialogOpen(false)}>
                         Cancel
                       </Button>
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                      <Button type="submit" className="" disabled={isSubmitting}>
                         {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Escalation"}
                       </Button>
                     </div>
@@ -757,7 +757,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                           <TableCell>
                             {format(new Date(escalation.effectiveDate), "MMM d, yyyy")}
                             {isPast && !escalation.applied && (
-                              <Badge variant="outline" className="ml-2 text-orange-600 border-orange-200">
+                              <Badge variant="outline" className="ml-2 text-amber-600 border-amber-200">
                                 <AlertTriangle className="h-3 w-3 mr-1" />
                                 Overdue
                               </Badge>
@@ -831,7 +831,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                     size="sm"
                     variant="outline"
                     onClick={handleRequestInsurance}
-                    className="text-[#4f17ce] border-[#4f17ce]/30"
+                    className="text-primary border-primary/30"
                   >
                     Request Insurance
                   </Button>
@@ -846,7 +846,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                 }}
               >
                 <DialogTrigger asChild>
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <Button size="sm" className="">
                     <Plus className="h-4 w-4 mr-1" />
                     Add Insurance
                   </Button>
@@ -856,7 +856,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                     <DialogTitle>Add Insurance Record</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleAddInsurance} className="space-y-4 mt-4">
-                    <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                    <div className="p-3 bg-primary/10 rounded-lg text-sm text-primary">
                       <p className="font-medium">Required Beneficiary:</p>
                       <p>{BENEFICIARY_NAME}</p>
                     </div>
@@ -950,7 +950,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                       <Button type="button" variant="outline" onClick={() => setIsInsuranceDialogOpen(false)}>
                         Cancel
                       </Button>
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                      <Button type="submit" className="" disabled={isSubmitting}>
                         {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Insurance"}
                       </Button>
                     </div>
@@ -998,7 +998,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                                 <Badge className="bg-red-50 text-red-700">Expired</Badge>
                               )}
                               {!isExpired && isExpiringSoon && (
-                                <Badge className="bg-orange-50 text-orange-700">
+                                <Badge className="bg-amber-50 text-amber-700">
                                   <AlertTriangle className="h-3 w-3 mr-1" />
                                   Expiring Soon
                                 </Badge>
@@ -1086,7 +1086,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
               href={lease.documentUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-primary hover:text-blue-700"
+              className="flex items-center gap-2 text-primary hover:text-primary"
             >
               <ExternalLink className="h-4 w-4" />
               View Lease Document

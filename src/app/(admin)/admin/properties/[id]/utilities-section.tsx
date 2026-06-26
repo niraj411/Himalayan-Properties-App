@@ -184,7 +184,7 @@ export default function UtilitiesSection({
         <Button
           size="sm"
           onClick={openAdd}
-          className="bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white"
+          className="text-white"
         >
           <Plus className="h-4 w-4 mr-1" /> Add utility
         </Button>
@@ -216,7 +216,7 @@ export default function UtilitiesSection({
                   <TableCell className="text-slate-600">{u.phone || "—"}</TableCell>
                   <TableCell className="text-slate-600 max-w-[140px] truncate">
                     {u.website ? (
-                      <a href={u.website} target="_blank" rel="noopener noreferrer" className="text-[#4f17ce] hover:underline">
+                      <a href={u.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                         {u.website.replace(/^https?:\/\//, "")}
                       </a>
                     ) : (
@@ -229,7 +229,7 @@ export default function UtilitiesSection({
                   <TableCell className="text-slate-600">{u.dueDay ?? "—"}</TableCell>
                   <TableCell>
                     {u.tenantVisible ? (
-                      <Badge className="bg-emerald-600">Visible</Badge>
+                      <Badge className="bg-green-600">Visible</Badge>
                     ) : (
                       <Badge variant="secondary">Hidden</Badge>
                     )}

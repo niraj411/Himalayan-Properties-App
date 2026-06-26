@@ -282,7 +282,7 @@ export default function PropertiesPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openNewDialog} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={openNewDialog} className="">
               <Plus className="h-4 w-4 mr-2" />
               Add Property
             </Button>
@@ -394,10 +394,10 @@ export default function PropertiesPage() {
                 <input
                   type="file"
                   accept="image/*"
-                  className="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#e9e8ea] file:text-[#1b1c1e] cursor-pointer"
+                  className="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-surface-container-high file:text-on-surface cursor-pointer"
                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
                 />
-                {imageFile && <p className="text-xs text-[#4f17ce]">New photo ready to upload</p>}
+                {imageFile && <p className="text-xs text-primary">New photo ready to upload</p>}
               </div>
 
               {/* Zillow URL — residential only */}
@@ -416,7 +416,7 @@ export default function PropertiesPage() {
 
               {/* Mortgage */}
               <div className="pt-2">
-                <p className="text-sm font-medium text-[#1b1c1e] mb-3">Mortgage (Optional)</p>
+                <p className="text-sm font-medium text-on-surface mb-3">Mortgage (Optional)</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label htmlFor="mortgageLender">Lender</Label>
@@ -474,7 +474,7 @@ export default function PropertiesPage() {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white rounded-xl border-0"
+                  className="text-white rounded-xl"
                   disabled={isSubmitting || isUploadingImage}
                 >
                   {isUploadingImage ? (
@@ -504,7 +504,7 @@ export default function PropertiesPage() {
             <p className="text-slate-500 text-center mb-4">
               Get started by adding your first property
             </p>
-            <Button onClick={openNewDialog} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={openNewDialog} className="">
               <Plus className="h-4 w-4 mr-2" />
               Add Property
             </Button>
@@ -528,15 +528,15 @@ export default function PropertiesPage() {
                     <div
                       className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                         property.type === "COMMERCIAL"
-                          ? "bg-purple-50"
-                          : "bg-blue-50"
+                          ? "bg-primary/10"
+                          : "bg-primary/10"
                       }`}
                     >
                       {property.type === "COMMERCIAL" ? (
                         <Building2
                           className={`h-5 w-5 ${
                             property.type === "COMMERCIAL"
-                              ? "text-purple-600"
+                              ? "text-primary"
                               : "text-primary"
                           }`}
                         />
@@ -582,8 +582,8 @@ export default function PropertiesPage() {
                       variant="secondary"
                       className={
                         property.type === "COMMERCIAL"
-                          ? "bg-purple-50 text-purple-700"
-                          : "bg-blue-50 text-blue-700"
+                          ? "bg-primary/10 text-primary"
+                          : "bg-primary/10 text-primary"
                       }
                     >
                       {property.type}

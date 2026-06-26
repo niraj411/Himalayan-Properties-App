@@ -120,9 +120,9 @@ export default function RentRollPage() {
           <div className="p-6 bg-muted/50">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div className="flex items-start gap-4">
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${property.type === "COMMERCIAL" ? "bg-purple-100" : "bg-primary/10"}`}>
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${property.type === "COMMERCIAL" ? "bg-primary/10" : "bg-primary/10"}`}>
                   {property.type === "COMMERCIAL" ? (
-                    <Store className="h-5 w-5 text-purple-600" />
+                    <Store className="h-5 w-5 text-primary" />
                   ) : (
                     <Home className="h-5 w-5 text-primary" />
                   )}

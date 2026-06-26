@@ -77,7 +77,7 @@ export default async function TenantDashboard() {
         <h1 className="text-2xl font-bold text-on-surface">Welcome</h1>
         <Card className="border-0 shadow-sm">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <AlertCircle className="h-12 w-12 text-orange-500 mb-4" />
+            <AlertCircle className="h-12 w-12 text-amber-500 mb-4" />
             <h3 className="text-lg font-medium text-on-surface mb-2">
               Profile Setup Required
             </h3>
@@ -186,8 +186,8 @@ export default async function TenantDashboard() {
         <Link href="/dashboard/maintenance">
           <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
             <CardContent className="p-5">
-              <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center mb-3">
-                <Wrench className="h-5 w-5 text-orange-600" />
+              <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center mb-3">
+                <Wrench className="h-5 w-5 text-amber-600" />
               </div>
               <h3 className="font-semibold text-on-surface">Maintenance</h3>
               <p className="text-sm text-muted-foreground mt-1">
@@ -214,8 +214,8 @@ export default async function TenantDashboard() {
         <Link href="/dashboard/lease">
           <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
             <CardContent className="p-5">
-              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center mb-3">
-                <FileText className="h-5 w-5 text-purple-600" />
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-3">
+                <FileText className="h-5 w-5 text-primary" />
               </div>
               <h3 className="font-semibold text-on-surface">My Lease</h3>
               <p className="text-sm text-muted-foreground mt-1">View lease details</p>
@@ -265,11 +265,11 @@ export default async function TenantDashboard() {
       <Card className="border-0 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Wrench className="h-5 w-5 text-orange-600" />
+            <Wrench className="h-5 w-5 text-amber-600" />
             Open Maintenance Requests
           </CardTitle>
           <Link href="/dashboard/maintenance">
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+            <Button size="sm" className="">
               <Plus className="h-4 w-4 mr-1" />
               New Request
             </Button>
@@ -298,7 +298,7 @@ export default async function TenantDashboard() {
                       variant={request.priority === "EMERGENCY" ? "destructive" : "secondary"}
                       className={
                         request.priority === "HIGH"
-                          ? "bg-orange-50 text-orange-700"
+                          ? "bg-amber-50 text-amber-700"
                           : request.priority === "EMERGENCY"
                           ? ""
                           : "bg-slate-100"
@@ -309,8 +309,8 @@ export default async function TenantDashboard() {
                     <Badge
                       className={
                         request.status === "IN_PROGRESS"
-                          ? "bg-purple-50 text-purple-700"
-                          : "bg-blue-50 text-blue-700"
+                          ? "bg-primary/10 text-primary"
+                          : "bg-primary/10 text-primary"
                       }
                     >
                       {request.status === "IN_PROGRESS" ? "In Progress" : "Open"}

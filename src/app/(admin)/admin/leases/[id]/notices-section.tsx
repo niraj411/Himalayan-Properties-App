@@ -193,7 +193,7 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
         </CardTitle>
         <Dialog open={open} onOpenChange={onOpenChange}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white">
+            <Button size="sm" className="text-white">
               <Send className="h-4 w-4 mr-1" /> Send notice
             </Button>
           </DialogTrigger>
@@ -270,7 +270,7 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
                   required
                 />
               </div>
-              <Button type="submit" disabled={sending} className="w-full bg-gradient-to-br from-[#4f17ce] to-[#673de6] text-white">
+              <Button type="submit" disabled={sending} className="w-full text-white">
                 {sending ? "Sending…" : "Send notice"}
               </Button>
             </form>
@@ -304,7 +304,7 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
                   </TableCell>
                   <TableCell>
                     {n.status === "SENT" ? (
-                      <Badge className="bg-emerald-600">Sent</Badge>
+                      <Badge className="bg-green-600">Sent</Badge>
                     ) : (
                       <Badge className="bg-red-600" title={n.errorText ?? undefined}>Failed</Badge>
                     )}
@@ -315,7 +315,7 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button size="sm" variant="ghost" title="Re-send" onClick={() => resend(n.id)}>
-                        <RotateCw className="h-4 w-4 text-[#4f17ce]" />
+                        <RotateCw className="h-4 w-4 text-primary" />
                       </Button>
                     </div>
                   </TableCell>
@@ -338,7 +338,7 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
                 {viewing.ccEmails && <> · CC: {viewing.ccEmails}</>}
                 {viewing.replyTo && <> · Reply-To: {viewing.replyTo}</>}
               </div>
-              <pre className="whitespace-pre-wrap font-mono text-xs bg-[#f5f3f5] p-4 rounded-xl max-h-[60vh] overflow-auto">
+              <pre className="whitespace-pre-wrap font-mono text-xs bg-surface-container-low p-4 rounded-xl max-h-[60vh] overflow-auto">
                 {viewing.body}
               </pre>
             </div>

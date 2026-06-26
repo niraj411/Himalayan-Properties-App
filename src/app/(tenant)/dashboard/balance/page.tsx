@@ -100,8 +100,8 @@ export default function TenantBalancePage() {
       ) : (
         <Card className="border-0 shadow-sm">
           <CardContent className="flex items-center gap-3 py-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50">
-              <Receipt className="h-5 w-5 text-emerald-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
+              <Receipt className="h-5 w-5 text-green-600" />
             </div>
             <div>
               <p className="font-semibold text-on-surface">You&apos;re all caught up</p>
@@ -166,7 +166,7 @@ function ChargeTable({ title, rows, muted }: { title: string; rows: Charge[]; mu
 }
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === "PAID") return <Badge className="bg-emerald-600">Paid</Badge>;
+  if (status === "PAID") return <Badge className="bg-green-600">Paid</Badge>;
   if (status === "WAIVED") return <Badge variant="secondary">Waived</Badge>;
   return <Badge className="bg-amber-600">Open</Badge>;
 }

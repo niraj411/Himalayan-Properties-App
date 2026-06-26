@@ -49,7 +49,7 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
       {/* Main image + thumbnails */}
       <div className="space-y-3 min-w-0">
         <div
-          className="w-full h-72 md:h-96 rounded-2xl overflow-hidden bg-[#f5f3f5] cursor-zoom-in relative group"
+          className="w-full h-72 md:h-96 rounded-2xl overflow-hidden bg-surface-container-low cursor-zoom-in relative group"
           onClick={() => setLightbox(true)}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
@@ -76,8 +76,8 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
               <button
                 key={i}
                 onClick={() => setActive(i)}
-                className={`relative flex-shrink-0 h-16 w-24 rounded-xl overflow-hidden bg-[#f5f3f5] transition-all ${
-                  i === active ? "ring-2 ring-[#4f17ce] ring-offset-1" : "opacity-60 hover:opacity-100"
+                className={`relative flex-shrink-0 h-16 w-24 rounded-xl overflow-hidden bg-surface-container-low transition-all ${
+                  i === active ? "ring-2 ring-primary ring-offset-1" : "opacity-60 hover:opacity-100"
                 }`}
               >
                 <Image src={photo} alt={`${name} ${i + 1}`} fill sizes="96px" className="object-cover" />

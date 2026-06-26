@@ -225,7 +225,7 @@ export default function SettingsPage() {
                     href={formData.baselanePaymentLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-3 py-2 text-sm text-primary border border-blue-200 rounded-md hover:bg-blue-50"
+                    className="flex items-center gap-1 px-3 py-2 text-sm text-primary border border-primary/20 rounded-md hover:bg-primary/10"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>
@@ -293,7 +293,7 @@ export default function SettingsPage() {
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <ExternalLink className="h-5 w-5 text-purple-600" />
+              <ExternalLink className="h-5 w-5 text-primary" />
               <CardTitle>Applications</CardTitle>
             </div>
             <CardDescription>Zillow link for residential rental applications</CardDescription>
@@ -313,7 +313,7 @@ export default function SettingsPage() {
                     href={formData.zillowUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-3 py-2 text-sm text-primary border border-blue-200 rounded-md hover:bg-blue-50"
+                    className="flex items-center gap-1 px-3 py-2 text-sm text-primary border border-primary/20 rounded-md hover:bg-primary/10"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>
@@ -330,7 +330,7 @@ export default function SettingsPage() {
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-purple-600" />
+              <Mail className="h-5 w-5 text-primary" />
               <CardTitle>Email Notifications</CardTitle>
             </div>
             <CardDescription>
@@ -358,7 +358,7 @@ export default function SettingsPage() {
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-purple-600" />
+              <Shield className="h-5 w-5 text-primary" />
               <CardTitle>Insurance Reminders</CardTitle>
             </div>
             <CardDescription>
@@ -394,7 +394,7 @@ export default function SettingsPage() {
         </Card>
 
         <div className="flex justify-end">
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSaving}>
+          <Button type="submit" className="" disabled={isSaving}>
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />

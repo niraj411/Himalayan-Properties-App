@@ -78,16 +78,16 @@ export default async function TenantLeasePage() {
         <>
           {/* Expiration Warning */}
           {daysUntilExpiration !== null && daysUntilExpiration <= 60 && (
-            <Card className="border-orange-200 bg-orange-50">
+            <Card className="border-amber-200 bg-amber-50">
               <CardContent className="p-4 flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <AlertTriangle className="h-5 w-5 text-amber-600" />
                 <div>
-                  <p className="font-medium text-orange-800">
+                  <p className="font-medium text-amber-800">
                     {daysUntilExpiration <= 0
                       ? "Your lease has expired"
                       : `Your lease expires in ${daysUntilExpiration} days`}
                   </p>
-                  <p className="text-sm text-orange-700">
+                  <p className="text-sm text-amber-700">
                     Please contact your property manager about renewal
                   </p>
                 </div>
@@ -100,13 +100,13 @@ export default async function TenantLeasePage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 {activeLease.leaseType === "COMMERCIAL" ? (
-                  <Building2 className="h-5 w-5 text-purple-600" />
+                  <Building2 className="h-5 w-5 text-primary" />
                 ) : (
                   <FileText className="h-5 w-5 text-primary" />
                 )}
                 Active Lease
                 {activeLease.leaseType === "COMMERCIAL" && (
-                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 ml-2">
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 ml-2">
                     Commercial
                   </Badge>
                 )}
@@ -116,7 +116,7 @@ export default async function TenantLeasePage() {
             <CardContent className="space-y-6">
               {/* Property Info */}
               <div className="flex items-start gap-4 p-4 bg-muted/50 rounded-xl">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                   <Home className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -313,7 +313,7 @@ export default async function TenantLeasePage() {
                   <Badge
                     className={
                       lease.status === "EXPIRED"
-                        ? "bg-orange-50 text-orange-700"
+                        ? "bg-amber-50 text-amber-700"
                         : "bg-muted text-muted-foreground"
                     }
                   >

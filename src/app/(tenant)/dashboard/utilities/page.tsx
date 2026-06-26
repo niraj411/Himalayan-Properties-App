@@ -105,7 +105,7 @@ export default function TenantUtilitiesPage() {
               <Card key={utility.id} className="border-0 shadow-sm rounded-xl">
                 <CardContent className="p-5 space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
                       <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -122,14 +122,14 @@ export default function TenantUtilitiesPage() {
                     <div className="space-y-2">
                       {utility.phone && (
                         <a href={`tel:${utility.phone}`}
-                           className="flex items-center gap-2 text-sm text-primary hover:text-blue-700">
+                           className="flex items-center gap-2 text-sm text-primary hover:text-primary">
                           <Phone className="h-4 w-4 shrink-0" />
                           <span>{utility.phone}</span>
                         </a>
                       )}
                       {utility.website && (
                         <a href={utility.website} target="_blank" rel="noopener noreferrer"
-                           className="flex items-center gap-2 text-sm text-primary hover:text-blue-700 break-all">
+                           className="flex items-center gap-2 text-sm text-primary hover:text-primary break-all">
                           <ExternalLink className="h-4 w-4 shrink-0" />
                           <span>{utility.website}</span>
                         </a>

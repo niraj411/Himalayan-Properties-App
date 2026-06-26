@@ -240,7 +240,7 @@ export default function TenantsPage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openNewDialog} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={openNewDialog} className="">
               <Plus className="h-4 w-4 mr-2" />
               Add Tenant
             </Button>
@@ -332,7 +332,7 @@ export default function TenantsPage() {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                <Button type="submit" className="" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -356,7 +356,7 @@ export default function TenantsPage() {
             <Users className="h-12 w-12 text-slate-300 mb-4" />
             <h3 className="text-lg font-medium text-slate-900 mb-2">No tenants yet</h3>
             <p className="text-slate-500 text-center mb-4">Add your first tenant to get started</p>
-            <Button onClick={openNewDialog} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={openNewDialog} className="">
               <Plus className="h-4 w-4 mr-2" />
               Add Tenant
             </Button>

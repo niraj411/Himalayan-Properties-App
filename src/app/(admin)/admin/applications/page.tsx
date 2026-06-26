@@ -205,8 +205,8 @@ export default function ApplicationsPage() {
                     <TableCell>
                       <Badge variant="outline" className={
                         app.applicationType === "COMMERCIAL"
-                          ? "border-purple-200 text-purple-700 bg-purple-50"
-                          : "border-blue-200 text-blue-700 bg-blue-50"
+                          ? "border-primary/20 text-primary bg-primary/10"
+                          : "border-primary/20 text-primary bg-primary/10"
                       }>
                         {app.applicationType === "COMMERCIAL" ? (
                           <Store className="h-3 w-3 mr-1" />
@@ -223,7 +223,7 @@ export default function ApplicationsPage() {
                       <Badge
                         className={
                           app.status === "PENDING"
-                            ? "bg-yellow-50 text-yellow-700"
+                            ? "bg-amber-50 text-amber-700"
                             : app.status === "APPROVED"
                             ? "bg-green-50 text-green-700"
                             : "bg-red-50 text-red-700"
@@ -276,7 +276,7 @@ export default function ApplicationsPage() {
             <DialogTitle className="flex items-center gap-2">
               Application Details
               {selectedApplication?.applicationType === "COMMERCIAL" && (
-                <Badge variant="outline" className="border-purple-200 text-purple-700 bg-purple-50">
+                <Badge variant="outline" className="border-primary/20 text-primary bg-primary/10">
                   <Store className="h-3 w-3 mr-1" />
                   Commercial
                 </Badge>
@@ -290,11 +290,11 @@ export default function ApplicationsPage() {
                 <div className="flex items-center gap-3">
                   <div className={`w-11 h-11 rounded-full flex items-center justify-center ${
                     selectedApplication.applicationType === "COMMERCIAL"
-                      ? "bg-purple-100"
-                      : "bg-blue-100"
+                      ? "bg-primary/10"
+                      : "bg-primary/10"
                   }`}>
                     {selectedApplication.applicationType === "COMMERCIAL" ? (
-                      <Store className="h-5 w-5 text-purple-600" />
+                      <Store className="h-5 w-5 text-primary" />
                     ) : (
                       <User className="h-5 w-5 text-primary" />
                     )}
@@ -311,7 +311,7 @@ export default function ApplicationsPage() {
                 <Badge
                   className={
                     selectedApplication.status === "PENDING"
-                      ? "bg-yellow-50 text-yellow-700"
+                      ? "bg-amber-50 text-amber-700"
                       : selectedApplication.status === "APPROVED"
                       ? "bg-green-50 text-green-700"
                       : "bg-red-50 text-red-700"
@@ -370,9 +370,9 @@ export default function ApplicationsPage() {
 
               {/* Commercial Documents */}
               {selectedApplication.applicationType === "COMMERCIAL" && (
-                <Card className="border-purple-200 bg-purple-50/50 shadow-none">
+                <Card className="border-primary/20 bg-primary/10 shadow-none">
                   <CardHeader className="pb-2 pt-3 px-4">
-                    <CardTitle className="text-xs font-medium text-purple-700 uppercase tracking-wide flex items-center gap-1">
+                    <CardTitle className="text-xs font-medium text-primary uppercase tracking-wide flex items-center gap-1">
                       <FileText className="h-3.5 w-3.5" />
                       Commercial Documents
                     </CardTitle>
@@ -383,7 +383,7 @@ export default function ApplicationsPage() {
                         href={selectedApplication.taxReturnsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-purple-700 hover:text-purple-900"
+                        className="flex items-center gap-2 text-sm text-primary hover:text-primary"
                       >
                         <ExternalLink className="h-4 w-4" />
                         2 Years Corporate Tax Returns
@@ -394,7 +394,7 @@ export default function ApplicationsPage() {
                         href={selectedApplication.bankStatementsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-purple-700 hover:text-purple-900"
+                        className="flex items-center gap-2 text-sm text-primary hover:text-primary"
                       >
                         <ExternalLink className="h-4 w-4" />
                         3 Months Bank Statements

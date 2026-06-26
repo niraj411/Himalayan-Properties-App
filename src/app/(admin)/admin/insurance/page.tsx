@@ -21,7 +21,7 @@ type Status = "VALID" | "EXPIRING" | "PENDING" | "MISSING";
 
 const STATUS_META: Record<Status, { label: string; className: string }> = {
   VALID: { label: "Valid", className: "bg-green-50 text-green-700 border-green-200" },
-  EXPIRING: { label: "Expiring soon", className: "bg-orange-50 text-orange-700 border-orange-200" },
+  EXPIRING: { label: "Expiring soon", className: "bg-amber-50 text-amber-700 border-amber-200" },
   PENDING: { label: "Pending review", className: "bg-amber-50 text-amber-700 border-amber-200" },
   MISSING: { label: "Missing / expired", className: "bg-red-50 text-red-700 border-red-200" },
 };
@@ -127,7 +127,7 @@ export default async function InsuranceCompliancePage() {
                       <TableCell>
                         <Link
                           href={`/admin/leases/${lease.id}`}
-                          className="font-medium text-slate-900 hover:text-[#4f17ce]"
+                          className="font-medium text-slate-900 hover:text-primary"
                         >
                           {lease.tenant.user.name}
                         </Link>
@@ -141,8 +141,8 @@ export default async function InsuranceCompliancePage() {
                           variant="outline"
                           className={
                             isCommercial
-                              ? "bg-purple-50 text-purple-700 border-purple-200"
-                              : "bg-blue-50 text-blue-700 border-blue-200"
+                              ? "bg-primary/10 text-primary border-primary/20"
+                              : "bg-primary/10 text-primary border-primary/20"
                           }
                         >
                           {isCommercial ? (

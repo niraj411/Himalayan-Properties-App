@@ -108,9 +108,9 @@ export default function TenantMaintenancePage() {
       case "COMPLETED":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case "IN_PROGRESS":
-        return <Clock className="h-5 w-5 text-purple-500" />;
+        return <Clock className="h-5 w-5 text-primary" />;
       default:
-        return <AlertTriangle className="h-5 w-5 text-blue-500" />;
+        return <AlertTriangle className="h-5 w-5 text-primary" />;
     }
   };
 
@@ -147,7 +147,7 @@ export default function TenantMaintenancePage() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button className="">
               <Plus className="h-4 w-4 mr-2" />
               New Request
             </Button>
@@ -219,7 +219,7 @@ export default function TenantMaintenancePage() {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                <Button type="submit" className="" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -243,7 +243,7 @@ export default function TenantMaintenancePage() {
             <p className="text-slate-500 text-center mb-4">
               Submit a request when you need maintenance help
             </p>
-            <Button onClick={() => setIsDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setIsDialogOpen(true)} className="">
               <Plus className="h-4 w-4 mr-2" />
               New Request
             </Button>
@@ -267,7 +267,7 @@ export default function TenantMaintenancePage() {
                           variant={request.priority === "EMERGENCY" ? "destructive" : "secondary"}
                           className={
                             request.priority === "HIGH"
-                              ? "bg-orange-50 text-orange-700"
+                              ? "bg-amber-50 text-amber-700"
                               : request.priority === "EMERGENCY"
                               ? ""
                               : "bg-slate-100"
@@ -280,8 +280,8 @@ export default function TenantMaintenancePage() {
                             request.status === "COMPLETED"
                               ? "bg-green-50 text-green-700"
                               : request.status === "IN_PROGRESS"
-                              ? "bg-purple-50 text-purple-700"
-                              : "bg-blue-50 text-blue-700"
+                              ? "bg-primary/10 text-primary"
+                              : "bg-primary/10 text-primary"
                           }
                         >
                           {request.status === "IN_PROGRESS" ? "In Progress" : request.status}

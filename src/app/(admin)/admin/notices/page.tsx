@@ -94,7 +94,7 @@ export default async function NoticesPage() {
                     <TableCell className="text-right text-on-surface">{n.amountDue != null ? money(n.amountDue) : "—"}</TableCell>
                     <TableCell>
                       {n.status === "SENT" ? (
-                        <Badge className="bg-emerald-600">Sent</Badge>
+                        <Badge className="bg-green-600">Sent</Badge>
                       ) : (
                         <Badge className="bg-destructive" title={n.errorText ?? undefined}>Failed</Badge>
                       )}

@@ -263,7 +263,7 @@ export default function TenantProfilePage() {
         </Card>
 
         <div className="flex justify-end">
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isSaving}>
+          <Button type="submit" className="" disabled={isSaving}>
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -281,7 +281,7 @@ export default function TenantProfilePage() {
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-purple-600" />
+              <Mail className="h-5 w-5 text-primary" />
               Contact Property Manager
             </CardTitle>
           </CardHeader>

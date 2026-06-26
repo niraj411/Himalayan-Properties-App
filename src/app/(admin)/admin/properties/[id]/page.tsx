@@ -305,11 +305,11 @@ export default function PropertyDetailPage({
         <div className="flex items-start gap-4">
           <div
             className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
-              property.type === "COMMERCIAL" ? "bg-purple-50" : "bg-blue-50"
+              property.type === "COMMERCIAL" ? "bg-primary/10" : "bg-primary/10"
             }`}
           >
             {property.type === "COMMERCIAL" ? (
-              <Building2 className="h-7 w-7 text-purple-600" />
+              <Building2 className="h-7 w-7 text-primary" />
             ) : (
               <Home className="h-7 w-7 text-primary" />
             )}
@@ -323,8 +323,8 @@ export default function PropertyDetailPage({
                 variant="secondary"
                 className={
                   property.type === "COMMERCIAL"
-                    ? "bg-purple-50 text-purple-700"
-                    : "bg-blue-50 text-blue-700"
+                    ? "bg-primary/10 text-primary"
+                    : "bg-primary/10 text-primary"
                 }
               >
                 {property.type}
@@ -347,7 +347,7 @@ export default function PropertyDetailPage({
             href={property.zillowUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#e9e8ea] text-[#1b1c1e] text-sm font-medium rounded-xl self-start"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-surface-container-high text-on-surface text-sm font-medium rounded-xl self-start"
           >
             <ExternalLink className="h-4 w-4" />
             Zillow Listing
@@ -373,7 +373,7 @@ export default function PropertyDetailPage({
         </Card>
         <Card className="border-0 shadow-sm">
           <CardContent className="p-4">
-            <p className="text-2xl font-bold text-orange-600">{vacantUnits}</p>
+            <p className="text-2xl font-bold text-amber-600">{vacantUnits}</p>
             <p className="text-sm text-slate-500">Vacant</p>
           </CardContent>
         </Card>
@@ -384,30 +384,30 @@ export default function PropertyDetailPage({
         <Card className="border-0 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Landmark className="h-5 w-5 text-[#4f17ce]" />
+              <Landmark className="h-5 w-5 text-primary" />
               Mortgage
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {property.mortgageLender && (
-              <div className="p-4 bg-[#f5f3f5] rounded-xl">
+              <div className="p-4 bg-surface-container-low rounded-xl">
                 <p className="text-xs text-slate-400 mb-1">Lender</p>
-                <p className="font-semibold text-[#1b1c1e]">{property.mortgageLender}</p>
+                <p className="font-semibold text-on-surface">{property.mortgageLender}</p>
               </div>
             )}
             {property.mortgageMonthlyPayment && (
-              <div className="p-4 bg-[#f5f3f5] rounded-xl">
+              <div className="p-4 bg-surface-container-low rounded-xl">
                 <p className="text-xs text-slate-400 mb-1">Monthly Payment</p>
-                <p className="font-semibold text-[#1b1c1e]">${property.mortgageMonthlyPayment.toLocaleString()}</p>
+                <p className="font-semibold text-on-surface">${property.mortgageMonthlyPayment.toLocaleString()}</p>
                 {property.mortgageDueDay && (
                   <p className="text-xs text-slate-400 mt-0.5">Due on the {property.mortgageDueDay}th</p>
                 )}
               </div>
             )}
             {property.mortgageBalance && (
-              <div className="p-4 bg-[#f5f3f5] rounded-xl">
+              <div className="p-4 bg-surface-container-low rounded-xl">
                 <p className="text-xs text-slate-400 mb-1">Remaining Balance</p>
-                <p className="font-semibold text-[#1b1c1e]">${property.mortgageBalance.toLocaleString()}</p>
+                <p className="font-semibold text-on-surface">${property.mortgageBalance.toLocaleString()}</p>
               </div>
             )}
           </CardContent>
@@ -418,7 +418,7 @@ export default function PropertyDetailPage({
       <Card className="border-0 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Photos</CardTitle>
-          <label className="flex items-center gap-2 px-3 py-1.5 bg-[#e9e8ea] text-[#1b1c1e] text-sm font-medium rounded-xl cursor-pointer">
+          <label className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-high text-on-surface text-sm font-medium rounded-xl cursor-pointer">
             {isUploadingPhoto ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             {isUploadingPhoto ? "Uploading..." : "Add Photo"}
             <input
@@ -441,7 +441,7 @@ export default function PropertyDetailPage({
             return (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {allPhotos.map((photo, i) => (
-                  <div key={i} className="relative group rounded-xl overflow-hidden h-28 bg-[#f5f3f5]">
+                  <div key={i} className="relative group rounded-xl overflow-hidden h-28 bg-surface-container-low">
                     <Image src={photo} alt={`Photo ${i + 1}`} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover" />
                     {i === 0 && (
                       <span className="absolute top-1.5 left-1.5 text-xs px-2 py-0.5 bg-black/60 text-white rounded-lg">Main</span>
@@ -470,7 +470,7 @@ export default function PropertyDetailPage({
             <DialogTrigger asChild>
               <Button
                 onClick={openNewUnitDialog}
-                className="bg-blue-600 hover:bg-blue-700"
+                className=""
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Unit
@@ -587,7 +587,7 @@ export default function PropertyDetailPage({
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className=""
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -656,7 +656,7 @@ export default function PropertyDetailPage({
                         }
                         className={
                           unit.status === "VACANT"
-                            ? "bg-orange-50 text-orange-700"
+                            ? "bg-amber-50 text-amber-700"
                             : unit.status === "OCCUPIED"
                             ? "bg-green-50 text-green-700"
                             : ""

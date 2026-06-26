@@ -25,7 +25,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -49,7 +49,7 @@ export default function HomePage() {
                 <Button variant="ghost" size="sm">Browse Units</Button>
               </Link>
               <Link href="/login">
-                <Button size="sm" className="bg-gradient-to-br from-[#4f17ce] to-[#673de6] border-0">Sign In</Button>
+                <Button size="sm" className="">Sign In</Button>
               </Link>
             </div>
           </div>
@@ -70,7 +70,7 @@ export default function HomePage() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/listings">
-              <Button size="lg" className="bg-gradient-to-br from-[#4f17ce] to-[#673de6] border-0 h-11 px-6">
+              <Button size="lg" className="h-11 px-6">
                 Browse Available Properties
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -97,7 +97,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="p-5 bg-blue-50 rounded-xl">
+            <div className="p-5 bg-primary/10 rounded-xl">
               <Heart className="h-7 w-7 text-primary mb-3" />
               <h3 className="font-semibold text-slate-900 mb-2">Resident-First</h3>
               <p className="text-sm text-slate-600">
@@ -118,7 +118,7 @@ export default function HomePage() {
                 We are active members of every neighborhood where we own property.
               </p>
             </div>
-            <div className="p-5 bg-blue-50 rounded-xl">
+            <div className="p-5 bg-primary/10 rounded-xl">
               <Leaf className="h-7 w-7 text-primary mb-3" />
               <h3 className="font-semibold text-slate-900 mb-2">Long-Term Vision</h3>
               <p className="text-sm text-slate-600">
@@ -152,7 +152,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Residential */}
             <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                 <Home className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-3">Residential</h3>
@@ -178,8 +178,8 @@ export default function HomePage() {
 
             {/* Commercial */}
             <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                <Store className="h-6 w-6 text-purple-600" />
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                <Store className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-3">Commercial</h3>
               <p className="text-slate-600 text-sm mb-4">
@@ -187,15 +187,15 @@ export default function HomePage() {
               </p>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2 text-slate-600">
-                  <CheckCircle className="h-4 w-4 text-purple-600" />
+                  <CheckCircle className="h-4 w-4 text-primary" />
                   Healthcare and medical offices
                 </li>
                 <li className="flex items-center gap-2 text-slate-600">
-                  <CheckCircle className="h-4 w-4 text-purple-600" />
+                  <CheckCircle className="h-4 w-4 text-primary" />
                   Educational and tutoring centers
                 </li>
                 <li className="flex items-center gap-2 text-slate-600">
-                  <CheckCircle className="h-4 w-4 text-purple-600" />
+                  <CheckCircle className="h-4 w-4 text-primary" />
                   Local and independent businesses
                 </li>
               </ul>
@@ -252,7 +252,7 @@ export default function HomePage() {
                 key={feature.title}
                 className="p-5 rounded-xl bg-slate-50"
               >
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-3">
                   <feature.icon className="h-5 w-5 text-primary" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-1">
@@ -266,18 +266,18 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 px-4 bg-gradient-to-br from-[#4f17ce] to-[#673de6]">
+      <section className="py-16 px-4 bg-gradient-to-br from-primary to-primary-container">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
             Looking for a Property?
           </h2>
-          <p className="text-purple-100 mb-6">
+          <p className="text-white/80 mb-6">
             Browse available units and submit your application online.
           </p>
           <Link href="/listings">
             <Button
               size="lg"
-              className="bg-white text-[#4f17ce] hover:bg-purple-50 h-11 px-6"
+              className="bg-white text-primary hover:bg-primary/10 h-11 px-6"
             >
               View Available Units
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -292,7 +292,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
                   <Building2 className="w-4 h-4 text-white" />
                 </div>
                 <span className="font-bold text-white">Himalayan Properties</span>
