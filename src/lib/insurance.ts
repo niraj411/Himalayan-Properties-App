@@ -54,9 +54,10 @@ const RESIDENTIAL: InsuranceCopy = {
   interestType: "ADDITIONAL_INTEREST",
   interestPhrase: "additional interest",
   requiredBody: `We ask that all residents maintain valid renters insurance with ${BENEFICIARY_NAME} listed as an additional interest.`,
+  // Residential tenants must carry a renters policy — not a liability-only
+  // policy — so renters is the only accepted type.
   typeOptions: [
     { value: "RENTERS", label: "Renters Insurance" },
-    { value: "LIABILITY", label: "Personal Liability" },
   ],
   requestSubject: "Action Required: Upload Your Renters Insurance",
   requestBody: (propertyName, unitNumber) =>
