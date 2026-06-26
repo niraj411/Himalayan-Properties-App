@@ -65,7 +65,7 @@ export default function HomePage() {
             <span className="text-primary"> Quality Real Estate</span>
           </h1>
           <p className="mt-5 text-lg text-slate-600 max-w-2xl mx-auto">
-            Himalayan Properties is a family-owned investment firm focused on residential and
+            Himalayan Properties is a real estate investment firm focused on residential and
             commercial properties in Erie, Lafayette, and the North Denver Metro area.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -99,9 +99,9 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <div className="p-5 bg-blue-50 rounded-xl">
               <Heart className="h-7 w-7 text-primary mb-3" />
-              <h3 className="font-semibold text-slate-900 mb-2">Family-Focused</h3>
+              <h3 className="font-semibold text-slate-900 mb-2">Resident-First</h3>
               <p className="text-sm text-slate-600">
-                Strong families build strong communities. We prioritize housing that supports family life.
+                We prioritize safe, well-maintained homes and responsive service for the people who live in them.
               </p>
             </div>
             <div className="p-5 bg-slate-50 rounded-xl">
@@ -122,14 +122,14 @@ export default function HomePage() {
               <Leaf className="h-7 w-7 text-primary mb-3" />
               <h3 className="font-semibold text-slate-900 mb-2">Long-Term Vision</h3>
               <p className="text-sm text-slate-600">
-                We build lasting value that benefits future generations, not quick profits.
+                We build lasting value over the long term, not quick profits.
               </p>
             </div>
           </div>
 
           <div className="mt-12 p-6 bg-slate-900 rounded-xl text-center">
             <p className="text-lg text-white font-medium max-w-2xl mx-auto">
-              &ldquo;When communities thrive, property values strengthen. When families have
+              &ldquo;When communities thrive, property values strengthen. When residents have
               access to quality housing near good schools, neighborhoods flourish.&rdquo;
             </p>
             <p className="text-slate-400 text-sm mt-3">— Himalayan Properties</p>
@@ -171,7 +171,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-center gap-2 text-slate-600">
                   <Shield className="h-4 w-4 text-primary" />
-                  Safe, family-friendly neighborhoods
+                  Safe, established neighborhoods
                 </li>
               </ul>
             </div>
@@ -196,7 +196,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-center gap-2 text-slate-600">
                   <CheckCircle className="h-4 w-4 text-purple-600" />
-                  Local and family-owned businesses
+                  Local and independent businesses
                 </li>
               </ul>
             </div>
@@ -298,7 +298,7 @@ export default function HomePage() {
                 <span className="font-bold text-white">Himalayan Properties</span>
               </div>
               <p className="text-slate-400 text-sm">
-                Family-owned property management in the North Denver Metro Area.
+                Property management in the North Denver Metro Area.
               </p>
               <p className="text-slate-500 text-xs mt-2">
                 himalayanprop.cloud
