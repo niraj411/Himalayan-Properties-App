@@ -27,9 +27,16 @@ export async function GET(
       return NextResponse.json({ error: "Request not found" }, { status: 404 });
     }
 
-    // Tenants can only view their own requests
-    if (session.user.role === "TENANT" && maintenanceRequest.tenantId !== session.user.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Tenants can only view their own requests, and never the internal repair
+    // cost / contractor / payment fields.
+    if (session.user.role === "TENANT") {
+      if (maintenanceRequest.tenantId !== session.user.tenantId) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      const { repairCost, contractor, paymentMethod, paymentAccount, chargeId, ...safe } =
+        maintenanceRequest;
+      void repairCost; void contractor; void paymentMethod; void paymentAccount; void chargeId;
+      return NextResponse.json(safe);
     }
 
     return NextResponse.json(maintenanceRequest);

@@ -24,6 +24,28 @@ export async function GET(request: Request) {
       where.status = status;
     }
 
+    // Tenants get only the fields that belong to them — never the internal
+    // repair cost, contractor, or how we paid them. Admins get the full record.
+    if (session.user.role === "TENANT") {
+      const requests = await db.maintenanceRequest.findMany({
+        where,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          category: true,
+          priority: true,
+          status: true,
+          notes: true,
+          createdAt: true,
+          completedAt: true,
+          unit: { select: { unitNumber: true, property: { select: { name: true } } } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      return NextResponse.json(requests);
+    }
+
     const requests = await db.maintenanceRequest.findMany({
       where,
       include: {

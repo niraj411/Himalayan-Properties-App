@@ -24,7 +24,10 @@ export async function GET(request: Request) {
     if (!tenant) return NextResponse.json({ charges: [], balance: 0 });
     const leaseIds = await leaseIdsForTenant(tenant.id);
     const charges = await db.charge.findMany({
-      where: { leaseId: { in: leaseIds } },
+      // MAINTENANCE charges are our internal repair costs (contractor + amount we
+      // paid). They're not something the tenant owes, so keep them off the tenant
+      // ledger entirely.
+      where: { leaseId: { in: leaseIds }, kind: { not: "MAINTENANCE" } },
       select: { id: true, kind: true, label: true, amount: true, amountPaid: true, dueDate: true, status: true, paidDate: true },
       orderBy: [{ status: "asc" }, { dueDate: "asc" }],
     });
