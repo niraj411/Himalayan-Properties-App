@@ -47,7 +47,7 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
   return (
     <>
       {/* Main image + thumbnails */}
-      <div className="space-y-3">
+      <div className="space-y-3 min-w-0">
         <div
           className="w-full h-72 md:h-96 rounded-2xl overflow-hidden bg-[#f5f3f5] cursor-zoom-in relative group"
           onClick={() => setLightbox(true)}

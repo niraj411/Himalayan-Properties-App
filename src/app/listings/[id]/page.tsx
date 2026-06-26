@@ -134,8 +134,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <div className="grid lg:grid-cols-3 gap-10">
-          {/* Left: Photos + info */}
-          <div className="lg:col-span-2 space-y-8">
+          {/* Left: Photos + info. min-w-0 so the thumbnail strip's overflow-x
+              scroller is constrained to the column instead of forcing the
+              whole grid wider than the mobile viewport. */}
+          <div className="lg:col-span-2 space-y-8 min-w-0">
             {/* Photo gallery */}
             {allPhotos.length > 0 ? (
               <PhotoGallery photos={allPhotos} name={listing.name} />
