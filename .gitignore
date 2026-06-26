@@ -62,3 +62,6 @@ tenant-records/
 /lightbox-*.png
 /gallery-*.png
 /apply-*.png
+
+# Vendor quote / negotiation trackers (business-internal working notes)
+/vendor-records
