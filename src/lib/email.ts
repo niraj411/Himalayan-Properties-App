@@ -52,5 +52,5 @@ export async function sendTenantEmail({
   subject: string;
   body: string;
 }) {
-  return sendEmail({ to: tenantEmail, subject, body: `Hi ${tenantName},\n\n${body}\n\n— Himalayan Properties` });
+  return sendEmail({ to: tenantEmail, subject, body: `Hi ${tenantName},\n\n${body}\n\nThank you,\nHimalayan Properties` });
 }
