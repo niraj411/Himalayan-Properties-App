@@ -37,6 +37,8 @@ export default withAuth(
           pathname.startsWith("/api/auth") ||
           pathname.startsWith("/api/register") ||
           pathname.startsWith("/api/listings") ||
+          pathname === "/api/applications" || // public application submission (POST); collection GET is admin-gated in the route, [id] routes stay protected
+          pathname === "/api/apply-context" || // public read-only data for the /apply form (property list + zillow url)
           pathname.startsWith("/api/cron") || // guarded by its own CRON_SECRET bearer token
           pathname.startsWith("/api/agent") || // guarded by its own AGENT_API_TOKEN bearer token
           pathname.startsWith("/uploads")

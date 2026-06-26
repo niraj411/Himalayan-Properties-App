@@ -57,14 +57,14 @@ export default function ApplyPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [propertiesRes, settingsRes] = await Promise.all([
-          fetch("/api/properties"),
-          fetch("/api/settings"),
-        ]);
-        if (propertiesRes.ok) setProperties(await propertiesRes.json());
-        if (settingsRes.ok) {
-          const settings = await settingsRes.json();
-          if (settings.zillowUrl) setZillowUrl(settings.zillowUrl);
+        // Public endpoint — applicants aren't logged in, so this must not hit
+        // the authenticated /api/properties or /api/settings (which redirect to
+        // login and return HTML, breaking JSON parsing).
+        const res = await fetch("/api/apply-context");
+        if (res.ok) {
+          const data = await res.json();
+          setProperties(data.properties ?? []);
+          if (data.zillowUrl) setZillowUrl(data.zillowUrl);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -103,7 +103,9 @@ export default function ApplyPage() {
         }),
       });
 
-      if (response.ok) {
+      // Guard against a silent redirect-to-login (200 HTML) reading as success:
+      // only treat a real created (201) JSON response as submitted.
+      if (response.ok && !response.redirected && response.status === 201) {
         setIsSubmitted(true);
       } else {
         toast.error("Failed to submit application");
