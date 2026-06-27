@@ -87,7 +87,7 @@ export default function HomePage() {
           <div className="w-full lg:w-7/12 relative mt-8 lg:mt-0">
             <div className="aspect-[4/3] lg:aspect-[4/4] rounded-[2rem] overflow-hidden shadow-ambient relative w-full">
               <Image 
-                src="/hero-architecture.png" 
+                src="/hero-architecture.jpg" 
                 alt="Modern Colorado Architectural Home" 
                 fill 
                 className="object-cover"
@@ -169,7 +169,7 @@ export default function HomePage() {
             {/* Residential */}
             <div className="bg-surface-container-lowest rounded-[2rem] overflow-hidden shadow-ambient transition-all duration-300 hover:bg-surface-bright group flex flex-col">
               <div className="relative h-64 w-full">
-                <Image src="/residential.png" alt="Residential Property" fill className="object-cover" />
+                <Image src="/residential.jpg" alt="Residential Property" fill className="object-cover" />
               </div>
               <div className="p-10 md:p-12 flex-1 relative">
                 <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-container rounded-2xl flex items-center justify-center mb-8 shadow-ambient group-hover:scale-105 transition-transform absolute -top-8 left-10">
@@ -207,7 +207,7 @@ export default function HomePage() {
             {/* Commercial */}
             <div className="bg-surface-container-lowest rounded-[2rem] overflow-hidden shadow-ambient transition-all duration-300 hover:bg-surface-bright group flex flex-col">
               <div className="relative h-64 w-full">
-                <Image src="/commercial.png" alt="Commercial Property" fill className="object-cover" />
+                <Image src="/commercial.jpg" alt="Commercial Property" fill className="object-cover" />
               </div>
               <div className="p-10 md:p-12 flex-1 relative">
                 <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-container rounded-2xl flex items-center justify-center mb-8 shadow-ambient group-hover:scale-105 transition-transform absolute -top-8 left-10">
