@@ -8,6 +8,7 @@ import {
   Building2, Home, Store, MapPin, ArrowLeft,
   BedDouble, Bath, Maximize2, ExternalLink, ChevronRight,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 async function getListing(id: string) {
   const property = await db.property.findUnique({
@@ -32,56 +33,55 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   if (listing.units.length === 0) {
     return (
       <div className="min-h-screen bg-surface">
-        <nav className="sticky top-0 z-50 bg-surface/80 backdrop-blur-[16px] border-b border-outline-variant/15">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center">
-                  <Building2 className="w-4 h-4 text-white" />
+        <nav className="sticky top-0 bg-surface/80 backdrop-blur-xl z-50">
+          <div className="max-w-7xl mx-auto px-6 lg:px-12">
+            <div className="flex items-center justify-between h-20">
+              <Link href="/" className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-container rounded-2xl flex items-center justify-center shadow-ambient">
+                  <Building2 className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="font-bold text-on-surface text-sm leading-none">Himalayan</p>
-                  <p className="text-xs text-slate-500 leading-none mt-0.5">Properties</p>
+                  <h1 className="font-bold text-on-surface text-lg leading-none">Himalayan</h1>
+                  <p className="text-xs text-on-surface/60 leading-none mt-1 tracking-widest uppercase">Properties</p>
                 </div>
               </Link>
-              <Link href="/login" className="text-sm px-4 py-2 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl">
-                Tenant Sign In
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link href="/login">
+                  <Button className="bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient border-none hover:opacity-90 font-medium px-6">Tenant Sign In</Button>
+                </Link>
+              </div>
             </div>
           </div>
         </nav>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
-          <div className="flex items-center gap-2 text-sm text-slate-500 mb-8">
-            <Link href="/listings" className="flex items-center gap-1 hover:text-primary transition-colors">
-              <ArrowLeft className="h-4 w-4" />
-              Available Properties
-            </Link>
-          </div>
+        <div className="max-w-4xl mx-auto px-6 pt-12 pb-24">
+          <Link href="/listings" className="inline-flex items-center gap-2 text-sm font-medium text-on-surface/60 hover:text-primary transition-colors mb-12">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Available Properties
+          </Link>
 
-          <div className="bg-white rounded-2xl p-10 max-w-xl mx-auto text-center" style={{ boxShadow: "0 40px 40px -10px rgba(27,28,30,0.06)" }}>
-            <div className="w-12 h-12 bg-surface-container-low rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <div className="bg-surface-container-lowest rounded-[2rem] p-12 text-center shadow-ambient max-w-2xl mx-auto border border-outline-variant/10">
+            <div className="w-20 h-20 bg-surface-container-high rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
               {listing.type === "COMMERCIAL" ? (
-                <Store className="h-6 w-6 text-slate-400" />
+                <Store className="h-10 w-10 text-primary/60" />
               ) : (
-                <Home className="h-6 w-6 text-slate-400" />
+                <Home className="h-10 w-10 text-primary/60" />
               )}
             </div>
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-lg inline-block mb-4 ${listing.type === "COMMERCIAL" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary"}`}>
+            <span className={`text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-xl inline-block mb-6 shadow-sm ${listing.type === "COMMERCIAL" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary"}`}>
               {listing.type === "COMMERCIAL" ? "Commercial" : "Residential"}
             </span>
-            <h1 className="text-2xl font-bold text-on-surface mb-2" style={{ letterSpacing: "-0.02em" }}>
+            <h1 className="text-4xl font-bold text-on-surface tracking-tight mb-4">
               Not currently for rent
             </h1>
-            <p className="text-slate-500 leading-[1.5] mb-1">
+            <p className="text-on-surface/70 leading-relaxed text-lg max-w-md mx-auto mb-10">
               This {listing.city}, {listing.state} property is fully leased and not accepting applications at this time.
             </p>
-            <p className="text-slate-500 leading-[1.5] mb-6">
-              Check back later or browse other available properties.
-            </p>
-            <Link href="/listings" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl text-sm font-medium">
-              View Available Properties
-              <ChevronRight className="h-4 w-4" />
+            <Link href="/listings">
+              <Button size="lg" className="h-14 px-8 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient border-none hover:opacity-90 font-medium text-base w-full sm:w-auto">
+                View Available Properties
+                <ChevronRight className="ml-2 h-5 w-5" />
+              </Button>
             </Link>
           </div>
         </div>
@@ -102,121 +102,130 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-surface">
-      {/* Glassmorphic nav */}
-      <nav className="sticky top-0 z-50 bg-surface/80 backdrop-blur-[16px] border-b border-outline-variant/15">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center">
-                <Building2 className="w-4 h-4 text-white" />
+      {/* Navigation (Glassmorphism, No borders) */}
+      <nav className="sticky top-0 bg-surface/80 backdrop-blur-xl z-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="flex items-center justify-between h-20">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-container rounded-2xl flex items-center justify-center shadow-ambient transition-transform hover:scale-105">
+                <Building2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="font-bold text-on-surface text-sm leading-none">Himalayan</p>
-                <p className="text-xs text-slate-500 leading-none mt-0.5">Properties</p>
+                <h1 className="font-bold text-on-surface text-lg leading-none">Himalayan</h1>
+                <p className="text-xs text-on-surface/60 leading-none mt-1 tracking-widest uppercase">Properties</p>
               </div>
             </Link>
-            <Link href="/login" className="text-sm px-4 py-2 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl">
-              Tenant Sign In
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/login">
+                <Button className="bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient border-none hover:opacity-90 font-medium px-6">Tenant Sign In</Button>
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-12 pb-24">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-slate-500 mb-8">
-          <Link href="/listings" className="flex items-center gap-1 hover:text-primary transition-colors">
+        <div className="flex items-center gap-2 text-sm font-medium text-on-surface/50 mb-10">
+          <Link href="/listings" className="flex items-center gap-1.5 hover:text-primary transition-colors">
             <ArrowLeft className="h-4 w-4" />
             Available Properties
           </Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-on-surface">{listing.name}</span>
+          <span className="text-on-surface/80">{listing.name}</span>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-10">
-          {/* Left: Photos + info. min-w-0 so the thumbnail strip's overflow-x
-              scroller is constrained to the column instead of forcing the
-              whole grid wider than the mobile viewport. */}
-          <div className="lg:col-span-2 space-y-8 min-w-0">
-            {/* Photo gallery */}
+        <div className="grid lg:grid-cols-12 gap-12">
+          {/* Left Column: Photos + Info */}
+          <div className="lg:col-span-8 space-y-12 min-w-0">
+            
+            {/* Gallery */}
             {allPhotos.length > 0 ? (
               <PhotoGallery photos={allPhotos} name={listing.name} />
             ) : (
-              <div className="w-full h-72 rounded-2xl bg-surface-container-low flex items-center justify-center">
+              <div className="w-full h-80 md:h-[28rem] rounded-[2rem] bg-surface-container-low flex items-center justify-center shadow-inner">
                 {listing.type === "COMMERCIAL" ? (
-                  <Store className="h-20 w-20 text-slate-200" />
+                  <Store className="h-24 w-24 text-primary/20" />
                 ) : (
-                  <Home className="h-20 w-20 text-slate-200" />
+                  <Home className="h-24 w-24 text-primary/20" />
                 )}
               </div>
             )}
 
-            {/* Property info */}
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-lg ${listing.type === "COMMERCIAL" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary"}`}>
+            {/* Property Info */}
+            <div className="pt-4">
+              <div className="flex items-center gap-3 mb-4">
+                <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-sm ${listing.type === "COMMERCIAL" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary"}`}>
                   {listing.type === "COMMERCIAL" ? "Commercial" : "Residential"}
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-on-surface mb-3" style={{ letterSpacing: "-0.02em" }}>
+              <h1 className="text-4xl md:text-5xl font-bold text-on-surface tracking-tighter mb-4">
                 {listing.name}
               </h1>
-              <div className="flex items-center gap-1.5 text-slate-500">
-                <MapPin className="h-4 w-4 flex-shrink-0" />
+              <div className="flex items-center gap-2 text-on-surface/70 font-medium text-lg mb-8">
+                <MapPin className="h-5 w-5 flex-shrink-0 text-primary" />
                 {listing.address}, {listing.city}, {listing.state} {listing.zip}
               </div>
+              
               {listing.description && (
-                <p className="mt-5 text-slate-600 leading-[1.5] max-w-xl">{listing.description}</p>
+                <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-ambient">
+                  <h3 className="font-bold text-on-surface text-xl mb-4">About this property</h3>
+                  <p className="text-on-surface/70 leading-relaxed text-lg whitespace-pre-wrap">
+                    {listing.description}
+                  </p>
+                </div>
               )}
             </div>
 
-            {/* Available units */}
-            <div>
-              <h2 className="text-xl font-semibold text-on-surface mb-5" style={{ letterSpacing: "-0.01em" }}>
+            {/* Units */}
+            <div className="pt-4">
+              <h2 className="text-3xl font-bold text-on-surface tracking-tight mb-8">
                 Available Units
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-6">
                 {listing.units.map((unit) => (
                   <div
                     key={unit.id}
-                    className="bg-white rounded-xl p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-                    style={{ boxShadow: "0 40px 40px -10px rgba(27,28,30,0.06)" }}
+                    className="bg-surface-container-lowest rounded-[2rem] p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-ambient transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
                   >
-                    <div className="flex items-center gap-5">
-                      <div className="w-10 h-10 bg-surface-container-low rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Home className="h-5 w-5 text-slate-400" />
+                    <div className="flex items-start md:items-center gap-6">
+                      <div className="w-16 h-16 bg-gradient-to-br from-surface-container-low to-surface-container-high rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner">
+                        <Home className="h-7 w-7 text-primary/70" />
                       </div>
                       <div>
-                        <p className="font-semibold text-on-surface">Unit #{unit.unitNumber}</p>
-                        <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
+                        <p className="font-bold text-on-surface text-xl mb-2">Unit #{unit.unitNumber}</p>
+                        <div className="flex flex-wrap items-center gap-4 text-on-surface/70 font-medium">
                           {unit.bedrooms && (
-                            <span className="flex items-center gap-1"><BedDouble className="h-3.5 w-3.5" />{unit.bedrooms} bed</span>
+                            <span className="flex items-center gap-1.5 bg-surface px-3 py-1 rounded-lg"><BedDouble className="h-4 w-4 text-primary" />{unit.bedrooms} bed</span>
                           )}
                           {unit.bathrooms && (
-                            <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5" />{unit.bathrooms} bath</span>
+                            <span className="flex items-center gap-1.5 bg-surface px-3 py-1 rounded-lg"><Bath className="h-4 w-4 text-primary" />{unit.bathrooms} bath</span>
                           )}
                           {unit.sqft && (
-                            <span className="flex items-center gap-1"><Maximize2 className="h-3.5 w-3.5" />{unit.sqft.toLocaleString()} sqft</span>
+                            <span className="flex items-center gap-1.5 bg-surface px-3 py-1 rounded-lg"><Maximize2 className="h-4 w-4 text-primary" />{unit.sqft.toLocaleString()} sqft</span>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <p className="font-bold text-on-surface text-lg">
-                        ${unit.rent.toLocaleString()}<span className="text-sm font-normal text-slate-400">/mo</span>
+                    <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 md:gap-2 mt-4 md:mt-0 pt-6 md:pt-0 border-t md:border-t-0 border-outline-variant/20">
+                      <p className="font-bold text-on-surface text-2xl">
+                        ${unit.rent.toLocaleString()}<span className="text-base font-medium text-on-surface/50">/mo</span>
                       </p>
                       {applyIsExternal ? (
                         <a
                           href={applyHref}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-primary to-primary-container text-white text-sm font-medium rounded-xl"
                         >
-                          Apply on Zillow <ExternalLink className="h-3.5 w-3.5" />
+                          <Button className="bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient hover:shadow-2xl transition-all duration-300 border-none font-medium px-6 h-12">
+                            Apply on Zillow <ExternalLink className="ml-2 h-4 w-4" />
+                          </Button>
                         </a>
                       ) : (
-                        <Link href={applyHref} className="px-4 py-2 bg-gradient-to-br from-primary to-primary-container text-white text-sm font-medium rounded-xl">
-                          Apply
+                        <Link href={applyHref}>
+                          <Button className="bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient hover:shadow-2xl transition-all duration-300 border-none font-medium px-8 h-12">
+                            Apply Now
+                          </Button>
                         </Link>
                       )}
                     </div>
@@ -226,38 +235,56 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             </div>
           </div>
 
-          {/* Right: Apply CTA sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl p-6 sticky top-24" style={{ boxShadow: "0 40px 40px -10px rgba(27,28,30,0.06)" }}>
-              <h3 className="font-semibold text-on-surface mb-2">
-                {listing.units.length} unit{listing.units.length !== 1 ? "s" : ""} available
-              </h3>
-              <p className="text-2xl font-bold text-on-surface mb-1">
-                ${Math.min(...listing.units.map((u) => u.rent)).toLocaleString()}
-                <span className="text-base font-normal text-slate-400">/mo</span>
-              </p>
-              <p className="text-sm text-slate-500 mb-6 leading-[1.5]">
-                {listing.type === "RESIDENTIAL"
-                  ? "Residential applications are processed through Zillow."
-                  : "Submit your commercial application and we'll be in touch."}
-              </p>
-              {applyIsExternal ? (
-                <a
-                  href={applyHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-br from-primary to-primary-container text-white font-medium rounded-xl"
-                >
-                  Apply on Zillow <ExternalLink className="h-4 w-4" />
-                </a>
-              ) : (
-                <Link href={applyHref} className="flex items-center justify-center w-full py-3 bg-gradient-to-br from-primary to-primary-container text-white font-medium rounded-xl">
-                  Start Application
+          {/* Right Column: CTA Sidebar */}
+          <div className="lg:col-span-4 relative">
+            <div className="sticky top-28 bg-surface/50 backdrop-blur-3xl border border-white/20 rounded-[2rem] p-8 shadow-[0_8px_32px_rgba(0,0,0,0.08)] overflow-hidden group">
+              {/* Subtle gradient background effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 pointer-events-none" />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.6)] animate-pulse" />
+                  <h3 className="font-bold text-on-surface text-lg uppercase tracking-wider">
+                    {listing.units.length} unit{listing.units.length !== 1 ? "s" : ""} available
+                  </h3>
+                </div>
+                
+                <p className="text-4xl font-bold text-on-surface tracking-tighter mb-2">
+                  ${Math.min(...listing.units.map((u) => u.rent)).toLocaleString()}
+                  <span className="text-xl font-medium text-on-surface/50">/mo</span>
+                </p>
+                <p className="text-sm font-medium text-primary mb-8 tracking-widest uppercase">Starting price</p>
+                
+                <p className="text-on-surface/70 mb-8 leading-relaxed text-lg">
+                  {listing.type === "RESIDENTIAL"
+                    ? "Residential applications are securely processed and screened through Zillow."
+                    : "Submit your commercial application securely and our team will be in touch shortly."}
+                </p>
+
+                {applyIsExternal ? (
+                  <a
+                    href={applyHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button size="lg" className="w-full h-14 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-none font-semibold text-lg">
+                      Apply on Zillow <ExternalLink className="ml-2 h-5 w-5" />
+                    </Button>
+                  </a>
+                ) : (
+                  <Link href={applyHref}>
+                    <Button size="lg" className="w-full h-14 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-none font-semibold text-lg">
+                      Start Application
+                    </Button>
+                  </Link>
+                )}
+                
+                <Link href="/listings" className="block mt-4">
+                  <Button variant="ghost" className="w-full h-12 text-on-surface/70 hover:bg-surface-container-high hover:text-on-surface rounded-xl font-medium transition-colors">
+                    View All Properties
+                  </Button>
                 </Link>
-              )}
-              <Link href="/listings" className="flex items-center justify-center w-full py-2.5 mt-3 bg-surface-container-high text-on-surface text-sm font-medium rounded-xl">
-                View All Properties
-              </Link>
+              </div>
             </div>
           </div>
         </div>

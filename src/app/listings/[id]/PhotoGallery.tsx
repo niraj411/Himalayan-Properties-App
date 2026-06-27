@@ -47,9 +47,9 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
   return (
     <>
       {/* Main image + thumbnails */}
-      <div className="space-y-3 min-w-0">
+      <div className="space-y-4 min-w-0">
         <div
-          className="w-full h-72 md:h-96 rounded-2xl overflow-hidden bg-surface-container-low cursor-zoom-in relative group"
+          className="w-full h-80 md:h-[28rem] rounded-[2rem] overflow-hidden bg-surface-container-low cursor-zoom-in relative group shadow-ambient transition-transform duration-500 hover:shadow-2xl"
           onClick={() => setLightbox(true)}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
@@ -59,28 +59,30 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
             alt={name}
             fill
             sizes="(max-width: 1024px) 100vw, 66vw"
-            className="object-cover"
+            className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-2xl" />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500 rounded-[2rem]" />
           {photos.length > 1 && (
-            <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2.5 py-1 rounded-lg">
+            <div className="absolute bottom-4 right-4 bg-black/40 backdrop-blur-md text-white text-xs font-medium px-4 py-1.5 rounded-full shadow-ambient">
               {active + 1} / {photos.length}
             </div>
           )}
         </div>
 
         {photos.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide py-1 px-1">
             {photos.map((photo, i) => (
               <button
                 key={i}
                 onClick={() => setActive(i)}
-                className={`relative flex-shrink-0 h-16 w-24 rounded-xl overflow-hidden bg-surface-container-low transition-all ${
-                  i === active ? "ring-2 ring-primary ring-offset-1" : "opacity-60 hover:opacity-100"
+                className={`relative flex-shrink-0 h-20 w-32 rounded-2xl overflow-hidden bg-surface-container-low transition-all duration-300 transform shadow-sm ${
+                  i === active 
+                    ? "ring-2 ring-primary ring-offset-2 scale-105 z-10 shadow-ambient" 
+                    : "opacity-70 hover:opacity-100 hover:scale-105"
                 }`}
               >
-                <Image src={photo} alt={`${name} ${i + 1}`} fill sizes="96px" className="object-cover" />
+                <Image src={photo} alt={`${name} ${i + 1}`} fill sizes="128px" className="object-cover" />
               </button>
             ))}
           </div>
@@ -89,12 +91,15 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
 
       {/* Lightbox */}
       {lightbox && (
-        <div className="fixed inset-0 z-50 bg-black/92 flex flex-col" onClick={() => setLightbox(false)}>
+        <div 
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-2xl flex flex-col transition-all duration-500 ease-in-out animate-in fade-in zoom-in-95" 
+          onClick={() => setLightbox(false)}
+        >
           {/* Top bar */}
-          <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-            <span className="text-white/60 text-sm">{active + 1} / {photos.length}</span>
+          <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+            <span className="text-white/80 text-sm font-medium tracking-widest">{active + 1} / {photos.length}</span>
             <button
-              className="text-white/70 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-colors"
+              className="text-white/80 hover:text-white p-2 rounded-2xl bg-white/5 hover:bg-white/20 transition-all duration-300 backdrop-blur-xl"
               onClick={() => setLightbox(false)}
             >
               <X className="h-6 w-6" />
@@ -103,18 +108,18 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
 
           {/* Image area */}
           <div
-            className="flex-1 flex items-center justify-center min-h-0 px-2"
+            className="flex-1 flex items-center justify-center min-h-0 px-4 relative"
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
             onClick={() => setLightbox(false)}
           >
-            {/* On-demand full-size view; raw img keeps object-contain + click-outside-to-close behavior */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
+              key={active} // Forces re-render on active change to trigger animation
               src={photos[active]}
               alt={name}
-              className="max-h-full max-w-full object-contain rounded-xl"
-              style={{ maxHeight: "calc(100dvh - 120px)" }}
+              className="max-h-full max-w-full object-contain rounded-2xl shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-500"
+              style={{ maxHeight: "calc(100dvh - 140px)" }}
               onClick={(e) => e.stopPropagation()}
             />
           </div>
@@ -122,33 +127,35 @@ export default function PhotoGallery({ photos, name }: { photos: string[]; name:
           {/* Bottom controls */}
           {photos.length > 1 && (
             <div
-              className="flex items-center justify-center gap-6 py-4 flex-shrink-0"
+              className="flex items-center justify-center gap-8 py-6 flex-shrink-0"
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className="flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                className="flex items-center justify-center w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 hover:scale-110 text-white transition-all duration-300 backdrop-blur-xl shadow-ambient"
                 onClick={prev}
               >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className="h-8 w-8" />
               </button>
-              {/* Dot indicators (up to 12) */}
-              <div className="flex gap-1.5">
+              
+              {/* Dot indicators */}
+              <div className="flex gap-2.5">
                 {photos.slice(0, 12).map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setActive(i)}
-                    className={`rounded-full transition-all ${
-                      i === active ? "w-4 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/30"
+                    className={`rounded-full transition-all duration-500 ease-out ${
+                      i === active ? "w-8 h-2 bg-white" : "w-2 h-2 bg-white/30 hover:bg-white/50 hover:scale-150"
                     }`}
                   />
                 ))}
-                {photos.length > 12 && <span className="text-white/40 text-xs self-center ml-1">+{photos.length - 12}</span>}
+                {photos.length > 12 && <span className="text-white/50 text-xs self-center font-medium ml-2">+{photos.length - 12}</span>}
               </div>
+
               <button
-                className="flex items-center justify-center w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                className="flex items-center justify-center w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 hover:scale-110 text-white transition-all duration-300 backdrop-blur-xl shadow-ambient"
                 onClick={next}
               >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-8 w-8" />
               </button>
             </div>
           )}
