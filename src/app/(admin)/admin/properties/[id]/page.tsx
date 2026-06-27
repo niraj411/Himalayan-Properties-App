@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
+import { isCommonArea } from "@/lib/units";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -286,8 +287,11 @@ export default function PropertyDetailPage({
     return null;
   }
 
-  const vacantUnits = property.units.filter((u) => u.status === "VACANT").length;
-  const occupiedUnits = property.units.length - vacantUnits;
+  // Common-area units (parking lot, shared exterior) are not leasable and are
+  // excluded from unit counts and the units table.
+  const leasableUnits = property.units.filter((u) => !isCommonArea(u));
+  const vacantUnits = leasableUnits.filter((u) => u.status === "VACANT").length;
+  const occupiedUnits = leasableUnits.length - vacantUnits;
 
   return (
     <div className="space-y-6">
@@ -360,7 +364,7 @@ export default function PropertyDetailPage({
         <Card className="border-0 shadow-sm">
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-slate-900">
-              {property.units.length}
+              {leasableUnits.length}
             </p>
             <p className="text-sm text-slate-500">Total Units</p>
           </CardContent>
@@ -607,7 +611,7 @@ export default function PropertyDetailPage({
           </Dialog>
         </CardHeader>
         <CardContent>
-          {property.units.length === 0 ? (
+          {leasableUnits.length === 0 ? (
             <div className="text-center py-8">
               <Home className="h-12 w-12 text-slate-300 mx-auto mb-3" />
               <p className="text-slate-500">No units yet. Add your first unit.</p>
@@ -625,7 +629,7 @@ export default function PropertyDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {property.units.map((unit) => (
+                {leasableUnits.map((unit) => (
                   <TableRow key={unit.id}>
                     <TableCell className="font-medium">
                       #{unit.unitNumber}

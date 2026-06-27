@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { notCommonAreaTenant } from "@/lib/units";
 import bcrypt from "bcryptjs";
 
 export async function GET() {
@@ -12,6 +13,7 @@ export async function GET() {
     }
 
     const tenants = await db.tenant.findMany({
+      where: notCommonAreaTenant,
       include: {
         user: true,
         unit: {

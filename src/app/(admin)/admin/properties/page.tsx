@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { isCommonArea } from "@/lib/units";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -513,10 +514,12 @@ export default function PropertiesPage() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {properties.map((property) => {
-            const vacantUnits = property.units.filter(
+            const realUnits = property.units.filter((u) => !isCommonArea(u));
+            const totalUnits = realUnits.length;
+            const vacantUnits = realUnits.filter(
               (u) => u.status === "VACANT"
             ).length;
-            const occupiedUnits = property._count.units - vacantUnits;
+            const occupiedUnits = totalUnits - vacantUnits;
 
             return (
               <Card
@@ -592,7 +595,7 @@ export default function PropertiesPage() {
                       <span className="font-medium text-slate-900">
                         {occupiedUnits}
                       </span>
-                      /{property._count.units} occupied
+                      /{totalUnits} occupied
                     </div>
                   </div>
                 </CardContent>

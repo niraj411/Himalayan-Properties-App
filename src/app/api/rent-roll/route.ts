@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { isCommonArea } from "@/lib/units";
 import { startOfMonth, endOfMonth } from "date-fns";
 
 export async function GET() {
@@ -63,7 +64,10 @@ export async function GET() {
       let propertyExpected = 0;
       let propertyCollected = 0;
 
-      const unitData = property.units.map((unit) => {
+      // Exclude non-leasable common-area units from the rent roll.
+      const leasableUnits = property.units.filter((unit) => !isCommonArea(unit));
+
+      const unitData = leasableUnits.map((unit) => {
         const activeLease = unit.leases[0] || null;
         const base = activeLease?.monthlyRent ?? unit.rent;
         const nnn = activeLease?.nnnMonthly ?? 0;
@@ -99,8 +103,8 @@ export async function GET() {
         address: property.address,
         city: property.city,
         state: property.state,
-        totalUnits: property.units.length,
-        occupiedUnits: property.units.filter((u) => u.status === "OCCUPIED").length,
+        totalUnits: leasableUnits.length,
+        occupiedUnits: leasableUnits.filter((u) => u.status === "OCCUPIED").length,
         expectedRent: propertyExpected,
         collectedRent: propertyCollected,
         variance: propertyCollected - propertyExpected,

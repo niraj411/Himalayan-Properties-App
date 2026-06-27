@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import { COMMON_AREA_STATUS } from "@/lib/units";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -32,9 +33,9 @@ async function getDashboardData() {
     expiringInsurance,
   ] = await Promise.all([
     db.property.count(),
-    db.unit.count(),
+    db.unit.count({ where: { status: { not: COMMON_AREA_STATUS } } }),
     db.unit.count({ where: { status: "VACANT" } }),
-    db.tenant.count({ where: { unitId: { not: null } } }),
+    db.tenant.count({ where: { unitId: { not: null }, unit: { status: { not: COMMON_AREA_STATUS } } } }),
     db.lease.count({ where: { status: "ACTIVE" } }),
     db.maintenanceRequest.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
     db.application.count({ where: { status: "PENDING" } }),
