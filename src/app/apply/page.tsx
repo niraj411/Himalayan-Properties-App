@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Building2, Loader2, CheckCircle, Home, Store, ExternalLink, FileText, AlertCircle } from "lucide-react";
+import { Building2, Loader2, CheckCircle, Home, Store, ExternalLink, FileText, AlertCircle, Languages } from "lucide-react";
 
 interface Property {
   id: string;
@@ -26,14 +27,30 @@ interface Property {
   zillowUrl: string | null;
 }
 
-export default function ApplyPage() {
+function ApplyPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isEs = searchParams.get("lang") === "es";
+
+  const toggleLanguage = () => {
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (isEs) {
+      newParams.delete("lang");
+    } else {
+      newParams.set("lang", "es");
+    }
+    router.push(`/apply?${newParams.toString()}`);
+  };
+
+  const initialPropertyId = searchParams.get("propertyId") || "";
+
   const [properties, setProperties] = useState<Property[]>([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicationType, setApplicationType] = useState<"RESIDENTIAL" | "COMMERCIAL" | null>(null);
   const [zillowUrl, setZillowUrl] = useState<string>("https://www.zillow.com/rental-manager/");
   const [formData, setFormData] = useState({
-    propertyId: "",
+    propertyId: initialPropertyId,
     firstName: "",
     lastName: "",
     email: "",
@@ -48,7 +65,6 @@ export default function ApplyPage() {
     pets: "",
     references: "",
     additionalNotes: "",
-    // Commercial fields
     businessName: "",
     taxReturnsUrl: "",
     bankStatementsUrl: "",
@@ -57,9 +73,6 @@ export default function ApplyPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Public endpoint — applicants aren't logged in, so this must not hit
-        // the authenticated /api/properties or /api/settings (which redirect to
-        // login and return HTML, breaking JSON parsing).
         const res = await fetch("/api/apply-context");
         if (res.ok) {
           const data = await res.json();
@@ -74,13 +87,11 @@ export default function ApplyPage() {
     fetchData();
   }, []);
 
-  // Update application type when property changes
   useEffect(() => {
     if (formData.propertyId && formData.propertyId !== "general") {
       const selectedProperty = properties.find(p => p.id === formData.propertyId);
       if (selectedProperty) {
         setApplicationType(selectedProperty.type as "RESIDENTIAL" | "COMMERCIAL");
-        // Use property-specific Zillow URL if set, else fall back to global
         if (selectedProperty.zillowUrl) setZillowUrl(selectedProperty.zillowUrl);
       }
     } else if (formData.propertyId === "general") {
@@ -103,34 +114,94 @@ export default function ApplyPage() {
         }),
       });
 
-      // Guard against a silent redirect-to-login (200 HTML) reading as success:
-      // only treat a real created (201) JSON response as submitted.
       if (response.ok && !response.redirected && response.status === 201) {
         setIsSubmitted(true);
       } else {
-        toast.error("Failed to submit application");
+        toast.error(isEs ? "Error al enviar la solicitud" : "Failed to submit application");
       }
     } catch {
-      toast.error("Something went wrong");
+      toast.error(isEs ? "Algo salió mal" : "Something went wrong");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Translations
+  const t = {
+    title: isEs ? "Himalayan" : "Himalayan",
+    subtitle: isEs ? "Propiedades" : "Properties",
+    applyForProp: isEs ? "Aplicar para una Propiedad" : "Apply for a Property",
+    selectProp: isEs ? "Seleccione una propiedad para comenzar" : "Select a property to get started",
+    formTitle: isEs ? "Formulario de Solicitud" : "Application Form",
+    formDesc: isEs ? "Los campos marcados con * son obligatorios" : "Fields marked with * are required",
+    propOfInterest: isEs ? "Propiedad de Interés *" : "Property of Interest *",
+    selectPlaceholder: isEs ? "Seleccione una propiedad" : "Select a property",
+    generalInquiry: isEs ? "Consulta General" : "General Inquiry",
+    commercial: isEs ? "Comercial" : "Commercial",
+    residential: isEs ? "Residencial" : "Residential",
+    resApp: isEs ? "Solicitudes Residenciales" : "Residential Applications",
+    resAppDesc: isEs 
+      ? "Para propiedades residenciales, usamos Zillow para las solicitudes. Aplique a través de Zillow y mencione esta propiedad en su solicitud."
+      : "For residential properties, we use Zillow for applications. Please apply through Zillow and reference this property in your application.",
+    applyZillow: isEs ? "Aplicar en Zillow" : "Apply on Zillow",
+    comApp: isEs ? "Solicitud Comercial" : "Commercial Application",
+    comAppDesc: isEs 
+      ? "Las solicitudes comerciales requieren 2 años de declaraciones de impuestos corporativas y 3 meses de estados de cuenta bancarios."
+      : "Commercial applications require 2 years of corporate tax returns and 3 months of bank statements.",
+    businessName: isEs ? "Nombre del Negocio *" : "Business Name *",
+    firstName: isEs ? "Nombre *" : "First Name *",
+    contactFirstName: isEs ? "Nombre del Contacto *" : "Contact First Name *",
+    lastName: isEs ? "Apellido *" : "Last Name *",
+    contactLastName: isEs ? "Apellido del Contacto *" : "Contact Last Name *",
+    email: isEs ? "Correo Electrónico *" : "Email *",
+    phone: isEs ? "Teléfono *" : "Phone *",
+    businessAddress: isEs ? "Dirección del Negocio" : "Business Address",
+    addressPlaceholder: isEs ? "Calle, Ciudad, Estado, Código Postal" : "Street, City, State, ZIP",
+    reqDocs: isEs ? "Documentos Requeridos" : "Required Documents",
+    reqDocsDesc: isEs 
+      ? "Suba sus documentos a un servicio seguro (Google Drive, Dropbox, etc.) y pegue los enlaces aquí."
+      : "Upload your documents to a secure file sharing service (Google Drive, Dropbox, etc.) and paste the share links below.",
+    taxReturns: isEs ? "Declaraciones de Impuestos (2 años) *" : "2 Years Corporate Tax Returns *",
+    bankStatements: isEs ? "Estados de Cuenta (3 meses) *" : "3 Months Bank Statements *",
+    moveInDate: isEs ? "Fecha Deseada de Mudanza" : "Desired Move-in Date",
+    additionalNotes: isEs ? "Notas Adicionales" : "Additional Notes",
+    notesComPlaceholder: isEs ? "Cuéntenos sobre su negocio..." : "Tell us about your business and space requirements...",
+    whatLookingFor: isEs ? "¿Qué está buscando?" : "What are you looking for?",
+    notesGenPlaceholder: isEs ? "Cuéntenos sobre sus necesidades..." : "Tell us about your needs...",
+    submitApp: isEs ? "Enviar Solicitud" : "Submit Application",
+    submitInquiry: isEs ? "Enviar Consulta" : "Submit Inquiry",
+    submitting: isEs ? "Enviando..." : "Submitting...",
+    submittedTitle: isEs ? "Solicitud Enviada" : "Application Submitted",
+    submittedDesc: isEs 
+      ? "Gracias por su interés. Revisaremos su solicitud y nos comunicaremos con usted pronto."
+      : "Thank you for your interest. We'll review your application and contact you soon.",
+    returnHome: isEs ? "Volver al Inicio" : "Return Home",
+    alreadyTenant: isEs ? "¿Ya es inquilino?" : "Already a tenant?",
+    signInHere: isEs ? "Inicie sesión aquí" : "Sign in here"
+  };
+
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative">
+        {/* Language Toggle */}
+        <div className="absolute top-6 right-6">
+          <Button variant="outline" size="sm" onClick={toggleLanguage} className="rounded-xl">
+            <Languages className="w-4 h-4 mr-2" />
+            {isEs ? "English" : "Español"}
+          </Button>
+        </div>
+
         <Card className="w-full max-w-md border-0 shadow-lg">
           <CardContent className="flex flex-col items-center justify-center py-10">
             <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <CheckCircle className="h-7 w-7 text-green-600" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Application Submitted</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">{t.submittedTitle}</h2>
             <p className="text-slate-500 text-center text-sm mb-6">
-              Thank you for your interest. We&apos;ll review your application and contact you soon.
+              {t.submittedDesc}
             </p>
-            <Link href="/">
-              <Button variant="outline" size="sm">Return Home</Button>
+            <Link href={isEs ? "/?lang=es" : "/"}>
+              <Button variant="outline" size="sm">{t.returnHome}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -139,48 +210,56 @@ export default function ApplyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4">
+    <div className="min-h-screen bg-slate-50 py-8 px-4 relative">
+      {/* Language Toggle */}
+      <div className="absolute top-6 right-6">
+        <Button variant="outline" size="sm" onClick={toggleLanguage} className="rounded-xl bg-white shadow-sm border-slate-200 text-slate-700 hover:text-slate-900">
+          <Languages className="w-4 h-4 mr-2" />
+          {isEs ? "English" : "Español"}
+        </Button>
+      </div>
+
       <div className="max-w-xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4">
+          <Link href={isEs ? "/?lang=es" : "/"} className="inline-flex items-center gap-2 mb-4">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div className="text-left">
-              <h1 className="font-bold text-slate-900 text-sm">Himalayan</h1>
-              <p className="text-xs text-slate-500">Properties</p>
+              <h1 className="font-bold text-slate-900 text-sm">{t.title}</h1>
+              <p className="text-xs text-slate-500">{t.subtitle}</p>
             </div>
           </Link>
-          <h2 className="text-2xl font-bold text-slate-900">Apply for a Property</h2>
+          <h2 className="text-2xl font-bold text-slate-900">{t.applyForProp}</h2>
           <p className="text-slate-500 text-sm mt-1">
-            Select a property to get started
+            {t.selectProp}
           </p>
         </div>
 
         {/* Form */}
         <Card className="border-0 shadow-lg">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Application Form</CardTitle>
-            <CardDescription className="text-sm">Fields marked with * are required</CardDescription>
+            <CardTitle className="text-lg">{t.formTitle}</CardTitle>
+            <CardDescription className="text-sm">{t.formDesc}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Property Selection */}
               <div className="space-y-2">
-                <Label htmlFor="propertyId" className="text-sm">Property of Interest *</Label>
+                <Label htmlFor="propertyId" className="text-sm">{t.propOfInterest}</Label>
                 <Select
                   value={formData.propertyId}
                   onValueChange={(value) => setFormData({ ...formData, propertyId: value })}
                 >
                   <SelectTrigger className="h-10">
-                    <SelectValue placeholder="Select a property" />
+                    <SelectValue placeholder={t.selectPlaceholder} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="general">
                       <span className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-slate-400" />
-                        General Inquiry
+                        {t.generalInquiry}
                       </span>
                     </SelectItem>
                     {properties.map((property) => (
@@ -193,7 +272,7 @@ export default function ApplyPage() {
                           )}
                           {property.name} - {property.city}
                           <span className="text-xs text-slate-400">
-                            ({property.type === "COMMERCIAL" ? "Commercial" : "Residential"})
+                            ({property.type === "COMMERCIAL" ? t.commercial : t.residential})
                           </span>
                         </span>
                       </SelectItem>
@@ -208,9 +287,9 @@ export default function ApplyPage() {
                   <div className="flex items-start gap-3">
                     <ExternalLink className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-primary text-sm">Residential Applications</p>
+                      <p className="font-medium text-primary text-sm">{t.resApp}</p>
                       <p className="text-primary text-sm mt-1">
-                        For residential properties, we use Zillow for applications. Please apply through Zillow and reference this property in your application.
+                        {t.resAppDesc}
                       </p>
                       <a
                         href={zillowUrl}
@@ -218,7 +297,7 @@ export default function ApplyPage() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-primary hover:text-primary font-medium text-sm mt-2"
                       >
-                        Apply on Zillow
+                        {t.applyZillow}
                         <ExternalLink className="h-3 w-3" />
                       </a>
                     </div>
@@ -234,9 +313,9 @@ export default function ApplyPage() {
                     <div className="flex items-start gap-3">
                       <Store className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-primary text-sm">Commercial Application</p>
+                        <p className="font-medium text-primary text-sm">{t.comApp}</p>
                         <p className="text-primary text-sm mt-1">
-                          Commercial applications require 2 years of corporate tax returns and 3 months of bank statements.
+                          {t.comAppDesc}
                         </p>
                       </div>
                     </div>
@@ -244,7 +323,7 @@ export default function ApplyPage() {
 
                   {/* Business Info */}
                   <div className="space-y-2">
-                    <Label htmlFor="businessName" className="text-sm">Business Name *</Label>
+                    <Label htmlFor="businessName" className="text-sm">{t.businessName}</Label>
                     <Input
                       id="businessName"
                       value={formData.businessName}
@@ -257,7 +336,7 @@ export default function ApplyPage() {
                   {/* Personal Info */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-sm">Contact First Name *</Label>
+                      <Label htmlFor="firstName" className="text-sm">{t.contactFirstName}</Label>
                       <Input
                         id="firstName"
                         value={formData.firstName}
@@ -267,7 +346,7 @@ export default function ApplyPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-sm">Contact Last Name *</Label>
+                      <Label htmlFor="lastName" className="text-sm">{t.contactLastName}</Label>
                       <Input
                         id="lastName"
                         value={formData.lastName}
@@ -280,7 +359,7 @@ export default function ApplyPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm">Email *</Label>
+                      <Label htmlFor="email" className="text-sm">{t.email}</Label>
                       <Input
                         id="email"
                         type="email"
@@ -291,7 +370,7 @@ export default function ApplyPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm">Phone *</Label>
+                      <Label htmlFor="phone" className="text-sm">{t.phone}</Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -304,12 +383,12 @@ export default function ApplyPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="currentAddress" className="text-sm">Business Address</Label>
+                    <Label htmlFor="currentAddress" className="text-sm">{t.businessAddress}</Label>
                     <Input
                       id="currentAddress"
                       value={formData.currentAddress}
                       onChange={(e) => setFormData({ ...formData, currentAddress: e.target.value })}
-                      placeholder="Street, City, State, ZIP"
+                      placeholder={t.addressPlaceholder}
                       className="h-10"
                     />
                   </div>
@@ -318,14 +397,14 @@ export default function ApplyPage() {
                   <div className="pt-3 border-t">
                     <div className="flex items-center gap-2 mb-3">
                       <FileText className="h-4 w-4 text-slate-500" />
-                      <h3 className="font-medium text-slate-900 text-sm">Required Documents</h3>
+                      <h3 className="font-medium text-slate-900 text-sm">{t.reqDocs}</h3>
                     </div>
 
                     <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-4">
                       <div className="flex items-start gap-2">
                         <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
                         <p className="text-amber-800 text-xs">
-                          Upload your documents to a secure file sharing service (Google Drive, Dropbox, etc.) and paste the share links below.
+                          {t.reqDocsDesc}
                         </p>
                       </div>
                     </div>
@@ -333,7 +412,7 @@ export default function ApplyPage() {
                     <div className="space-y-3">
                       <div className="space-y-2">
                         <Label htmlFor="taxReturnsUrl" className="text-sm">
-                          2 Years Corporate Tax Returns *
+                          {t.taxReturns}
                         </Label>
                         <Input
                           id="taxReturnsUrl"
@@ -347,7 +426,7 @@ export default function ApplyPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="bankStatementsUrl" className="text-sm">
-                          3 Months Bank Statements *
+                          {t.bankStatements}
                         </Label>
                         <Input
                           id="bankStatementsUrl"
@@ -364,7 +443,7 @@ export default function ApplyPage() {
 
                   {/* Desired Move-in */}
                   <div className="space-y-2">
-                    <Label htmlFor="moveInDate" className="text-sm">Desired Move-in Date</Label>
+                    <Label htmlFor="moveInDate" className="text-sm">{t.moveInDate}</Label>
                     <Input
                       id="moveInDate"
                       type="date"
@@ -376,12 +455,12 @@ export default function ApplyPage() {
 
                   {/* Additional Notes */}
                   <div className="space-y-2">
-                    <Label htmlFor="additionalNotes" className="text-sm">Additional Notes</Label>
+                    <Label htmlFor="additionalNotes" className="text-sm">{t.additionalNotes}</Label>
                     <Textarea
                       id="additionalNotes"
                       value={formData.additionalNotes}
                       onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
-                      placeholder="Tell us about your business and space requirements..."
+                      placeholder={t.notesComPlaceholder}
                       rows={3}
                       className="resize-none"
                     />
@@ -395,10 +474,10 @@ export default function ApplyPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Submitting...
+                        {t.submitting}
                       </>
                     ) : (
-                      "Submit Application"
+                      t.submitApp
                     )}
                   </Button>
                 </>
@@ -409,7 +488,7 @@ export default function ApplyPage() {
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-sm">First Name *</Label>
+                      <Label htmlFor="firstName" className="text-sm">{t.firstName}</Label>
                       <Input
                         id="firstName"
                         value={formData.firstName}
@@ -419,7 +498,7 @@ export default function ApplyPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-sm">Last Name *</Label>
+                      <Label htmlFor="lastName" className="text-sm">{t.lastName}</Label>
                       <Input
                         id="lastName"
                         value={formData.lastName}
@@ -432,7 +511,7 @@ export default function ApplyPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm">Email *</Label>
+                      <Label htmlFor="email" className="text-sm">{t.email}</Label>
                       <Input
                         id="email"
                         type="email"
@@ -443,7 +522,7 @@ export default function ApplyPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm">Phone *</Label>
+                      <Label htmlFor="phone" className="text-sm">{t.phone}</Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -456,12 +535,12 @@ export default function ApplyPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="additionalNotes" className="text-sm">What are you looking for?</Label>
+                    <Label htmlFor="additionalNotes" className="text-sm">{t.whatLookingFor}</Label>
                     <Textarea
                       id="additionalNotes"
                       value={formData.additionalNotes}
                       onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
-                      placeholder="Tell us about your needs..."
+                      placeholder={t.notesGenPlaceholder}
                       rows={3}
                       className="resize-none"
                     />
@@ -475,10 +554,10 @@ export default function ApplyPage() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Submitting...
+                        {t.submitting}
                       </>
                     ) : (
-                      "Submit Inquiry"
+                      t.submitInquiry
                     )}
                   </Button>
                 </>
@@ -488,12 +567,20 @@ export default function ApplyPage() {
         </Card>
 
         <p className="text-center text-xs text-slate-500 mt-4">
-          Already a tenant?{" "}
+          {t.alreadyTenant}{" "}
           <Link href="/login" className="text-primary hover:text-primary font-medium">
-            Sign in here
+            {t.signInHere}
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function ApplyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+      <ApplyPageContent />
+    </Suspense>
   );
 }

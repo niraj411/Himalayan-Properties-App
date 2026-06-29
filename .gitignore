@@ -65,3 +65,6 @@ tenant-records/
 
 # Vendor quote / negotiation trackers (business-internal working notes)
 /vendor-records
+
+# Legal matter files (eviction notices, demand letters, case logs — contain PII; never commit)
+/legal
