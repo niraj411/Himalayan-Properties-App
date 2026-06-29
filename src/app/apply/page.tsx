@@ -283,7 +283,7 @@ function ApplyPageContent() {
 
               {/* Residential Notice */}
               {applicationType === "RESIDENTIAL" && (
-                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg mb-6">
                   <div className="flex items-start gap-3">
                     <ExternalLink className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                     <div>
@@ -305,83 +305,87 @@ function ApplyPageContent() {
                 </div>
               )}
 
-              {/* Commercial Application Form */}
+              {/* Commercial Notice */}
+              {applicationType === "COMMERCIAL" && (
+                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg mb-6">
+                  <div className="flex items-start gap-3">
+                    <Store className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-primary text-sm">{t.comApp}</p>
+                      <p className="text-primary text-sm mt-1">
+                        {t.comAppDesc}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Commercial-only: Business Name */}
+              {applicationType === "COMMERCIAL" && (
+                <div className="space-y-2">
+                  <Label htmlFor="businessName" className="text-sm">{t.businessName}</Label>
+                  <Input
+                    id="businessName"
+                    value={formData.businessName}
+                    onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                    className="h-10"
+                    required
+                  />
+                </div>
+              )}
+
+              {/* Personal Info (Shared across all) */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName" className="text-sm">{applicationType === "COMMERCIAL" ? t.contactFirstName : t.firstName}</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    className="h-10"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName" className="text-sm">{applicationType === "COMMERCIAL" ? t.contactLastName : t.lastName}</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    className="h-10"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm">{t.email}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="h-10"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm">{t.phone}</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="h-10"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Commercial-only: Business Address & Required Docs */}
               {applicationType === "COMMERCIAL" && (
                 <>
-                  {/* Commercial Notice */}
-                  <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
-                    <div className="flex items-start gap-3">
-                      <Store className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium text-primary text-sm">{t.comApp}</p>
-                        <p className="text-primary text-sm mt-1">
-                          {t.comAppDesc}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Business Info */}
-                  <div className="space-y-2">
-                    <Label htmlFor="businessName" className="text-sm">{t.businessName}</Label>
-                    <Input
-                      id="businessName"
-                      value={formData.businessName}
-                      onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                      className="h-10"
-                      required
-                    />
-                  </div>
-
-                  {/* Personal Info */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-sm">{t.contactFirstName}</Label>
-                      <Input
-                        id="firstName"
-                        value={formData.firstName}
-                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                        className="h-10"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-sm">{t.contactLastName}</Label>
-                      <Input
-                        id="lastName"
-                        value={formData.lastName}
-                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                        className="h-10"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm">{t.email}</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="h-10"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm">{t.phone}</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="h-10"
-                        required
-                      />
-                    </div>
-                  </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="currentAddress" className="text-sm">{t.businessAddress}</Label>
                     <Input
@@ -393,7 +397,6 @@ function ApplyPageContent() {
                     />
                   </div>
 
-                  {/* Required Documents */}
                   <div className="pt-3 border-t">
                     <div className="flex items-center gap-2 mb-3">
                       <FileText className="h-4 w-4 text-slate-500" />
@@ -440,128 +443,53 @@ function ApplyPageContent() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Desired Move-in */}
-                  <div className="space-y-2">
-                    <Label htmlFor="moveInDate" className="text-sm">{t.moveInDate}</Label>
-                    <Input
-                      id="moveInDate"
-                      type="date"
-                      value={formData.moveInDate}
-                      onChange={(e) => setFormData({ ...formData, moveInDate: e.target.value })}
-                      className="h-10"
-                    />
-                  </div>
-
-                  {/* Additional Notes */}
-                  <div className="space-y-2">
-                    <Label htmlFor="additionalNotes" className="text-sm">{t.additionalNotes}</Label>
-                    <Textarea
-                      id="additionalNotes"
-                      value={formData.additionalNotes}
-                      onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
-                      placeholder={t.notesComPlaceholder}
-                      rows={3}
-                      className="resize-none"
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full h-10"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {t.submitting}
-                      </>
-                    ) : (
-                      t.submitApp
-                    )}
-                  </Button>
                 </>
               )}
 
-              {/* General Inquiry Form */}
-              {(applicationType === null && formData.propertyId === "general") && (
-                <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-sm">{t.firstName}</Label>
-                      <Input
-                        id="firstName"
-                        value={formData.firstName}
-                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                        className="h-10"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-sm">{t.lastName}</Label>
-                      <Input
-                        id="lastName"
-                        value={formData.lastName}
-                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                        className="h-10"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm">{t.email}</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="h-10"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm">{t.phone}</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="h-10"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="additionalNotes" className="text-sm">{t.whatLookingFor}</Label>
-                    <Textarea
-                      id="additionalNotes"
-                      value={formData.additionalNotes}
-                      onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
-                      placeholder={t.notesGenPlaceholder}
-                      rows={3}
-                      className="resize-none"
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full h-10"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {t.submitting}
-                      </>
-                    ) : (
-                      t.submitInquiry
-                    )}
-                  </Button>
-                </>
+              {/* Move In Date (Not needed for General) */}
+              {applicationType !== null && (
+                <div className="space-y-2">
+                  <Label htmlFor="moveInDate" className="text-sm">{t.moveInDate}</Label>
+                  <Input
+                    id="moveInDate"
+                    type="date"
+                    value={formData.moveInDate}
+                    onChange={(e) => setFormData({ ...formData, moveInDate: e.target.value })}
+                    className="h-10"
+                  />
+                </div>
               )}
+
+              {/* Additional Notes (Shared) */}
+              <div className="space-y-2">
+                <Label htmlFor="additionalNotes" className="text-sm">
+                  {applicationType === null ? t.whatLookingFor : t.additionalNotes}
+                </Label>
+                <Textarea
+                  id="additionalNotes"
+                  value={formData.additionalNotes}
+                  onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
+                  placeholder={applicationType === "COMMERCIAL" ? t.notesComPlaceholder : (applicationType === "RESIDENTIAL" ? t.notesGenPlaceholder : t.notesGenPlaceholder)}
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="w-full h-10"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t.submitting}
+                  </>
+                ) : (
+                  applicationType === null ? t.submitInquiry : t.submitApp
+                )}
+              </Button>
             </form>
           </CardContent>
         </Card>

@@ -261,23 +261,20 @@ export default async function ListingDetailPage({ params, searchParams }: { para
                       <p className="font-bold text-on-surface text-2xl">
                         ${unit.rent.toLocaleString()}<span className="text-base font-medium text-on-surface/50">/{t.mo}</span>
                       </p>
-                      {applyIsExternal ? (
-                        <a
-                          href={applyHref}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Button className="bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient hover:shadow-2xl transition-all duration-300 border-none font-medium px-6 h-12">
-                            {t.applyZillow} <ExternalLink className="ml-2 h-4 w-4" />
-                          </Button>
-                        </a>
-                      ) : (
-                        <Link href={applyHref}>
-                          <Button className="bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient hover:shadow-2xl transition-all duration-300 border-none font-medium px-8 h-12">
+                      <div className="flex flex-col gap-2 w-full md:w-auto">
+                        {applyIsExternal && (
+                          <a href={applyHref} target="_blank" rel="noopener noreferrer" className="w-full">
+                            <Button className="w-full bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient hover:shadow-2xl transition-all duration-300 border-none font-medium px-6 h-12">
+                              {t.applyZillow} <ExternalLink className="ml-2 h-4 w-4" />
+                            </Button>
+                          </a>
+                        )}
+                        <Link href={isEs ? `/apply?propertyId=${listing.id}&lang=es` : `/apply?propertyId=${listing.id}`} className="w-full">
+                          <Button variant={applyIsExternal ? "outline" : "default"} className={`w-full rounded-xl transition-all duration-300 font-medium px-8 h-12 ${!applyIsExternal ? 'bg-gradient-to-br from-primary to-primary-container text-white shadow-ambient hover:shadow-2xl border-none' : 'border-outline-variant/30 text-on-surface/80 hover:text-primary hover:bg-surface-container-high'}`}>
                             {t.applyNow}
                           </Button>
                         </Link>
-                      )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -309,23 +306,19 @@ export default async function ListingDetailPage({ params, searchParams }: { para
                   {listing.type === "RESIDENTIAL" ? t.resAppDesc : t.comAppDesc}
                 </p>
 
-                {applyIsExternal ? (
-                  <a
-                    href={applyHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                {applyIsExternal && (
+                  <a href={applyHref} target="_blank" rel="noopener noreferrer" className="block mb-3">
                     <Button size="lg" className="w-full h-14 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-none font-semibold text-lg">
                       {t.applyZillow} <ExternalLink className="ml-2 h-5 w-5" />
                     </Button>
                   </a>
-                ) : (
-                  <Link href={applyHref}>
-                    <Button size="lg" className="w-full h-14 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl shadow-ambient hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border-none font-semibold text-lg">
-                      {t.startApp}
-                    </Button>
-                  </Link>
                 )}
+                
+                <Link href={isEs ? `/apply?propertyId=${listing.id}&lang=es` : `/apply?propertyId=${listing.id}`} className="block">
+                  <Button size="lg" variant={applyIsExternal ? "outline" : "default"} className={`w-full h-14 rounded-xl transition-all duration-300 font-semibold text-lg ${applyIsExternal ? 'border-outline-variant/30 text-on-surface/80 hover:text-primary hover:bg-surface-container-high bg-transparent' : 'bg-gradient-to-br from-primary to-primary-container text-white shadow-ambient hover:shadow-2xl hover:-translate-y-1 border-none'}`}>
+                    {t.startApp}
+                  </Button>
+                </Link>
                 
                 <Link href={isEs ? "/listings?lang=es" : "/listings"} className="block mt-4">
                   <Button variant="ghost" className="w-full h-12 text-on-surface/70 hover:bg-surface-container-high hover:text-on-surface rounded-xl font-medium transition-colors">
