@@ -35,6 +35,8 @@ model Property {
   imageUrl    String?
   photos      String?  // JSON array of additional image URLs
   zillowUrl   String?
+  tourVideoUrl String? // cinematic walkthrough video (mp4)
+  tourModelUrl String? // interactive 3D model (glb)
   mortgageLender          String?
   mortgageMonthlyPayment  Float?
   mortgageDueDay          Int?

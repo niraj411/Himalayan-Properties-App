@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import PhotoGallery from "./PhotoGallery";
+import Tour3D from "./Tour3D";
 
 export const dynamic = "force-dynamic";
 import {
@@ -46,6 +47,10 @@ export default async function ListingDetailPage({ params, searchParams }: { para
     commercial: isEs ? "Comercial" : "Commercial",
     residential: isEs ? "Residencial" : "Residential",
     about: isEs ? "Sobre esta propiedad" : "About this property",
+    tour3d: isEs ? "Recorrido 3D" : "3D Tour",
+    tourVideo: isEs ? "Video" : "Video Tour",
+    tourModel: isEs ? "Modelo 3D" : "3D Model",
+    tourHint: isEs ? "Arrastra para rotar" : "Drag to rotate",
     availableUnits: isEs ? "Unidades Disponibles" : "Available Units",
     unit: isEs ? "Unidad" : "Unit",
     bed: isEs ? "hab" : "bed",
@@ -200,6 +205,16 @@ export default async function ListingDetailPage({ params, searchParams }: { para
                   <Home className="h-24 w-24 text-primary/20" />
                 )}
               </div>
+            )}
+
+            {/* 3D Tour */}
+            {(listing.tourVideoUrl || listing.tourModelUrl) && (
+              <Tour3D
+                videoUrl={listing.tourVideoUrl}
+                modelUrl={listing.tourModelUrl}
+                poster={allPhotos[0]}
+                labels={{ heading: t.tour3d, video: t.tourVideo, model: t.tourModel, hint: t.tourHint }}
+              />
             )}
 
             {/* Property Info */}

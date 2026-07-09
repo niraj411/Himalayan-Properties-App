@@ -56,6 +56,8 @@ interface Property {
   description: string | null;
   imageUrl: string | null;
   zillowUrl: string | null;
+  tourVideoUrl: string | null;
+  tourModelUrl: string | null;
   mortgageLender: string | null;
   mortgageMonthlyPayment: number | null;
   mortgageDueDay: number | null;
@@ -85,6 +87,8 @@ export default function PropertiesPage() {
     description: "",
     imageUrl: "",
     zillowUrl: "",
+    tourVideoUrl: "",
+    tourModelUrl: "",
     mortgageLender: "",
     mortgageMonthlyPayment: "",
     mortgageDueDay: "",
@@ -166,6 +170,8 @@ export default function PropertiesPage() {
           description: "",
           imageUrl: "",
           zillowUrl: "",
+          tourVideoUrl: "",
+          tourModelUrl: "",
           mortgageLender: "",
           mortgageMonthlyPayment: "",
           mortgageDueDay: "",
@@ -195,6 +201,8 @@ export default function PropertiesPage() {
       description: property.description || "",
       imageUrl: property.imageUrl || "",
       zillowUrl: property.zillowUrl || "",
+      tourVideoUrl: property.tourVideoUrl || "",
+      tourModelUrl: property.tourModelUrl || "",
       mortgageLender: property.mortgageLender || "",
       mortgageMonthlyPayment: property.mortgageMonthlyPayment?.toString() || "",
       mortgageDueDay: property.mortgageDueDay?.toString() || "",
@@ -235,6 +243,8 @@ export default function PropertiesPage() {
       description: "",
       imageUrl: "",
       zillowUrl: "",
+      tourVideoUrl: "",
+      tourModelUrl: "",
       mortgageLender: "",
       mortgageMonthlyPayment: "",
       mortgageDueDay: "",
@@ -414,6 +424,31 @@ export default function PropertiesPage() {
                   />
                 </div>
               )}
+
+              {/* 3D Tour */}
+              <div className="pt-2">
+                <p className="text-sm font-medium text-on-surface mb-3">3D Tour (Optional)</p>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="tourVideoUrl">Tour Video URL (mp4)</Label>
+                    <Input
+                      id="tourVideoUrl"
+                      value={formData.tourVideoUrl}
+                      onChange={(e) => setFormData({ ...formData, tourVideoUrl: e.target.value })}
+                      placeholder="/uploads/properties/tour.mp4"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tourModelUrl">3D Model URL (glb)</Label>
+                    <Input
+                      id="tourModelUrl"
+                      value={formData.tourModelUrl}
+                      onChange={(e) => setFormData({ ...formData, tourModelUrl: e.target.value })}
+                      placeholder="/uploads/properties/model.glb"
+                    />
+                  </div>
+                </div>
+              </div>
 
               {/* Mortgage */}
               <div className="pt-2">
