@@ -79,9 +79,18 @@ export default function TenantBalancePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-on-surface">Balance</h1>
-        <p className="text-muted-foreground mt-1">Your current charges and account balance.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-on-surface">Balance</h1>
+          <p className="text-muted-foreground mt-1">Your current charges and account balance.</p>
+        </div>
+        {charges.length > 0 && (
+          <Button asChild variant="outline" className="self-start">
+            <a href="/api/tenant/statement" target="_blank" rel="noopener noreferrer">
+              <Receipt className="h-4 w-4" /> Statement PDF
+            </a>
+          </Button>
+        )}
       </div>
 
       {/* Balance hero */}

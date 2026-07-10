@@ -314,6 +314,11 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
                       <Button size="sm" variant="ghost" title="View" onClick={() => setViewing(n)}>
                         <Eye className="h-4 w-4" />
                       </Button>
+                      <Button asChild size="sm" variant="ghost" title="Download PDF">
+                        <a href={`/api/notices/${n.id}/pdf`} target="_blank" rel="noopener noreferrer">
+                          PDF
+                        </a>
+                      </Button>
                       <Button size="sm" variant="ghost" title="Re-send" onClick={() => resend(n.id)}>
                         <RotateCw className="h-4 w-4 text-primary" />
                       </Button>

@@ -114,9 +114,19 @@ export default function TenantNoticesPage() {
                     )}
                   </button>
                   {open && (
-                    <pre id={`notice-panel-${n.id}`} role="region" className="mx-5 mb-5 whitespace-pre-wrap rounded-xl bg-surface-container-low p-4 font-sans text-sm text-on-surface">
-                      {n.body}
-                    </pre>
+                    <div id={`notice-panel-${n.id}`} role="region" className="mx-5 mb-5">
+                      <pre className="whitespace-pre-wrap rounded-xl bg-surface-container-low p-4 font-sans text-sm text-on-surface">
+                        {n.body}
+                      </pre>
+                      <a
+                        href={`/api/notices/${n.id}/pdf`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 inline-flex text-sm font-medium text-primary hover:underline"
+                      >
+                        Download PDF
+                      </a>
+                    </div>
                   )}
                 </CardContent>
               </Card>

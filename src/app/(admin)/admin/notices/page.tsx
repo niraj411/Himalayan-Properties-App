@@ -73,6 +73,7 @@ export default async function NoticesPage() {
                   <TableHead>Type</TableHead>
                   <TableHead className="text-right">Amount due</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="text-right">PDF</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -98,6 +99,16 @@ export default async function NoticesPage() {
                       ) : (
                         <Badge className="bg-destructive" title={n.errorText ?? undefined}>Failed</Badge>
                       )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <a
+                        href={`/api/notices/${n.id}/pdf`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-primary hover:underline"
+                      >
+                        PDF
+                      </a>
                     </TableCell>
                   </TableRow>
                 ))}

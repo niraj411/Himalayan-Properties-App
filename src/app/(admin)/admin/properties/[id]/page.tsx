@@ -345,18 +345,30 @@ export default function PropertyDetailPage({
             )}
           </div>
         </div>
-        {/* Zillow button for residential */}
-        {property.zillowUrl && (
+        <div className="flex flex-wrap items-center gap-2 self-start">
+          {/* Printable listing flyer with QR */}
           <a
-            href={property.zillowUrl}
+            href={`/api/properties/${property.id}/flyer`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-surface-container-high text-on-surface text-sm font-medium rounded-xl self-start"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-xl"
           >
             <ExternalLink className="h-4 w-4" />
-            Zillow Listing
+            Flyer PDF
           </a>
-        )}
+          {/* Zillow button for residential */}
+          {property.zillowUrl && (
+            <a
+              href={property.zillowUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-surface-container-high text-on-surface text-sm font-medium rounded-xl"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Zillow Listing
+            </a>
+          )}
+        </div>
       </div>
 
       {/* Stats */}

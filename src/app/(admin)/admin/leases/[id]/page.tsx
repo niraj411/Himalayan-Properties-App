@@ -471,6 +471,11 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
             {lease.unit.property.name} - Unit #{lease.unit.unitNumber}
           </p>
         </div>
+        <Button asChild variant="outline" className="self-start">
+          <a href={`/api/leases/${lease.id}/statement`} target="_blank" rel="noopener noreferrer">
+            Statement PDF
+          </a>
+        </Button>
       </div>
 
       {/* Lease Overview */}

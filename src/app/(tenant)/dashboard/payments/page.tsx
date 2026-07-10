@@ -253,6 +253,7 @@ export default function TenantPaymentsPage() {
                   <TableHead>Amount</TableHead>
                   <TableHead>Method</TableHead>
                   <TableHead>Reference</TableHead>
+                  <TableHead className="text-right">Receipt</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -281,6 +282,16 @@ export default function TenantPaymentsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-slate-500">{payment.reference || "-"}</TableCell>
+                    <TableCell className="text-right">
+                      <a
+                        href={`/api/payments/${payment.id}/receipt`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        Download
+                      </a>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
