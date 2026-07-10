@@ -9,7 +9,7 @@ const db = new PrismaClient();
  * dev DB), a minimal copy is created so the listing page can be tested.
  * Idempotent.
  */
-const TOUR_VIDEO = "/uploads/properties/3174-tour.mp4";
+const TOUR_VIDEO = "/uploads/properties/3174-tour-v2.mp4";
 const TOUR_MODEL = "/uploads/properties/3174-exterior-3d.glb";
 
 async function main() {
