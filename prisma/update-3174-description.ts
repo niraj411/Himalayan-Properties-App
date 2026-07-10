@@ -10,9 +10,9 @@ const db = new PrismaClient();
  */
 const DESCRIPTION = `Duplex features two updated units, each with new appliances, countertops, flooring, and fresh interior paint. A new roof was installed in 2025. Ideally located near downtown Denver with easy access to shopping, dining, and entertainment.
 
-🏠 3 Bed / 2 Bath Duplex Unit — $2,500/mo
+🏠 2 Bed / 2 Bath Duplex Unit — $2,500/mo
 📍 3174 W Center Ave, Denver CO 80219 (Westwood)
-Spacious 3-bedroom side of a duplex with your own private entrance, fenced yard, and driveway parking. Kitchen has granite countertops, wood cabinets, and full appliance package. Two full bathrooms with tile. Laminate floors throughout. Your own thermostat — you control the heat. Washer/dryer hookups in the basement. Brand new roof as of 2025.
+Spacious 2-bedroom side of a duplex with your own private entrance, fenced yard, and driveway parking. Kitchen has granite countertops, wood cabinets, and full appliance package. Two full bathrooms with tile. Laminate floors throughout. Your own thermostat — you control the heat. Full-size washer and dryer included (in the basement). Brand new roof as of 2025.
 Quick access to Federal Blvd, US-285, and I-25. Close to restaurants, shopping, and RTD bus lines.
 🔑 Available: Now
 💰 $2,500/month
