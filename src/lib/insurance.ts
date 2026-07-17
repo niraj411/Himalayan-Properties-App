@@ -1,7 +1,7 @@
 // Type-aware insurance copy + constants.
 // Pure module (no React, no Prisma) so it can be imported from both server routes
-// and client components. Residential => renters insurance / "additional interest";
-// commercial => general liability / "additional insured".
+// and client components. Residential => renters insurance (upload proof only);
+// commercial => general liability with landlord as "additional insured".
 
 export const BENEFICIARY_NAME = "Himalayan Holdings Property LLC";
 
@@ -17,8 +17,9 @@ export interface InsuranceCopy {
   defaultInsuranceType: string;
   /** ADDITIONAL_INTEREST (residential) or ADDITIONAL_INSURED (commercial) */
   interestType: string;
-  /** Human phrase for how the landlord should be listed on the policy */
-  interestPhrase: string;
+  /** Human phrase for how the landlord should be listed on the policy;
+   *  null = we don't require the landlord on the policy (residential) */
+  interestPhrase: string | null;
   /** Body for the "insurance required" alert in the portal */
   requiredBody: string;
   /** Type options for the insurance-type <Select> */
@@ -52,8 +53,8 @@ const RESIDENTIAL: InsuranceCopy = {
   sectionTitle: "Renters Insurance",
   defaultInsuranceType: "RENTERS",
   interestType: "ADDITIONAL_INTEREST",
-  interestPhrase: "additional interest",
-  requiredBody: `We ask that all residents maintain valid renters insurance with ${BENEFICIARY_NAME} listed as an additional interest.`,
+  interestPhrase: null,
+  requiredBody: `We ask that all residents maintain valid renters insurance and upload proof of coverage.`,
   // Residential tenants must carry a renters policy — not a liability-only
   // policy — so renters is the only accepted type.
   typeOptions: [
@@ -61,7 +62,7 @@ const RESIDENTIAL: InsuranceCopy = {
   ],
   requestSubject: "Action Required: Upload Your Renters Insurance",
   requestBody: (propertyName, unitNumber) =>
-    `As a resident at ${propertyName} - Unit #${unitNumber}, we ask that you maintain valid renters insurance with ${BENEFICIARY_NAME} listed as an additional interest.\n\nPlease log in to your tenant portal and upload your current proof of insurance at your earliest convenience.\n\nIf you have any questions, please don't hesitate to reach out.`,
+    `As a resident at ${propertyName} - Unit #${unitNumber}, we ask that you maintain valid renters insurance.\n\nPlease log in to your tenant portal and upload your current proof of insurance at your earliest convenience.\n\nIf you have any questions, please don't hesitate to reach out.`,
   renewalSubject: "Action Required: Renters Insurance Renewal",
   renewalBody: (expDate) =>
     `Your renters insurance on file expires on ${expDate}.\n\nPlease upload a renewed proof of insurance through your tenant portal or email it to us as soon as possible.\n\nIf you have already renewed, please disregard this message.`,

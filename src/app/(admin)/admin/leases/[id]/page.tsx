@@ -861,10 +861,12 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
                     <DialogTitle>Add Insurance Record</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleAddInsurance} className="space-y-4 mt-4">
-                    <div className="p-3 bg-primary/10 rounded-lg text-sm text-primary">
-                      <p className="font-medium">Required Beneficiary:</p>
-                      <p>{BENEFICIARY_NAME}</p>
-                    </div>
+                    {insuranceCopyText.interestPhrase && (
+                      <div className="p-3 bg-primary/10 rounded-lg text-sm text-primary">
+                        <p className="font-medium">Required Beneficiary:</p>
+                        <p>{BENEFICIARY_NAME}</p>
+                      </div>
+                    )}
                     <div className="space-y-2">
                       <Label>Insurance Type</Label>
                       <Select

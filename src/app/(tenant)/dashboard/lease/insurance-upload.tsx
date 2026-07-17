@@ -154,13 +154,15 @@ export function InsuranceUploadSection({ leaseId, leaseType, insurance }: Insura
               <DialogTitle>Submit Insurance Certificate</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div className="p-3 bg-primary/10 rounded-lg text-sm text-primary">
-                <p className="font-medium">Required Beneficiary:</p>
-                <p className="font-bold">{BENEFICIARY_NAME}</p>
-                <p className="text-xs mt-1 text-primary">
-                  Your insurance certificate must list this entity as an {copy.interestPhrase}.
-                </p>
-              </div>
+              {copy.interestPhrase && (
+                <div className="p-3 bg-primary/10 rounded-lg text-sm text-primary">
+                  <p className="font-medium">Required Beneficiary:</p>
+                  <p className="font-bold">{BENEFICIARY_NAME}</p>
+                  <p className="text-xs mt-1 text-primary">
+                    Your insurance certificate must list this entity as an {copy.interestPhrase}.
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Insurance Type</Label>
