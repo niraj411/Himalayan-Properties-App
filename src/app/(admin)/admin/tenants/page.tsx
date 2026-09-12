@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -94,6 +95,14 @@ export default function TenantsPage() {
     baselaneLink: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Former tenants (lease history but nothing ACTIVE) are hidden by default so
+  // the list only shows who is actually in the buildings; their records stay.
+  const [showFormer, setShowFormer] = useState(false);
+
+  const isFormer = (t: Tenant) =>
+    t.leases.length > 0 && !t.leases.some((l) => l.status === "ACTIVE");
+  const formerCount = tenants.filter(isFormer).length;
+  const visibleTenants = showFormer ? tenants : tenants.filter((t) => !isFormer(t));
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -238,6 +247,20 @@ export default function TenantsPage() {
           <h1 className="text-2xl font-bold text-slate-900">Tenants</h1>
           <p className="text-slate-500 mt-1">Manage your property tenants</p>
         </div>
+        <div className="flex items-center gap-4">
+          {formerCount > 0 && (
+            <label
+              htmlFor="showFormer"
+              className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"
+            >
+              <Checkbox
+                id="showFormer"
+                checked={showFormer}
+                onCheckedChange={(checked) => setShowFormer(checked === true)}
+              />
+              Show former tenants ({formerCount})
+            </label>
+          )}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openNewDialog} className="">
@@ -348,6 +371,7 @@ export default function TenantsPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {tenants.length === 0 ? (
@@ -376,7 +400,7 @@ export default function TenantsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tenants.map((tenant) => (
+                {visibleTenants.map((tenant) => (
                   <TableRow key={tenant.id}>
                     <TableCell>
                       <div className="font-medium text-slate-900">{tenant.user.name}</div>

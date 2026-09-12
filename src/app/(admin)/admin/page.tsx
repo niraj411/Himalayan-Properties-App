@@ -35,7 +35,15 @@ async function getDashboardData() {
     db.property.count(),
     db.unit.count({ where: { status: { not: COMMON_AREA_STATUS } } }),
     db.unit.count({ where: { status: "VACANT" } }),
-    db.tenant.count({ where: { unitId: { not: null }, unit: { status: { not: COMMON_AREA_STATUS } } } }),
+    // Active tenants: assigned to a real unit and not a former tenant (lease
+    // history with nothing ACTIVE). Co-tenants without their own lease still count.
+    db.tenant.count({
+      where: {
+        unitId: { not: null },
+        unit: { status: { not: COMMON_AREA_STATUS } },
+        NOT: { AND: [{ leases: { some: {} } }, { leases: { none: { status: "ACTIVE" } } }] },
+      },
+    }),
     db.lease.count({ where: { status: "ACTIVE" } }),
     db.maintenanceRequest.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
     db.application.count({ where: { status: "PENDING" } }),
