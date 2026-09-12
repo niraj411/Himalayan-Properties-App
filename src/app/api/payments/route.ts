@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json();
-    const { leaseId, amount, date, method, reference, notes, syncToQuickBooks, chargeId } = data;
+    const { leaseId, amount, date, method, reference, notes, syncToQuickBooks, chargeId, emailReceipt } = data;
 
     const amt = parseMoney(amount);
     if (!leaseId || amt === null || amt <= 0 || !date) {
@@ -116,8 +116,8 @@ export async function POST(request: Request) {
       }
     }
 
-    // Email tenant receipt
-    try {
+    // Email tenant receipt — opt-in only (admin ticks the box on the form)
+    if (emailReceipt === true) try {
       const tenantUser = payment.lease.tenant.user;
       const unitInfo = `${payment.lease.unit.property.name} - Unit ${payment.lease.unit.unitNumber}`;
       await sendTenantEmail({

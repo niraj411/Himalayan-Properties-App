@@ -33,7 +33,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { confirmDialog } from "@/components/ui/confirm";
 import { format } from "date-fns";
-import { Plus, CreditCard, Loader2, Trash2, DollarSign, Calculator } from "lucide-react";
+import { Plus, CreditCard, Loader2, Trash2, DollarSign, Calculator, Mail } from "lucide-react";
 import { chargeRemaining } from "@/lib/ledger";
 import { ErrorState } from "@/components/ui/error-state";
 import { TableSkeleton } from "@/components/ui/skeletons";
@@ -75,6 +75,7 @@ export default function PaymentsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [qbConnected, setQbConnected] = useState(false);
   const [syncToQuickBooks, setSyncToQuickBooks] = useState(false);
+  const [emailReceipt, setEmailReceipt] = useState(false);
   const [formData, setFormData] = useState({
     leaseId: "",
     chargeId: "",
@@ -131,7 +132,7 @@ export default function PaymentsPage() {
       const response = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, syncToQuickBooks }),
+        body: JSON.stringify({ ...formData, syncToQuickBooks, emailReceipt }),
       });
 
       if (response.ok) {
@@ -154,6 +155,7 @@ export default function PaymentsPage() {
           notes: "",
         });
         setOpenCharges([]);
+        setEmailReceipt(false);
         fetchData();
       } else {
         toast.error("Failed to record payment");
@@ -371,6 +373,20 @@ export default function PaymentsPage() {
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   rows={2}
                 />
+              </div>
+              <div className="flex items-center space-x-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <Checkbox
+                  id="emailReceipt"
+                  checked={emailReceipt}
+                  onCheckedChange={(checked) => setEmailReceipt(checked === true)}
+                />
+                <label
+                  htmlFor="emailReceipt"
+                  className="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer"
+                >
+                  <Mail className="h-4 w-4" />
+                  Email receipt to tenant
+                </label>
               </div>
               {qbConnected && (
                 <div className="flex items-center space-x-2 p-3 bg-green-50 rounded-lg border border-green-100">

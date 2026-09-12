@@ -183,8 +183,8 @@ async function recordPayment(p: Record<string, unknown>): Promise<AgentActionRes
     if (chargeId) await allocatePaymentToCharge(tx, chargeId, lease.id, amount);
     return created;
   });
-  // Email the tenant a receipt (best-effort; never fails the action).
-  try {
+  // Email the tenant a receipt only when asked (best-effort; never fails the action).
+  if (p.emailReceipt === true) try {
     const unitInfo = `${lease.unit.property.name} - Unit ${lease.unit.unitNumber}`;
     await sendTenantEmail({
       tenantName: lease.tenant.user.name,
