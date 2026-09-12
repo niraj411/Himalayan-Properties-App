@@ -19,10 +19,9 @@ export async function GET() {
         unit: {
           include: { property: true },
         },
-        leases: {
-          where: { status: "ACTIVE" },
-          take: 1,
-        },
+        // Every lease's status (not just ACTIVE) so the UI can tell a former
+        // tenant (history, nothing active) from one who simply has no lease yet.
+        leases: { select: { status: true } },
       },
       orderBy: { createdAt: "desc" },
     });

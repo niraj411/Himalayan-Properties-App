@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -117,6 +118,12 @@ export default function LeasesPage() {
     status: "ACTIVE",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Ended leases (TERMINATED / EXPIRED) are hidden by default; records stay.
+  const [showEnded, setShowEnded] = useState(false);
+
+  const isEnded = (l: Lease) => l.status !== "ACTIVE";
+  const endedCount = leases.filter(isEnded).length;
+  const visibleLeases = showEnded ? leases : leases.filter((l) => !isEnded(l));
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -269,6 +276,20 @@ export default function LeasesPage() {
           <h1 className="text-2xl font-bold text-slate-900">Leases</h1>
           <p className="text-slate-500 mt-1">Manage lease agreements</p>
         </div>
+        <div className="flex items-center gap-4">
+          {endedCount > 0 && (
+            <label
+              htmlFor="showEnded"
+              className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"
+            >
+              <Checkbox
+                id="showEnded"
+                checked={showEnded}
+                onCheckedChange={(checked) => setShowEnded(checked === true)}
+              />
+              Show ended leases ({endedCount})
+            </label>
+          )}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={openNewDialog} className="">
@@ -457,6 +478,7 @@ export default function LeasesPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {leases.length === 0 ? (
@@ -487,7 +509,7 @@ export default function LeasesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {leases.map((lease) => {
+                {visibleLeases.map((lease) => {
                   const isExpiringSoon =
                     lease.status === "ACTIVE" &&
                     isBefore(new Date(lease.endDate), addDays(new Date(), 60));
