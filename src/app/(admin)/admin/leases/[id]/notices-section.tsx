@@ -57,7 +57,8 @@ const TYPES: { value: string; label: string }[] = [
   { value: "CUSTOM", label: "Custom" },
 ];
 
-const typeLabel = (v: string) => TYPES.find((t) => t.value === v)?.label ?? v;
+const typeLabel = (v: string) =>
+  v === "ANNOUNCEMENT" ? "Announcement" : (TYPES.find((t) => t.value === v)?.label ?? v);
 
 export default function NoticesSection({ leaseId }: { leaseId: string }) {
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -305,6 +306,8 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
                   <TableCell>
                     {n.status === "SENT" ? (
                       <Badge className="bg-green-600">Sent</Badge>
+                    ) : n.status === "POSTED" ? (
+                      <Badge className="bg-primary" title="Visible in the tenant portal; not emailed">Posted</Badge>
                     ) : (
                       <Badge className="bg-red-600" title={n.errorText ?? undefined}>Failed</Badge>
                     )}

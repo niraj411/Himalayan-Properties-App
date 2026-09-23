@@ -19,7 +19,10 @@ export async function GET(
       include: {
         units: {
           include: {
+            // Only current occupants: a tenant whose leases have all ended
+            // (terminated / expired) is a former tenant and must not show on the unit.
             tenants: {
+              where: { leases: { some: { status: "ACTIVE" } } },
               include: { user: true },
             },
             leases: {

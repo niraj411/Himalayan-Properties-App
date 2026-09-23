@@ -15,6 +15,7 @@
 
 import { db } from "@/lib/db";
 import { sendEmail, sendTenantEmail } from "@/lib/email";
+import { postAnnouncement } from "@/lib/announcements";
 import { renderNotice, type NoticeType } from "@/lib/notices";
 import { insuranceCopy } from "@/lib/insurance";
 import { UTILITY_TYPES } from "@/lib/utilities";
@@ -340,6 +341,44 @@ async function addUtility(p: Record<string, unknown>): Promise<AgentActionResult
   };
 }
 
+// announce: property-wide ANNOUNCEMENT to every ACTIVE lease. deliver = PORTAL
+// (default: tenant Notices page only) or EMAIL (also emails now). Property may be
+// given as { propertyId } or a name fragment { property: "655 Federal" }.
+async function announce(p: Record<string, unknown>): Promise<AgentActionResult> {
+  let propertyId = typeof p.propertyId === "string" ? p.propertyId : "";
+  if (!propertyId) {
+    const q = typeof p.property === "string" ? p.property.trim() : "";
+    if (!q) throw new Error("Provide propertyId or property (name / address fragment).");
+    const all = await db.property.findMany({ select: { id: true, name: true, address: true } });
+    const needle = q.toLowerCase();
+    const hits = all.filter((x) => x.name.toLowerCase().includes(needle) || x.address.toLowerCase().includes(needle));
+    if (hits.length !== 1) {
+      throw new Error(hits.length === 0
+        ? `No property matches "${q}". Known: ${all.map((x) => x.name).join(", ")}.`
+        : `"${q}" matches several properties: ${hits.map((x) => x.name).join(", ")}. Be more specific.`);
+    }
+    propertyId = hits[0].id;
+  }
+  const deliver = typeof p.deliver === "string" && p.deliver.toUpperCase() === "EMAIL" ? "EMAIL" : "PORTAL";
+  const out = await postAnnouncement({
+    propertyId,
+    subject: String(p.subject ?? ""),
+    body: String(p.body ?? ""),
+    deliver,
+    replyTo: typeof p.replyTo === "string" ? p.replyTo : null,
+    sentById: await adminActorId(),
+  });
+  const failed = out.results.filter((r) => r.status === "FAILED");
+  const who = out.results.map((r) => `${r.tenant} (#${r.unit})`).join(", ");
+  return {
+    ok: failed.length === 0,
+    summary: deliver === "EMAIL"
+      ? `Announcement posted and emailed to ${out.results.length} tenant(s): ${who}.${failed.length ? ` ${failed.length} email(s) FAILED: ${failed.map((f) => f.tenant).join(", ")}.` : ""}`
+      : `Announcement posted to ${out.results.length} tenant portal(s): ${who}. Not emailed.`,
+    record: out.results,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Dispatcher + read context
 // ---------------------------------------------------------------------------
@@ -353,6 +392,7 @@ export const AGENT_ACTIONS = [
   "request_insurance",
   "log_message",
   "add_utility",
+  "announce",
 ] as const;
 export type AgentAction = (typeof AGENT_ACTIONS)[number];
 
@@ -367,6 +407,7 @@ export async function runAgentAction(action: string, params: Record<string, unkn
       case "request_insurance": return await requestInsurance(params);
       case "log_message": return await logMessage(params);
       case "add_utility": return await addUtility(params);
+      case "announce": return await announce(params);
       default:
         return { ok: false, summary: `Unknown or unsupported action "${action}". Allowed: ${AGENT_ACTIONS.join(", ")}.`, error: "unknown_action" };
     }

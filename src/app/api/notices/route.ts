@@ -15,7 +15,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const scope = searchParams.get("scope");
 
-  // Tenant-facing: only the caller's own SENT notices; no internal fields.
+  // Tenant-facing: only the caller's own delivered notices (emailed or posted
+  // to the portal); no internal fields.
   if (scope === "tenant") {
     const tenant = await db.tenant.findUnique({
       where: { userId: session.user.id },
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
       select: { id: true },
     });
     const notices = await db.notice.findMany({
-      where: { leaseId: { in: leases.map((l) => l.id) }, status: "SENT" },
+      where: { leaseId: { in: leases.map((l) => l.id) }, status: { in: ["SENT", "POSTED"] } },
       select: { id: true, type: true, subject: true, body: true, amountDue: true, sentAt: true },
       orderBy: { sentAt: "desc" },
     });

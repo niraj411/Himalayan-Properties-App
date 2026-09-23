@@ -115,6 +115,10 @@ Important model semantics — read before touching billing or files:
 - **Notice** — every outbound late/demand notice is logged here (subject, body,
   to/cc/replyTo, amountDue snapshot, SMTP messageId, status) so it's viewable,
   auditable, and re-sendable. CO_DEMAND = commercial 3-day demand (C.R.S. § 13-40-104).
+  Type `ANNOUNCEMENT` = property-wide message (Admin → Notices → New Announcement,
+  `POST /api/notices/announce`, one row per ACTIVE lease). Status `POSTED` = visible on
+  the tenant's Notices page but **not emailed** yet; "Email now" (resend route) flips
+  that same row to `SENT`/`FAILED`.
 - **InsuranceRecord** — renters (residential, `ADDITIONAL_INTEREST`) vs liability
   (commercial, `ADDITIONAL_INSURED`); tracks carrier/policy/coverage/expiry +
   `documentUrl` (COI). `Lease.insuranceRequired` can exempt a lease.
@@ -210,7 +214,8 @@ take **safe writes**, not just reads:
 - Bearer **`AGENT_API_TOKEN`** (in `.env`). Exempt from NextAuth middleware.
 - Allowed actions (each writes a viewable record, reusing app logic):
   `create_charge`, `mark_charge_paid`, `waive_charge`, `record_payment`,
-  `send_notice`, `request_insurance`, `log_message`, `add_utility`.
+  `send_notice`, `request_insurance`, `log_message`, `add_utility`, `announce`
+  (property-wide ANNOUNCEMENT to all ACTIVE leases; `deliver` PORTAL|EMAIL).
   **No deletes, no settings edits, no lease edits.** Outward emails need confirmation.
 
 ---

@@ -15,6 +15,7 @@ export async function GET() {
         units: {
           include: {
             tenants: {
+              where: { leases: { some: { status: "ACTIVE" } } },
               include: { user: true },
             },
           },

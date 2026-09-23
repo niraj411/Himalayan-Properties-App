@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { ErrorState } from "@/components/ui/error-state";
 import { TableSkeleton } from "@/components/ui/skeletons";
+import { LandlordContact } from "@/components/tenant/LandlordContact";
 
 interface Payment {
   id: string;
@@ -35,6 +36,9 @@ interface Payment {
 }
 
 interface Settings {
+  companyName?: string;
+  companyEmail?: string;
+  companyPhone?: string;
   bankName?: string;
   bankRoutingNumber?: string;
   bankAccountNumber?: string;
@@ -230,6 +234,15 @@ export default function TenantPaymentsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Landlord contact: tap to call / email with payment questions */}
+      <LandlordContact
+        phone={settings?.companyPhone}
+        email={settings?.companyEmail}
+        companyName={settings?.companyName}
+        title="Questions About a Payment?"
+        note="If you ever receive a request to change where you send rent, call this number to confirm it before sending anything."
+      />
 
       {/* Payment History */}
       <Card className="border-0 shadow-sm">

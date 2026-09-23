@@ -16,6 +16,7 @@ const KICKER: Record<string, string> = {
   DEMAND: "Demand for Payment",
   CO_DEMAND: "Demand for Compliance or Possession",
   CUSTOM: "Notice",
+  ANNOUNCEMENT: "Announcement",
 };
 
 // GET /api/notices/[id]/pdf -> the notice letter as a PDF (admin, or the tenant recipient)

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { openBalance } from "@/lib/ledger";
 import { leaseIdsForTenant } from "@/lib/ledger-db";
+import { LandlordContact } from "@/components/tenant/LandlordContact";
 
 async function getTenantData(tenantId: string) {
   const tenant = await db.tenant.findUnique({
@@ -91,7 +92,12 @@ export default async function TenantDashboard() {
     );
   }
 
-  const tenant = await getTenantData(session.user.tenantId);
+  const [tenant, settings] = await Promise.all([
+    getTenantData(session.user.tenantId),
+    db.settings.findFirst({
+      select: { companyName: true, companyEmail: true, companyPhone: true },
+    }),
+  ]);
 
   if (!tenant) {
     redirect("/login");
@@ -322,6 +328,13 @@ export default async function TenantDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Landlord contact: tap to call / email */}
+      <LandlordContact
+        phone={settings?.companyPhone}
+        email={settings?.companyEmail}
+        companyName={settings?.companyName}
+      />
     </div>
   );
 }

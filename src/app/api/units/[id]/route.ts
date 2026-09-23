@@ -19,6 +19,7 @@ export async function GET(
       include: {
         property: true,
         tenants: {
+          where: { leases: { some: { status: "ACTIVE" } } },
           include: { user: true },
         },
         leases: {

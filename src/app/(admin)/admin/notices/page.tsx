@@ -15,6 +15,8 @@ import {
 import { Bell } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
+import { AnnounceComposer } from "./announce-composer";
+import { EmailNowButton } from "./email-now-button";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
@@ -23,6 +25,7 @@ const TYPE_LABEL: Record<string, string> = {
   DEMAND: "Demand for payment",
   CO_DEMAND: "Compliance / possession",
   CUSTOM: "Custom",
+  ANNOUNCEMENT: "Announcement",
 };
 
 // Portfolio-wide log of every notice sent (or attempted), newest first. Drill
@@ -41,24 +44,44 @@ async function getNotices() {
   });
 }
 
+// Properties with their active-lease count, for the announcement composer.
+async function getPropertyOptions() {
+  const properties = await db.property.findMany({
+    select: {
+      id: true,
+      name: true,
+      units: { select: { leases: { where: { status: "ACTIVE" }, select: { id: true } } } },
+    },
+    orderBy: { name: "asc" },
+  });
+  return properties.map((p) => ({
+    id: p.id,
+    name: p.name,
+    activeLeases: p.units.reduce((n, u) => n + u.leases.length, 0),
+  }));
+}
+
 export default async function NoticesPage() {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") redirect("/login");
 
-  const notices = await getNotices();
+  const [notices, properties] = await Promise.all([getNotices(), getPropertyOptions()]);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-on-surface">Notices</h1>
-        <p className="text-muted-foreground mt-1">Every past-due, demand, and compliance notice sent across all leases</p>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-on-surface">Notices</h1>
+          <p className="text-muted-foreground mt-1">Announcements and every past-due, demand, and compliance notice across all leases</p>
+        </div>
+        <AnnounceComposer properties={properties} />
       </div>
 
       {notices.length === 0 ? (
         <Card className="border-0 shadow-sm">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Bell className="h-12 w-12 text-surface-container-highest mb-3" />
-            <p className="text-muted-foreground">No notices sent yet. Compose one from a lease&apos;s detail page.</p>
+            <p className="text-muted-foreground">No notices yet. Post an announcement here, or compose a notice from a lease&apos;s detail page.</p>
           </CardContent>
         </Card>
       ) : (
@@ -67,13 +90,13 @@ export default async function NoticesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Sent</TableHead>
+                  <TableHead>Date</TableHead>
                   <TableHead>Tenant</TableHead>
                   <TableHead>Unit</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead className="text-right">Amount due</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">PDF</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -96,11 +119,15 @@ export default async function NoticesPage() {
                     <TableCell>
                       {n.status === "SENT" ? (
                         <Badge className="bg-green-600">Sent</Badge>
+                      ) : n.status === "POSTED" ? (
+                        <Badge className="bg-primary" title="Visible in the tenant portal; not emailed">Posted</Badge>
                       ) : (
                         <Badge className="bg-destructive" title={n.errorText ?? undefined}>Failed</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-3">
+                      {n.status === "POSTED" && <EmailNowButton noticeId={n.id} toEmail={n.toEmail} />}
                       <a
                         href={`/api/notices/${n.id}/pdf`}
                         target="_blank"
@@ -109,6 +136,7 @@ export default async function NoticesPage() {
                       >
                         PDF
                       </a>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

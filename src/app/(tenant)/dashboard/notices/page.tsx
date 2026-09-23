@@ -21,6 +21,7 @@ const TYPE_LABEL: Record<string, string> = {
   DEMAND: "Demand for payment",
   CO_DEMAND: "Compliance / possession",
   CUSTOM: "Notice",
+  ANNOUNCEMENT: "Announcement",
 };
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
@@ -53,7 +54,7 @@ export default function TenantNoticesPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-on-surface">Notices</h1>
-          <p className="text-muted-foreground mt-1">Official letters from property management.</p>
+          <p className="text-muted-foreground mt-1">Announcements and official letters from property management.</p>
         </div>
         <CardListSkeleton count={4} />
       </div>
@@ -65,7 +66,7 @@ export default function TenantNoticesPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-on-surface">Notices</h1>
-          <p className="text-muted-foreground mt-1">Official letters from property management.</p>
+          <p className="text-muted-foreground mt-1">Announcements and official letters from property management.</p>
         </div>
         <ErrorState message="We couldn't load this page." onRetry={load} />
       </div>
@@ -76,7 +77,7 @@ export default function TenantNoticesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-on-surface">Notices</h1>
-        <p className="text-muted-foreground mt-1">Official letters from property management.</p>
+        <p className="text-muted-foreground mt-1">Announcements and official letters from property management.</p>
       </div>
 
       {notices.length === 0 ? (
