@@ -447,21 +447,31 @@ async function logUtilityBill(p: Record<string, unknown>): Promise<AgentActionRe
     if (!UTILITY_TYPES.includes(type as never)) {
       throw new Error(`Specify a utility type. One of: ${UTILITY_TYPES.join(", ")}.`);
     }
-    const candidates = await db.utility.findMany({ where: { propertyId, type } });
+    const candidates = await db.utility.findMany({ where: { propertyId, type }, include: { unit: true } });
     const hint = String(p.provider || p.providerName || "").trim().toLowerCase();
     const acct = String(p.accountNumber || "").trim();
+    // Unit hint: "A", "Unit A", "unit a" all resolve to unitNumber "A". No hint
+    // with several matches prefers the whole-property (common area) account.
+    const unitHint = String(p.unit || p.unitNumber || "").trim().toLowerCase().replace(/^unit\s*/, "");
+    const describe = (u: (typeof candidates)[number]) =>
+      `${u.providerName}${u.unit ? ` (Unit ${u.unit.unitNumber})` : " (whole property)"}${u.accountNumber ? ` #${u.accountNumber}` : ""} (${u.id})`;
     let filtered = candidates;
     if (acct) filtered = filtered.filter((u) => (u.accountNumber || "").replace(/\D/g, "") === acct.replace(/\D/g, ""));
     else if (hint) filtered = filtered.filter((u) => u.providerName.toLowerCase().includes(hint));
+    if (unitHint) {
+      filtered = filtered.filter((u) => (u.unit?.unitNumber || "").toLowerCase().replace(/^unit\s*/, "") === unitHint);
+    } else if (filtered.length > 1 && filtered.some((u) => !u.unitId)) {
+      filtered = filtered.filter((u) => !u.unitId);
+    }
     if (filtered.length === 0) {
       throw new Error(
         candidates.length === 0
           ? `That property has no ${type} utility yet. Add one first (add_utility) so the bill has an account to attach to.`
-          : `No ${type} utility matched provider "${hint || acct}". Options: ${candidates.map((u) => `${u.providerName}${u.accountNumber ? ` #${u.accountNumber}` : ""} (${u.id})`).join("; ")}.`
+          : `No ${type} utility matched ${unitHint ? `unit "${unitHint}"` : `provider "${hint || acct}"`}. Options: ${candidates.map(describe).join("; ")}.`
       );
     }
     if (filtered.length > 1) {
-      throw new Error(`Multiple ${type} utilities match. Pass utilityId or accountNumber: ${filtered.map((u) => `${u.providerName}${u.accountNumber ? ` #${u.accountNumber}` : ""} (${u.id})`).join("; ")}.`);
+      throw new Error(`Multiple ${type} utilities match. Pass unit, utilityId or accountNumber: ${filtered.map(describe).join("; ")}.`);
     }
     utility = filtered[0];
   }
