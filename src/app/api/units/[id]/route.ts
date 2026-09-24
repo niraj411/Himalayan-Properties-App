@@ -55,7 +55,7 @@ export async function PUT(
 
     const { id } = await params;
     const data = await request.json();
-    const { unitNumber, bedrooms, bathrooms, sqft, rent, status } = data;
+    const { unitNumber, bedrooms, bathrooms, sqft, rent, nnnMonthly, status } = data;
 
     const unit = await db.unit.update({
       where: { id },
@@ -65,6 +65,8 @@ export async function PUT(
         bathrooms: bathrooms || null,
         sqft: sqft || null,
         rent: rent !== undefined ? parseFloat(rent) : undefined,
+        // commercial only: estimated NNN/CAM per month used for marketing a vacant bay
+        nnnMonthly: nnnMonthly === undefined ? undefined : nnnMonthly === null || nnnMonthly === "" ? null : parseFloat(nnnMonthly),
         status,
       },
     });

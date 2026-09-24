@@ -67,9 +67,14 @@ interface Application {
   businessName: string | null;
   taxReturnsUrl: string | null;
   bankStatementsUrl: string | null;
+  unitId: string | null;
+  intendedUse: string | null;
+  desiredTerm: string | null;
+  guarantorName: string | null;
   status: string;
   createdAt: string;
   property: { name: string; type: string } | null;
+  unit: { unitNumber: string } | null;
 }
 
 export default function ApplicationsPage() {
@@ -217,7 +222,7 @@ export default function ApplicationsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-slate-600">
-                      {app.property?.name || "General Inquiry"}
+                      {app.property?.name || "General Inquiry"}{app.unit ? ` · Unit ${app.unit.unitNumber}` : ""}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -378,6 +383,17 @@ export default function ApplicationsPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 px-4 pb-3">
+                    {(selectedApplication.unit || selectedApplication.intendedUse || selectedApplication.desiredTerm || selectedApplication.guarantorName) && (
+                      <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm mb-2">
+                        {selectedApplication.unit && (<><dt className="text-muted-foreground">Unit</dt><dd className="text-on-surface font-medium">Unit {selectedApplication.unit.unitNumber}</dd></>)}
+                        {selectedApplication.intendedUse && (<><dt className="text-muted-foreground">Intended use</dt><dd className="text-on-surface font-medium">{selectedApplication.intendedUse}</dd></>)}
+                        {selectedApplication.desiredTerm && (<><dt className="text-muted-foreground">Desired term</dt><dd className="text-on-surface font-medium">{selectedApplication.desiredTerm}</dd></>)}
+                        {selectedApplication.guarantorName && (<><dt className="text-muted-foreground">Guarantor</dt><dd className="text-on-surface font-medium">{selectedApplication.guarantorName}</dd></>)}
+                      </dl>
+                    )}
+                    {!selectedApplication.taxReturnsUrl && !selectedApplication.bankStatementsUrl && (
+                      <p className="text-xs text-muted-foreground">No financial documents linked yet. Request 2 years of tax returns and 3 months of bank statements before an LOI.</p>
+                    )}
                     {selectedApplication.taxReturnsUrl && (
                       <a
                         href={selectedApplication.taxReturnsUrl}

@@ -8,6 +8,7 @@ import { pdfResponse } from "@/lib/pdf/render";
 import { dateFmt } from "@/lib/pdf/theme";
 import { imageSrc, firstImageSrc, qrDataUrl } from "@/lib/pdf/assets";
 import { unauthorized, notFound } from "@/lib/pdf/http";
+import { commercialPricing, usd } from "@/lib/commercial";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -54,9 +55,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const company = await loadCompany();
 
-  // Advertise a vacant unit if there is one, otherwise the first unit.
-  const unit = property.units.find((u) => u.status === "VACANT") ?? property.units[0];
+  // Advertise the requested unit (?unitId=), else a vacant one, else the first.
+  const wantedId = new URL(req.url).searchParams.get("unitId");
+  const unit =
+    (wantedId ? property.units.find((u) => u.id === wantedId) : undefined) ??
+    property.units.find((u) => u.status === "VACANT") ??
+    property.units[0];
   const anyVacant = property.units.some((u) => u.status === "VACANT");
+  const commercial = property.type === "COMMERCIAL";
+  const pricing = commercial && unit ? commercialPricing(unit) : null;
 
   const photos = parsePhotos(property.photos);
   const heroSrc = await firstImageSrc([property.imageUrl, ...photos]);
@@ -74,17 +81,27 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const typeLabel =
     property.units.length === 2 ? "Duplex" : property.type === "COMMERCIAL" ? "Commercial" : "Residential";
   const firstPara = (property.description ?? "").split(/\n\s*\n/)[0]?.trim().slice(0, 340) || null;
+  // Commercial flyers lead with the description's first sentence instead of the
+  // residential "move-in ready" line.
+  const tagline = commercial
+    ? (firstPara?.split(/(?<=[.!?])\s/)[0]?.slice(0, 90) ?? "Retail / office space for lease")
+    : undefined;
 
   const doc = PropertyFlyer({
     company,
     headline: property.address,
     addressLine: `${property.city}, ${property.state} ${property.zip}`,
     price: unit?.rent ?? null,
-    priceLabel: "per month",
+    priceLabel: commercial ? "per month, base rent" : "per month",
     beds: unit?.bedrooms ?? null,
     baths: unit?.bathrooms ?? null,
     sqft: unit?.sqft ?? null,
     typeLabel,
+    commercial,
+    unitLabel: commercial && unit ? `Unit ${unit.unitNumber}` : undefined,
+    perSfLabel: pricing?.perSf != null ? usd(pricing.perSf) : undefined,
+    nnnLabel: pricing?.nnn != null ? usd(pricing.nnn) : undefined,
+    tagline,
     description: firstPara,
     highlights: highlightsFrom(property.description),
     heroSrc,
@@ -96,6 +113,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     generatedOn: dateFmt(new Date()),
   });
 
-  const slug = property.address.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const slug = `${property.address}${commercial && unit ? `-unit-${unit.unitNumber}` : ""}`
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   return pdfResponse(doc, `flyer-${slug}.pdf`);
 }

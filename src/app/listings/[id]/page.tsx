@@ -7,9 +7,36 @@ import Tour3D from "./Tour3D";
 export const dynamic = "force-dynamic";
 import {
   Building2, Home, Store, MapPin, ArrowLeft,
-  BedDouble, Bath, Maximize2, ExternalLink, ChevronRight, Languages
+  BedDouble, Bath, Maximize2, ExternalLink, ChevronRight, Languages, Phone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { commercialPricing, usd } from "@/lib/commercial";
+import type { Metadata } from "next";
+
+// Social previews (Facebook, iMessage, Craigslist paste) read these tags.
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const p = await db.property.findUnique({
+    where: { id },
+    select: { name: true, address: true, city: true, state: true, type: true, description: true, imageUrl: true, units: { where: { status: "VACANT" }, select: { sqft: true, rent: true, nnnMonthly: true } } },
+  });
+  if (!p) return { title: "Listing not found" };
+  const u = p.units[0];
+  const price = u
+    ? p.type === "COMMERCIAL"
+      ? (commercialPricing(u).perSfLabel ?? commercialPricing(u).baseLabel)
+      : `$${u.rent.toLocaleString()}/mo`
+    : null;
+  const kind = p.type === "COMMERCIAL" ? "For Lease" : "For Rent";
+  const title = `${kind}: ${p.address}, ${p.city}${price ? ` · ${price}` : ""}`;
+  const description = (p.description ?? "").split("\n")[0].slice(0, 200) || `${p.name} in ${p.city}, ${p.state}`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website", ...(p.imageUrl ? { images: [{ url: p.imageUrl }] } : {}) },
+    twitter: { card: p.imageUrl ? "summary_large_image" : "summary", title, description },
+  };
+}
 
 async function getListing(id: string) {
   const property = await db.property.findUnique({
@@ -18,20 +45,26 @@ async function getListing(id: string) {
       units: {
         where: { status: "VACANT" },
         orderBy: { unitNumber: "asc" },
-        select: { id: true, unitNumber: true, bedrooms: true, bathrooms: true, sqft: true, rent: true },
+        select: { id: true, unitNumber: true, bedrooms: true, bathrooms: true, sqft: true, rent: true, nnnMonthly: true },
       },
     },
   });
   return property;
 }
 
+async function getContactPhone() {
+  const s = await db.settings.findFirst({ select: { companyPhone: true } });
+  return s?.companyPhone ?? null;
+}
+
 export default async function ListingDetailPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ lang?: string }> }) {
   const { id } = await params;
   const { lang } = await searchParams;
   const isEs = lang === "es";
-  const listing = await getListing(id);
+  const [listing, phone] = await Promise.all([getListing(id), getContactPhone()]);
 
   if (!listing) notFound();
+  const isCommercial = listing.type === "COMMERCIAL";
 
   // Translations
   const t = {
@@ -65,8 +98,16 @@ export default async function ListingDetailPage({ params, searchParams }: { para
       ? "Las solicitudes residenciales se procesan de forma segura a través de Zillow."
       : "Residential applications are securely processed and screened through Zillow.",
     comAppDesc: isEs 
-      ? "Envíe su solicitud comercial de forma segura y nuestro equipo se comunicará en breve."
-      : "Submit your commercial application securely and our team will be in touch shortly.",
+      ? "Solicite información o presente su solicitud en línea. Llame o envíe un mensaje de texto para ver el local."
+      : "Request info or apply online. Call or text to walk the space.",
+    forLease: isEs ? "En Arriendo" : "For Lease",
+    perSfYr: isEs ? "/pies²/año NNN" : "/sf/yr NNN",
+    baseRent: isEs ? "Renta base" : "Base rent",
+    estNnn: isEs ? "NNN estimado" : "Est. NNN/CAM",
+    allIn: isEs ? "Total aprox." : "Approx. total",
+    requestInfo: isEs ? "Solicitar Información" : "Request Info / Apply",
+    callOrText: isEs ? "Llame o envíe un texto" : "Call or text",
+    sfShort: isEs ? "pies²" : "sf",
     startApp: isEs ? "Comenzar Solicitud" : "Start Application",
     viewAll: isEs ? "Ver Todas las Propiedades" : "View All Properties",
   };
@@ -225,7 +266,7 @@ export default async function ListingDetailPage({ params, searchParams }: { para
                 </span>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold text-on-surface tracking-tighter mb-4">
-                {listing.name}
+                {isCommercial ? listing.address : listing.name}
               </h1>
               <div className="flex items-center gap-2 text-on-surface/70 font-medium text-lg mb-8">
                 <MapPin className="h-5 w-5 flex-shrink-0 text-primary" />
@@ -255,27 +296,46 @@ export default async function ListingDetailPage({ params, searchParams }: { para
                   >
                     <div className="flex items-start md:items-center gap-6">
                       <div className="w-16 h-16 bg-gradient-to-br from-surface-container-low to-surface-container-high rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner">
-                        <Home className="h-7 w-7 text-primary/70" />
+                        {isCommercial ? <Store className="h-7 w-7 text-primary/70" /> : <Home className="h-7 w-7 text-primary/70" />}
                       </div>
                       <div>
                         <p className="font-bold text-on-surface text-xl mb-2">{t.unit} #{unit.unitNumber}</p>
                         <div className="flex flex-wrap items-center gap-4 text-on-surface/70 font-medium">
-                          {unit.bedrooms && (
+                          {!isCommercial && !!unit.bedrooms && (
                             <span className="flex items-center gap-1.5 bg-surface px-3 py-1 rounded-lg"><BedDouble className="h-4 w-4 text-primary" />{unit.bedrooms} {t.bed}</span>
                           )}
-                          {unit.bathrooms && (
+                          {!isCommercial && !!unit.bathrooms && (
                             <span className="flex items-center gap-1.5 bg-surface px-3 py-1 rounded-lg"><Bath className="h-4 w-4 text-primary" />{unit.bathrooms} {t.bath}</span>
                           )}
-                          {unit.sqft && (
+                          {!!unit.sqft && (
                             <span className="flex items-center gap-1.5 bg-surface px-3 py-1 rounded-lg"><Maximize2 className="h-4 w-4 text-primary" />{unit.sqft.toLocaleString()} {t.sqft}</span>
                           )}
                         </div>
                       </div>
                     </div>
                     <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 md:gap-2 mt-4 md:mt-0 pt-6 md:pt-0 border-t md:border-t-0 border-outline-variant/20">
+                      {isCommercial ? (() => {
+                        const pr = commercialPricing(unit);
+                        return (
+                          <div className="md:text-right">
+                            <p className="font-bold text-on-surface text-2xl">
+                              {pr.perSf != null ? usd(pr.perSf) : usd(pr.base, false)}
+                              <span className="text-base font-medium text-on-surface/50">{pr.perSf != null ? t.perSfYr : `/${t.mo}`}</span>
+                            </p>
+                            <p className="text-sm text-on-surface/70 font-medium mt-1">
+                              {t.baseRent} {usd(pr.base, false)}/{t.mo}
+                              {pr.nnn != null && <> · {t.estNnn} {usd(pr.nnn)}/{t.mo}</>}
+                            </p>
+                            {pr.nnn != null && (
+                              <p className="text-sm text-primary font-semibold">{t.allIn} {usd(pr.total)}/{t.mo}</p>
+                            )}
+                          </div>
+                        );
+                      })() : (
                       <p className="font-bold text-on-surface text-2xl">
                         ${unit.rent.toLocaleString()}<span className="text-base font-medium text-on-surface/50">/{t.mo}</span>
                       </p>
+                      )}
                       <div className="flex flex-col gap-2 w-full md:w-auto">
                         {applyIsExternal && (
                           <a href={applyHref} target="_blank" rel="noopener noreferrer" className="w-full">
@@ -284,9 +344,9 @@ export default async function ListingDetailPage({ params, searchParams }: { para
                             </Button>
                           </a>
                         )}
-                        <Link href={isEs ? `/apply?propertyId=${listing.id}&lang=es` : `/apply?propertyId=${listing.id}`} className="w-full">
+                        <Link href={`/apply?propertyId=${listing.id}&unitId=${unit.id}${isEs ? "&lang=es" : ""}`} className="w-full">
                           <Button variant={applyIsExternal ? "outline" : "default"} className={`w-full rounded-xl transition-all duration-300 font-medium px-8 h-12 ${!applyIsExternal ? 'bg-gradient-to-br from-primary to-primary-container text-white shadow-ambient hover:shadow-2xl border-none' : 'border-outline-variant/30 text-on-surface/80 hover:text-primary hover:bg-surface-container-high'}`}>
-                            {t.applyNow}
+                            {isCommercial ? t.requestInfo : t.applyNow}
                           </Button>
                         </Link>
                       </div>
@@ -311,15 +371,41 @@ export default async function ListingDetailPage({ params, searchParams }: { para
                   </h3>
                 </div>
                 
-                <p className="text-4xl font-bold text-on-surface tracking-tighter mb-2">
-                  ${Math.min(...listing.units.map((u) => u.rent)).toLocaleString()}
-                  <span className="text-xl font-medium text-on-surface/50">/{t.mo}</span>
-                </p>
-                <p className="text-sm font-medium text-primary mb-8 tracking-widest uppercase">{t.startingPrice}</p>
+                {isCommercial ? (() => {
+                  const cheapest = [...listing.units].sort((a, b) => a.rent - b.rent)[0];
+                  const pr = commercialPricing(cheapest);
+                  return (
+                    <>
+                      <p className="text-4xl font-bold text-on-surface tracking-tighter mb-2">
+                        {pr.perSf != null ? usd(pr.perSf) : usd(pr.base, false)}
+                        <span className="text-xl font-medium text-on-surface/50">{pr.perSf != null ? t.perSfYr : `/${t.mo}`}</span>
+                      </p>
+                      <p className="text-sm font-medium text-primary mb-2 tracking-widest uppercase">{t.forLease}</p>
+                      <p className="text-on-surface/70 mb-6 font-medium">
+                        {t.baseRent} {usd(pr.base, false)}/{t.mo}{pr.nnn != null && <> + {t.estNnn} {usd(pr.nnn)}/{t.mo}</>}
+                        {pr.nnn != null && <><br />{t.allIn} <span className="text-on-surface font-semibold">{usd(pr.total)}/{t.mo}</span></>}
+                      </p>
+                    </>
+                  );
+                })() : (
+                  <>
+                    <p className="text-4xl font-bold text-on-surface tracking-tighter mb-2">
+                      ${Math.min(...listing.units.map((u) => u.rent)).toLocaleString()}
+                      <span className="text-xl font-medium text-on-surface/50">/{t.mo}</span>
+                    </p>
+                    <p className="text-sm font-medium text-primary mb-8 tracking-widest uppercase">{t.startingPrice}</p>
+                  </>
+                )}
                 
-                <p className="text-on-surface/70 mb-8 leading-relaxed text-lg">
+                <p className="text-on-surface/70 mb-6 leading-relaxed text-lg">
                   {listing.type === "RESIDENTIAL" ? t.resAppDesc : t.comAppDesc}
                 </p>
+                {isCommercial && phone && (
+                  <a href={`tel:+1${phone.replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "")}`} className="flex items-center gap-3 rounded-xl bg-primary/10 px-4 py-3 text-primary font-semibold mb-6 hover:bg-primary/15 transition-colors">
+                    <Phone className="h-4 w-4" />
+                    {t.callOrText} {phone.replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "").replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3")}
+                  </a>
+                )}
 
                 {applyIsExternal && (
                   <a href={applyHref} target="_blank" rel="noopener noreferrer" className="block mb-3">
@@ -331,7 +417,7 @@ export default async function ListingDetailPage({ params, searchParams }: { para
                 
                 <Link href={isEs ? `/apply?propertyId=${listing.id}&lang=es` : `/apply?propertyId=${listing.id}`} className="block">
                   <Button size="lg" variant={applyIsExternal ? "outline" : "default"} className={`w-full h-14 rounded-xl transition-all duration-300 font-semibold text-lg ${applyIsExternal ? 'border-outline-variant/30 text-on-surface/80 hover:text-primary hover:bg-surface-container-high bg-transparent' : 'bg-gradient-to-br from-primary to-primary-container text-white shadow-ambient hover:shadow-2xl hover:-translate-y-1 border-none'}`}>
-                    {t.startApp}
+                    {isCommercial ? t.requestInfo : t.startApp}
                   </Button>
                 </Link>
                 

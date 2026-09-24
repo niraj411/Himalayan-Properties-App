@@ -26,6 +26,15 @@ export interface PropertyFlyerData {
   phone?: string | null;
   availability?: string;
   generatedOn: string;
+  /** Commercial mode: FOR LEASE, $/sf + NNN spec cells, no bed/bath. */
+  commercial?: boolean;
+  unitLabel?: string;
+  /** "$26.00" (annual base rent per sf) */
+  perSfLabel?: string;
+  /** "$1,074.53" (estimated NNN per month) */
+  nnnLabel?: string;
+  /** Replaces the residential lead line. */
+  tagline?: string;
 }
 
 const s = StyleSheet.create({
@@ -132,8 +141,9 @@ const s = StyleSheet.create({
 
 export function PropertyFlyer(d: PropertyFlyerData) {
   const initial = (d.company.name || "H").trim().charAt(0).toUpperCase();
+  const kind = d.commercial ? "For Lease" : "For Rent";
   return (
-    <Document title={`For Rent — ${d.headline}`} author={d.company.name}>
+    <Document title={`${kind} — ${d.headline}${d.unitLabel ? `, ${d.unitLabel}` : ""}`} author={d.company.name}>
       <Page size="LETTER" style={s.page}>
         <View style={s.top}>
           <View style={s.brand}>
@@ -143,7 +153,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
               <Text style={s.brandSub}>Property Management</Text>
             </View>
           </View>
-          <Text style={s.forrent}>FOR RENT</Text>
+          <Text style={s.forrent}>{kind.toUpperCase()}</Text>
         </View>
 
         {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}
@@ -151,7 +161,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
 
         <View style={s.cap}>
           {d.availability ? <Text style={s.badge}>{d.availability}</Text> : null}
-          <Text style={s.h1}>{d.headline}</Text>
+          <Text style={s.h1}>{d.unitLabel ? `${d.headline}, ${d.unitLabel}` : d.headline}</Text>
           <Text style={s.addr}>{d.addressLine}</Text>
         </View>
 
@@ -160,6 +170,22 @@ export function PropertyFlyer(d: PropertyFlyerData) {
             <Text style={s.priceVal}>{d.price ? money(d.price) : "Call"}</Text>
             <Text style={s.priceLbl}>{d.priceLabel || "per month"}</Text>
           </View>
+          {d.commercial ? (
+            <View style={s.specCells}>
+              <View style={s.spec}>
+                <Text style={s.specVal}>{d.perSfLabel ?? "Call"}</Text>
+                <Text style={s.specLbl}>Per SF / YR, NNN</Text>
+              </View>
+              <View style={s.spec}>
+                <Text style={s.specVal}>{d.nnnLabel ?? "—"}</Text>
+                <Text style={s.specLbl}>Est. NNN / MO</Text>
+              </View>
+              <View style={s.spec}>
+                <Text style={s.specVal}>{d.sqft ? d.sqft.toLocaleString() : d.typeLabel}</Text>
+                <Text style={s.specLbl}>{d.sqft ? "Sq Ft" : "Type"}</Text>
+              </View>
+            </View>
+          ) : (
           <View style={s.specCells}>
             <View style={s.spec}>
               <Text style={s.specVal}>{d.beds ?? "—"}</Text>
@@ -174,6 +200,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
               <Text style={s.specLbl}>{d.sqft ? "Sq Ft" : "Type"}</Text>
             </View>
           </View>
+          )}
         </View>
 
         <View style={s.body}>
@@ -186,7 +213,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
                 ))}
               </View>
             ) : null}
-            <Text style={s.lead}>Bright, updated &amp; move-in ready</Text>
+            <Text style={s.lead}>{d.tagline ?? "Bright, updated & move-in ready"}</Text>
             {d.description ? <Text style={s.desc}>{d.description}</Text> : null}
             {d.highlights.length > 0 ? (
               <View style={s.hl}>
@@ -202,7 +229,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
 
           <View style={s.right}>
             <Text style={s.scanLbl}>Point your camera</Text>
-            <Text style={s.scanBig}>Scan to see photos &amp; apply</Text>
+            <Text style={s.scanBig}>{d.commercial ? "Scan for photos, details & to request info" : "Scan to see photos & apply"}</Text>
             {d.qrSrc ? (
               // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt
               <Image src={d.qrSrc} style={s.qr} />
@@ -215,7 +242,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
 
         <View style={s.contact}>
           <View>
-            <Text style={s.callLbl}>Call or text to schedule a showing</Text>
+            <Text style={s.callLbl}>{d.commercial ? "Call or text to walk the space or send an LOI" : "Call or text to schedule a showing"}</Text>
             <Text style={s.callVal}>{d.phone || d.company.phone || d.listingUrl}</Text>
           </View>
           <Text style={s.callSite}>{d.company.name}</Text>

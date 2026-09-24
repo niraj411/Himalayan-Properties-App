@@ -3,6 +3,7 @@ import Image from "next/image";
 import { db } from "@/lib/db";
 import { Building2, Home, Store, MapPin, ArrowRight, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { commercialPricing } from "@/lib/commercial";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ async function getListings() {
       units: {
         where: { status: "VACANT" },
         orderBy: { unitNumber: "asc" },
-        select: { id: true, unitNumber: true, bedrooms: true, bathrooms: true, sqft: true, rent: true },
+        select: { id: true, unitNumber: true, bedrooms: true, bathrooms: true, sqft: true, rent: true, nnnMonthly: true },
       },
     },
     orderBy: { name: "asc" },
@@ -50,6 +51,9 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
     more: isEs ? "más" : "more",
     available: isEs ? "disponibles" : "available",
     details: isEs ? "Detalles" : "Details",
+    sf: isEs ? "pies²" : "sf",
+    baseRent: isEs ? "renta base" : "base",
+    forLease: isEs ? "En Arriendo" : "For Lease",
   };
 
   return (
@@ -130,12 +134,21 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {listings.map((listing) => {
+                const isCommercial = listing.type === "COMMERCIAL";
                 const minRent = Math.min(...listing.units.map((u) => u.rent));
                 const maxRent = Math.max(...listing.units.map((u) => u.rent));
-                const rentRange =
-                  minRent === maxRent
+                // Commercial bays quote annual base rent per sf (NNN); residential quotes $/mo.
+                const perSfs = listing.units.map((u) => commercialPricing(u).perSf).filter((x): x is number => x != null);
+                const rentRange = isCommercial
+                  ? perSfs.length > 0
+                    ? `$${Math.min(...perSfs).toFixed(2)}/${t.sf}/${isEs ? "año" : "yr"} NNN`
+                    : `$${minRent.toLocaleString()}/${isEs ? "mes" : "mo"} ${t.baseRent}`
+                  : minRent === maxRent
                     ? `$${minRent.toLocaleString()}/${isEs ? 'mes' : 'mo'}`
                     : `$${minRent.toLocaleString()}–$${maxRent.toLocaleString()}/${isEs ? 'mes' : 'mo'}`;
+                const rentSub = isCommercial && perSfs.length > 0
+                  ? `$${minRent.toLocaleString()}/${isEs ? "mes" : "mo"} ${t.baseRent}`
+                  : null;
 
                 return (
                   <div
@@ -164,7 +177,7 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
                       <div className="absolute top-4 left-4 z-10">
                         <span className="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-ambient backdrop-blur-md bg-surface/90 text-primary">
-                          {listing.type === "COMMERCIAL" ? t.commercial : t.residential}
+                          {isCommercial ? `${t.commercial} · ${t.forLease}` : t.residential}
                         </span>
                       </div>
                     </div>
@@ -183,8 +196,9 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
                         {listing.units.slice(0, 3).map((unit) => (
                           <span key={unit.id} className="text-xs px-3 py-1.5 bg-surface-container-low rounded-lg text-on-surface/80 font-medium">
                             {t.unit} #{unit.unitNumber}
-                            {unit.bedrooms ? ` · ${unit.bedrooms}${t.bed}` : ""}
-                            {unit.bathrooms ? `/${unit.bathrooms}${t.bath}` : ""}
+                            {isCommercial
+                              ? unit.sqft ? ` · ${unit.sqft.toLocaleString()} ${t.sf}` : ""
+                              : `${unit.bedrooms ? ` · ${unit.bedrooms}${t.bed}` : ""}${unit.bathrooms ? `/${unit.bathrooms}${t.bath}` : ""}`}
                           </span>
                         ))}
                         {listing.units.length > 3 && (
@@ -200,6 +214,7 @@ export default async function ListingsPage({ searchParams }: { searchParams: Pro
                             {listing.units.length} {listing.units.length === 1 && isEs ? 'disponible' : t.available}
                           </p>
                           <p className="font-bold text-on-surface text-lg">{rentRange}</p>
+                          {rentSub && <p className="text-xs text-on-surface/60 font-medium">{rentSub}</p>}
                         </div>
                         <Link href={isEs ? `/listings/${listing.id}?lang=es` : `/listings/${listing.id}`}>
                           <Button variant="ghost" className="text-primary hover:bg-surface-container-high rounded-xl font-medium px-4 transition-colors">

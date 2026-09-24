@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     const applications = await db.application.findMany({
-      include: { property: true },
+      include: { property: true, unit: { select: { unitNumber: true } } },
       orderBy: { createdAt: "desc" },
     });
 
@@ -47,17 +47,27 @@ export async function POST(request: Request) {
       businessName,
       taxReturnsUrl,
       bankStatementsUrl,
+      unitId,
+      intendedUse,
+      desiredTerm,
+      guarantorName,
     } = data;
 
     if (!firstName || !lastName || !email || !phone) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Validate commercial application required fields
-    if (applicationType === "COMMERCIAL") {
-      if (!businessName || !taxReturnsUrl || !bankStatementsUrl) {
-        return NextResponse.json({ error: "Commercial applications require business name, tax returns, and bank statements" }, { status: 400 });
-      }
+    // Commercial: business name is required; financial document links are optional
+    // at the inquiry stage (requested before an LOI is signed).
+    if (applicationType === "COMMERCIAL" && !businessName) {
+      return NextResponse.json({ error: "Commercial applications require a business name" }, { status: 400 });
+    }
+
+    // Only accept a unitId that belongs to the chosen property.
+    let validUnitId: string | null = null;
+    if (unitId && propertyId) {
+      const u = await db.unit.findFirst({ where: { id: unitId, propertyId }, select: { id: true } });
+      validUnitId = u?.id ?? null;
     }
 
     const application = await db.application.create({
@@ -79,10 +89,15 @@ export async function POST(request: Request) {
         references,
         additionalNotes,
         businessName,
-        taxReturnsUrl,
-        bankStatementsUrl,
+        taxReturnsUrl: taxReturnsUrl || null,
+        bankStatementsUrl: bankStatementsUrl || null,
+        unitId: validUnitId,
+        intendedUse: intendedUse || null,
+        desiredTerm: desiredTerm || null,
+        guarantorName: guarantorName || null,
         status: "PENDING",
       },
+      include: { unit: { select: { unitNumber: true } }, property: { select: { name: true } } },
     });
 
     // Notify admin of new application
@@ -92,7 +107,7 @@ export async function POST(request: Request) {
         await sendEmail({
           to: settings.companyEmail,
           subject: `New ${application.applicationType} Application from ${firstName} ${lastName}`,
-          body: `A new application has been submitted.\n\nApplicant: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}\nType: ${applicationType || "RESIDENTIAL"}\n\nPlease log in to the admin portal to review.`,
+          body: `A new application has been submitted.\n\nApplicant: ${firstName} ${lastName}${businessName ? ` (${businessName})` : ""}\nEmail: ${email}\nPhone: ${phone}\nType: ${applicationType || "RESIDENTIAL"}${application.property ? `\nProperty: ${application.property.name}${application.unit ? ` Unit ${application.unit.unitNumber}` : ""}` : ""}${intendedUse ? `\nIntended use: ${intendedUse}` : ""}${desiredTerm ? `\nDesired term: ${desiredTerm}` : ""}${guarantorName ? `\nGuarantor: ${guarantorName}` : ""}\n\nPlease log in to the admin portal to review.`,
         });
       }
     } catch (emailErr) {

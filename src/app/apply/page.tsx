@@ -43,6 +43,7 @@ function ApplyPageContent() {
   };
 
   const initialPropertyId = searchParams.get("propertyId") || "";
+  const initialUnitId = searchParams.get("unitId") || "";
 
   const [properties, setProperties] = useState<Property[]>([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -68,6 +69,10 @@ function ApplyPageContent() {
     businessName: "",
     taxReturnsUrl: "",
     bankStatementsUrl: "",
+    unitId: initialUnitId,
+    intendedUse: "",
+    desiredTerm: "",
+    guarantorName: "",
   });
 
   useEffect(() => {
@@ -157,12 +162,20 @@ function ApplyPageContent() {
     phone: isEs ? "Teléfono *" : "Phone *",
     businessAddress: isEs ? "Dirección del Negocio" : "Business Address",
     addressPlaceholder: isEs ? "Calle, Ciudad, Estado, Código Postal" : "Street, City, State, ZIP",
-    reqDocs: isEs ? "Documentos Requeridos" : "Required Documents",
+    reqDocs: isEs ? "Documentos Financieros" : "Financial Documents",
+    intendedUse: isEs ? "Uso previsto del local" : "Intended use of the space",
+    intendedUsePlaceholder: isEs ? "Ej. salón de uñas, oficina de seguros" : "e.g. nail salon, insurance office, retail",
+    desiredTerm: isEs ? "Plazo deseado" : "Desired lease term",
+    desiredTermPlaceholder: isEs ? "Ej. 5 años" : "e.g. 3 years, 5 years",
+    guarantorName: isEs ? "Garante personal (dueño / socio principal)" : "Personal guarantor (owner / principal)",
+    docsOptional: isEs
+      ? "Opcional por ahora. Puede enviar los documentos después de que hablemos, antes de firmar una carta de intención."
+      : "Optional for now. You can send these after we talk, before an LOI is signed.",
     reqDocsDesc: isEs 
       ? "Suba sus documentos a un servicio seguro (Google Drive, Dropbox, etc.) y pegue los enlaces aquí."
       : "Upload your documents to a secure file sharing service (Google Drive, Dropbox, etc.) and paste the share links below.",
-    taxReturns: isEs ? "Declaraciones de Impuestos (2 años) *" : "2 Years Corporate Tax Returns *",
-    bankStatements: isEs ? "Estados de Cuenta (3 meses) *" : "3 Months Bank Statements *",
+    taxReturns: isEs ? "Declaraciones de Impuestos (2 años)" : "2 Years Corporate Tax Returns",
+    bankStatements: isEs ? "Estados de Cuenta (3 meses)" : "3 Months Bank Statements",
     moveInDate: isEs ? "Fecha Deseada de Mudanza" : "Desired Move-in Date",
     additionalNotes: isEs ? "Notas Adicionales" : "Additional Notes",
     notesComPlaceholder: isEs ? "Cuéntenos sobre su negocio..." : "Tell us about your business and space requirements...",
@@ -397,17 +410,49 @@ function ApplyPageContent() {
                     />
                   </div>
 
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2 col-span-2">
+                      <Label htmlFor="intendedUse" className="text-sm">{t.intendedUse}</Label>
+                      <Input
+                        id="intendedUse"
+                        value={formData.intendedUse}
+                        onChange={(e) => setFormData({ ...formData, intendedUse: e.target.value })}
+                        placeholder={t.intendedUsePlaceholder}
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="desiredTerm" className="text-sm">{t.desiredTerm}</Label>
+                      <Input
+                        id="desiredTerm"
+                        value={formData.desiredTerm}
+                        onChange={(e) => setFormData({ ...formData, desiredTerm: e.target.value })}
+                        placeholder={t.desiredTermPlaceholder}
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="guarantorName" className="text-sm">{t.guarantorName}</Label>
+                      <Input
+                        id="guarantorName"
+                        value={formData.guarantorName}
+                        onChange={(e) => setFormData({ ...formData, guarantorName: e.target.value })}
+                        className="h-10"
+                      />
+                    </div>
+                  </div>
+
                   <div className="pt-3 border-t">
                     <div className="flex items-center gap-2 mb-3">
                       <FileText className="h-4 w-4 text-slate-500" />
                       <h3 className="font-medium text-slate-900 text-sm">{t.reqDocs}</h3>
                     </div>
 
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-4">
+                    <div className="p-3 bg-primary/10 rounded-lg mb-4">
                       <div className="flex items-start gap-2">
-                        <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                        <p className="text-amber-800 text-xs">
-                          {t.reqDocsDesc}
+                        <AlertCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <p className="text-primary text-xs">
+                          {t.docsOptional}
                         </p>
                       </div>
                     </div>
@@ -424,7 +469,6 @@ function ApplyPageContent() {
                           onChange={(e) => setFormData({ ...formData, taxReturnsUrl: e.target.value })}
                           placeholder="https://drive.google.com/..."
                           className="h-10"
-                          required
                         />
                       </div>
                       <div className="space-y-2">
@@ -438,7 +482,6 @@ function ApplyPageContent() {
                           onChange={(e) => setFormData({ ...formData, bankStatementsUrl: e.target.value })}
                           placeholder="https://drive.google.com/..."
                           className="h-10"
-                          required
                         />
                       </div>
                     </div>

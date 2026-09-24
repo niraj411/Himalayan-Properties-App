@@ -67,6 +67,7 @@ interface Unit {
   bathrooms: number | null;
   sqft: number | null;
   rent: number;
+  nnnMonthly: number | null;
   status: string;
   tenants: {
     id: string;
@@ -118,6 +119,7 @@ export default function PropertyDetailPage({
     bathrooms: "",
     sqft: "",
     rent: "",
+    nnnMonthly: "",
     status: "VACANT",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -164,6 +166,7 @@ export default function PropertyDetailPage({
             : null,
           sqft: unitFormData.sqft ? parseInt(unitFormData.sqft) : null,
           rent: parseFloat(unitFormData.rent),
+          nnnMonthly: unitFormData.nnnMonthly ? parseFloat(unitFormData.nnnMonthly) : null,
         }),
       });
 
@@ -177,6 +180,7 @@ export default function PropertyDetailPage({
           bathrooms: "",
           sqft: "",
           rent: "",
+          nnnMonthly: "",
           status: "VACANT",
         });
         fetchProperty();
@@ -198,6 +202,7 @@ export default function PropertyDetailPage({
       bathrooms: unit.bathrooms?.toString() || "",
       sqft: unit.sqft?.toString() || "",
       rent: unit.rent.toString(),
+      nnnMonthly: unit.nnnMonthly?.toString() || "",
       status: unit.status,
     });
     setIsUnitDialogOpen(true);
@@ -230,6 +235,7 @@ export default function PropertyDetailPage({
       bathrooms: "",
       sqft: "",
       rent: "",
+      nnnMonthly: "",
       status: "VACANT",
     });
     setIsUnitDialogOpen(true);
@@ -517,7 +523,7 @@ export default function PropertyDetailPage({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="rent">Monthly Rent ($)</Label>
+                    <Label htmlFor="rent">{property.type === "COMMERCIAL" ? "Base Rent / mo ($)" : "Monthly Rent ($)"}</Label>
                     <Input
                       id="rent"
                       type="number"
@@ -530,6 +536,24 @@ export default function PropertyDetailPage({
                       required
                     />
                   </div>
+                  {property.type === "COMMERCIAL" && (
+                    <div className="space-y-2 col-span-2">
+                      <Label htmlFor="nnnMonthly">Est. NNN / CAM per month ($)</Label>
+                      <Input
+                        id="nnnMonthly"
+                        type="number"
+                        step="0.01"
+                        value={unitFormData.nnnMonthly}
+                        onChange={(e) =>
+                          setUnitFormData({ ...unitFormData, nnnMonthly: e.target.value })
+                        }
+                        placeholder="1074.53"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Shown on the public listing and flyer as the estimated NNN for a vacant bay. Base rent + NNN = advertised total.
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-2">
@@ -704,6 +728,14 @@ export default function PropertyDetailPage({
                             <Pencil className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
+                          {unit.status === "VACANT" && (
+                            <DropdownMenuItem asChild>
+                              <a href={`/api/properties/${property.id}/flyer?unitId=${unit.id}`} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                Flyer PDF (this unit)
+                              </a>
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem
                             onClick={() => handleDeleteUnit(unit.id)}
                             className="text-red-600"
