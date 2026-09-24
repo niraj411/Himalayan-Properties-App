@@ -112,7 +112,7 @@ async function getData() {
     return ad - bd;
   });
 
-  const activeMonths = MONTHS.map((_, i) => i).filter((i) => rows.some((r) => monthly[r.id][i] > 0));
+  const activeMonths = MONTHS.map((_, i) => i).filter((i) => rows.some((r) => monthly[r.id][i] !== 0));
 
   return { rows, openBills, monthly, activeMonths, year, portfolioYtd, portfolioTrailing };
 }
@@ -282,13 +282,13 @@ export default async function UtilitiesOverviewPage() {
                   </TableHeader>
                   <TableBody>
                     {rows
-                      .filter((r) => r.ytd > 0)
+                      .filter((r) => r.utilities.some((u) => u.billCount > 0))
                       .map((r) => (
                         <TableRow key={r.id}>
                           <TableCell className="font-medium">{r.name}</TableCell>
                           {activeMonths.map((m) => (
                             <TableCell key={m} className="text-right tabular-nums text-slate-600">
-                              {monthly[r.id][m] > 0 ? money(monthly[r.id][m]) : ""}
+                              {monthly[r.id][m] !== 0 ? money(monthly[r.id][m]) : ""}
                             </TableCell>
                           ))}
                           <TableCell className="text-right tabular-nums font-medium">{money(r.ytd)}</TableCell>
