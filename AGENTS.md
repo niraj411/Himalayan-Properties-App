@@ -61,7 +61,7 @@ Route groups under `src/app/` (parentheses = layout grouping, not URL segments):
 
 - **`(admin)/admin/*`** — admin portal: `properties`, `properties/[id]`, `tenants`,
   `leases`, `leases/[id]`, `charges`, `payments`, `rent-roll`, `accounting`,
-  `applications`, `maintenance`, `insurance`, `notices`, `messages`, `settings`
+  `applications`, `maintenance`, `insurance`, `notices`, `messages`, `utilities`, `settings`
 - **`(tenant)/dashboard/*`** — tenant portal: `lease`, `balance`, `payments`,
   `maintenance`, `utilities`, `notices`, `profile`
 - **`(auth)/login`, `(auth)/register`**
@@ -71,7 +71,7 @@ Route groups under `src/app/` (parentheses = layout grouping, not URL segments):
 `charges`, `cron`, `email`, `escalations`, `files`, `insurance`, `leases`,
 `listings`, `maintenance`, `notices`, `payments`, `properties`, `quickbooks`,
 `rent-roll`, `register`, `settings`, `tenant-payments`, `tenants`, `units`,
-`upload`, `utilities`.
+`upload`, `utilities`, `utility-bills` (admin-only).
 
 **`src/lib/`** (domain logic — reuse these, don't re-implement):
 | File | Purpose |
@@ -125,6 +125,12 @@ Important model semantics — read before touching billing or files:
 - **Utility** — per-property/unit providers. Fields `accountNumber`, `monthlyCost`,
   `dueDay`, `internalNotes` are **ADMIN-ONLY — never send to tenants**;
   `tenantNotes` + `tenantVisible` are the tenant-facing parts.
+- **UtilityBill** — one provider statement (e.g. an Xcel monthly bill) against a
+  `Utility`: period, `amount`, usage (`kwh`/`therms`/`gallons`), `dueDate`, `paidAt`,
+  `documentUrl` (private statement PDF), `source` MANUAL/AGENT/IMPORT. **ADMIN-ONLY,
+  no tenant-scoped API exists.** Unique on (utility, periodStart, periodEnd) so
+  re-imports upsert. UI: property page "Utility bills" section + `/admin/utilities`
+  portfolio overview. Helpers in `lib/utilities.ts` (`billStatus`, `formatBillPeriod`).
 - **MaintenanceRequest** — completing one can spawn a `Charge` (`chargeId` prevents
   duplicate billing); `contractor`/`repairCost`/`paymentMethod` are internal.
 - **Settings** — singleton: company info, Baselane link, Zillow URL, email toggle,
@@ -215,7 +221,8 @@ take **safe writes**, not just reads:
 - Bearer **`AGENT_API_TOKEN`** (in `.env`). Exempt from NextAuth middleware.
 - Allowed actions (each writes a viewable record, reusing app logic):
   `create_charge`, `mark_charge_paid`, `waive_charge`, `record_payment`,
-  `send_notice`, `request_insurance`, `log_message`, `add_utility`, `announce`
+  `send_notice`, `request_insurance`, `log_message`, `add_utility`, `log_utility_bill`
+  (upsert an owner-paid utility statement; resolve by `utilityId` or property + type), `announce`
   (property-wide ANNOUNCEMENT to all ACTIVE leases; `deliver` PORTAL|EMAIL).
   **No deletes, no settings edits, no lease edits.** Outward emails need confirmation.
 
@@ -259,3 +266,13 @@ not in this repo**:
 
 When you need a "who/where" detail (an address, a contact, an account), pull it from
 those sources or the database — do not hardcode tenant PII into committed files.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

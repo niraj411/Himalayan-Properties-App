@@ -56,7 +56,8 @@ model Unit {
   bedrooms   Int?
   bathrooms  Float?
   sqft       Int?
-  rent       Float
+  rent       Float    // residential: monthly rent; commercial: BASE rent per month
+  nnnMonthly Float?   // commercial only: estimated NNN/CAM per month for marketing a vacant bay
   status     String   @default("VACANT") // VACANT, OCCUPIED, MAINTENANCE
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -66,6 +67,7 @@ model Unit {
   leases              Lease[]
   maintenanceRequests MaintenanceRequest[]
   utilities           Utility[]
+  applications        Application[]
 
   @@unique([propertyId, unitNumber])
 }
@@ -94,8 +96,38 @@ model Utility {
 
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   unit     Unit?    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  bills    UtilityBill[]
 
   @@index([propertyId])
+}
+
+// One provider statement for a Utility (e.g. an Xcel monthly bill). ADMIN-ONLY:
+// never exposed through any tenant-scoped API. Usage columns are optional so a
+// water or HOA bill can log just the amount. (utilityId, periodStart, periodEnd)
+// is unique so agent/import re-runs upsert instead of duplicating.
+model UtilityBill {
+  id            String    @id @default(cuid())
+  utilityId     String
+  periodStart   DateTime
+  periodEnd     DateTime
+  dueDate       DateTime?
+  amount        Float
+  kwh           Float?    // electric usage
+  therms        Float?    // gas usage
+  gallons       Float?    // water usage
+  paidAt        DateTime?
+  paymentMethod String?   // AUTOPAY, CARD, ACH, CHECK, OTHER
+  documentUrl   String?   // private-uploads statement PDF, served via /api/files
+  source        String    @default("MANUAL") // MANUAL | AGENT | IMPORT
+  externalId    String?   // provider statement / invoice number
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  utility Utility @relation(fields: [utilityId], references: [id], onDelete: Cascade)
+
+  @@unique([utilityId, periodStart, periodEnd])
+  @@index([utilityId, periodEnd])
 }
 
 model Tenant {
@@ -267,13 +299,18 @@ model Application {
   additionalNotes String?
   // Commercial application fields
   businessName        String?
-  taxReturnsUrl       String?  // 2 years of corporate tax returns
-  bankStatementsUrl   String?  // 3 months of bank statements
+  taxReturnsUrl       String?  // 2 years of corporate tax returns (optional at inquiry stage)
+  bankStatementsUrl   String?  // 3 months of bank statements (optional at inquiry stage)
+  unitId              String?  // which vacant unit they are applying for
+  intendedUse         String?  // e.g. "nail salon", "insurance office"
+  desiredTerm         String?  // e.g. "5 years"
+  guarantorName       String?  // personal guarantor (owner/principal)
   status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   property Property? @relation(fields: [propertyId], references: [id])
+  unit     Unit?     @relation(fields: [unitId], references: [id], onDelete: SetNull)
 }
 
 model MaintenanceRequest {

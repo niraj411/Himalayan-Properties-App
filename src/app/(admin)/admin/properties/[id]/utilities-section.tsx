@@ -158,7 +158,7 @@ export default function UtilitiesSection({
   };
 
   const remove = async (id: string) => {
-    if (!(await confirmDialog({ title: "Delete utility?", description: "This permanently deletes the utility record.", confirmText: "Delete", destructive: true }))) return;
+    if (!(await confirmDialog({ title: "Delete utility?", description: "This permanently deletes the utility record and every bill logged against it.", confirmText: "Delete", destructive: true }))) return;
     try {
       const res = await fetch(`/api/utilities/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();

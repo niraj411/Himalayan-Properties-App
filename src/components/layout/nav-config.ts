@@ -83,6 +83,7 @@ export const adminNavConfig: NavConfig = {
         { name: "Payments", href: "/admin/payments", icon: CreditCard },
         { name: "Outstanding", href: "/admin/charges", icon: Receipt },
         { name: "Accounting", href: "/admin/accounting", icon: Calculator },
+        { name: "Utilities", href: "/admin/utilities", icon: Plug },
       ],
     },
     {

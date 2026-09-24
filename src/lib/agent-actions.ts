@@ -18,7 +18,7 @@ import { sendEmail, sendTenantEmail } from "@/lib/email";
 import { postAnnouncement } from "@/lib/announcements";
 import { renderNotice, type NoticeType } from "@/lib/notices";
 import { insuranceCopy } from "@/lib/insurance";
-import { UTILITY_TYPES } from "@/lib/utilities";
+import { UTILITY_TYPES, parseDateOnly, parseOptionalNumber, formatBillPeriod } from "@/lib/utilities";
 import { chargeRemaining, openBalance } from "@/lib/ledger";
 import { allocatePaymentToCharge } from "@/lib/ledger-db";
 
@@ -392,6 +392,7 @@ export const AGENT_ACTIONS = [
   "request_insurance",
   "log_message",
   "add_utility",
+  "log_utility_bill",
   "announce",
 ] as const;
 export type AgentAction = (typeof AGENT_ACTIONS)[number];
@@ -407,6 +408,7 @@ export async function runAgentAction(action: string, params: Record<string, unkn
       case "request_insurance": return await requestInsurance(params);
       case "log_message": return await logMessage(params);
       case "add_utility": return await addUtility(params);
+      case "log_utility_bill": return await logUtilityBill(params);
       case "announce": return await announce(params);
       default:
         return { ok: false, summary: `Unknown or unsupported action "${action}". Allowed: ${AGENT_ACTIONS.join(", ")}.`, error: "unknown_action" };
@@ -419,6 +421,89 @@ export async function runAgentAction(action: string, params: Record<string, unkn
 
 // Compact, name-resolvable snapshot so an agent can map free-text -> the right
 // lease/property before issuing an action. Read-only.
+// log_utility_bill — record one provider statement (e.g. an Xcel monthly bill)
+// against a Utility row. ADMIN-ONLY data; never surfaces to tenants. Resolves the
+// utility by utilityId, or by property (name/id) + type (ELECTRIC/GAS/...) and an
+// optional provider/accountNumber hint when a property has several of one type.
+// Same (utility, periodStart, periodEnd) re-logged updates instead of duplicating,
+// so a scraper can safely re-run over a statement history.
+async function logUtilityBill(p: Record<string, unknown>): Promise<AgentActionResult> {
+  let utility = null as Awaited<ReturnType<typeof db.utility.findFirst>> | null;
+  if (typeof p.utilityId === "string" && p.utilityId) {
+    utility = await db.utility.findUnique({ where: { id: p.utilityId } });
+    if (!utility) throw new Error(`No utility with id ${p.utilityId}.`);
+  } else {
+    let propertyId = p.propertyId as string | undefined;
+    if (!propertyId) {
+      const needle = String(p.property || "").trim().toLowerCase();
+      if (!needle) throw new Error("Specify utilityId, or a property (name or propertyId) plus type.");
+      const props = await db.property.findMany();
+      const match = props.filter((pr) => pr.name.toLowerCase().includes(needle) || pr.address.toLowerCase().includes(needle));
+      if (match.length === 0) throw new Error(`No property matched "${p.property}".`);
+      if (match.length > 1) throw new Error(`"${p.property}" matched multiple properties: ${match.map((m) => m.name).join("; ")}.`);
+      propertyId = match[0].id;
+    }
+    const type = typeof p.type === "string" ? p.type.toUpperCase() : "";
+    if (!UTILITY_TYPES.includes(type as never)) {
+      throw new Error(`Specify a utility type. One of: ${UTILITY_TYPES.join(", ")}.`);
+    }
+    const candidates = await db.utility.findMany({ where: { propertyId, type } });
+    const hint = String(p.provider || p.providerName || "").trim().toLowerCase();
+    const acct = String(p.accountNumber || "").trim();
+    let filtered = candidates;
+    if (acct) filtered = filtered.filter((u) => (u.accountNumber || "").replace(/\D/g, "") === acct.replace(/\D/g, ""));
+    else if (hint) filtered = filtered.filter((u) => u.providerName.toLowerCase().includes(hint));
+    if (filtered.length === 0) {
+      throw new Error(
+        candidates.length === 0
+          ? `That property has no ${type} utility yet. Add one first (add_utility) so the bill has an account to attach to.`
+          : `No ${type} utility matched provider "${hint || acct}". Options: ${candidates.map((u) => `${u.providerName}${u.accountNumber ? ` #${u.accountNumber}` : ""} (${u.id})`).join("; ")}.`
+      );
+    }
+    if (filtered.length > 1) {
+      throw new Error(`Multiple ${type} utilities match. Pass utilityId or accountNumber: ${filtered.map((u) => `${u.providerName}${u.accountNumber ? ` #${u.accountNumber}` : ""} (${u.id})`).join("; ")}.`);
+    }
+    utility = filtered[0];
+  }
+
+  const periodStart = parseDateOnly(p.periodStart);
+  const periodEnd = parseDateOnly(p.periodEnd);
+  if (!periodStart || !periodEnd) throw new Error("periodStart and periodEnd (YYYY-MM-DD) are required.");
+  if (periodEnd < periodStart) throw new Error("periodEnd must be on or after periodStart.");
+  const amount = parseOptionalNumber(p.amount, "amount");
+  if (amount === null) throw new Error("amount is required.");
+
+  const fields = {
+    dueDate: parseDateOnly(p.dueDate),
+    amount,
+    kwh: parseOptionalNumber(p.kwh, "kwh"),
+    therms: parseOptionalNumber(p.therms, "therms"),
+    gallons: parseOptionalNumber(p.gallons, "gallons"),
+    paidAt: parseDateOnly(p.paidAt),
+    paymentMethod: p.paymentMethod ? String(p.paymentMethod).toUpperCase() : null,
+    documentUrl: p.documentUrl ? String(p.documentUrl) : null,
+    externalId: p.externalId ? String(p.externalId) : null,
+    notes: p.notes ? String(p.notes) : null,
+  };
+
+  const bill = await db.utilityBill.upsert({
+    where: { utilityId_periodStart_periodEnd: { utilityId: utility.id, periodStart, periodEnd } },
+    create: { utilityId: utility.id, periodStart, periodEnd, source: "AGENT", ...fields },
+    update: { source: "AGENT", ...fields },
+    include: { utility: { include: { property: true } } },
+  });
+  const usage = [
+    bill.kwh != null ? `${Math.round(bill.kwh)} kWh` : null,
+    bill.therms != null ? `${Math.round(bill.therms)} therms` : null,
+    bill.gallons != null ? `${Math.round(bill.gallons)} gal` : null,
+  ].filter(Boolean).join(", ");
+  return {
+    ok: true,
+    summary: `Logged ${bill.utility.type} bill of ${money(bill.amount)} for ${bill.utility.property.name} (${bill.utility.providerName}), ${formatBillPeriod(bill.periodStart, bill.periodEnd)}${usage ? `, ${usage}` : ""}${bill.paidAt ? ", paid" : bill.dueDate ? `, due ${bill.dueDate.toLocaleDateString("en-US", { timeZone: "UTC" })}` : ""}.`,
+    record: bill,
+  };
+}
+
 export async function getAgentContext() {
   const properties = await db.property.findMany({
     include: { units: { select: { id: true, unitNumber: true, status: true } } },
