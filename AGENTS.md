@@ -222,7 +222,7 @@ take **safe writes**, not just reads:
 - Allowed actions (each writes a viewable record, reusing app logic):
   `create_charge`, `mark_charge_paid`, `waive_charge`, `record_payment`,
   `send_notice`, `request_insurance`, `log_message`, `add_utility`, `log_utility_bill`
-  (upsert an owner-paid utility statement; resolve by `utilityId` or property + type), `announce`
+  (upsert an owner-paid utility statement; resolve by `utilityId` or property + type, optional `unit`; whole-property account wins when several match), `announce`
   (property-wide ANNOUNCEMENT to all ACTIVE leases; `deliver` PORTAL|EMAIL).
   **No deletes, no settings edits, no lease edits.** Outward emails need confirmation.
 
