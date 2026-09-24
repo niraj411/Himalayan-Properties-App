@@ -65,6 +65,7 @@ const s = StyleSheet.create({
   brandSub: { fontSize: 7, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,0.75)" },
   forrent: { fontSize: 18, fontFamily: "Helvetica-Bold", color: "#ffffff", letterSpacing: 1 },
   hero: { height: 250, width: "100%", objectFit: "cover" },
+  heroCompact: { height: 215, width: "100%", objectFit: "cover" },
   heroPlaceholder: { height: 250, width: "100%", backgroundColor: "#e9e5f2" },
   cap: { paddingHorizontal: 34, paddingTop: 16 },
   badge: {
@@ -139,9 +140,15 @@ const s = StyleSheet.create({
   gen: { textAlign: "center", fontSize: 7, color: colors.muted, marginTop: 14 },
 });
 
+const prettyPhone = (raw: string) => {
+  const digits = raw.replace(/\D/g, "").replace(/^1(?=\d{10}$)/, "");
+  return digits.length === 10 ? `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}` : raw;
+};
+
 export function PropertyFlyer(d: PropertyFlyerData) {
   const initial = (d.company.name || "H").trim().charAt(0).toUpperCase();
   const kind = d.commercial ? "For Lease" : "For Rent";
+  const phone = d.phone || d.company.phone;
   return (
     <Document title={`${kind} — ${d.headline}${d.unitLabel ? `, ${d.unitLabel}` : ""}`} author={d.company.name}>
       <Page size="LETTER" style={s.page}>
@@ -157,7 +164,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
         </View>
 
         {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}
-        {d.heroSrc ? <Image src={d.heroSrc} style={s.hero} /> : <View style={s.heroPlaceholder} />}
+        {d.heroSrc ? <Image src={d.heroSrc} style={d.commercial ? s.heroCompact : s.hero} /> : <View style={s.heroPlaceholder} />}
 
         <View style={s.cap}>
           {d.availability ? <Text style={s.badge}>{d.availability}</Text> : null}
@@ -229,7 +236,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
 
           <View style={s.right}>
             <Text style={s.scanLbl}>Point your camera</Text>
-            <Text style={s.scanBig}>{d.commercial ? "Scan for photos, details & to request info" : "Scan to see photos & apply"}</Text>
+            <Text style={s.scanBig}>{d.commercial ? "Scan for photos & details" : "Scan to see photos & apply"}</Text>
             {d.qrSrc ? (
               // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt
               <Image src={d.qrSrc} style={s.qr} />
@@ -243,7 +250,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
         <View style={s.contact}>
           <View>
             <Text style={s.callLbl}>{d.commercial ? "Call or text to walk the space or send an LOI" : "Call or text to schedule a showing"}</Text>
-            <Text style={s.callVal}>{d.phone || d.company.phone || d.listingUrl}</Text>
+            <Text style={s.callVal}>{phone ? prettyPhone(phone) : d.listingUrl}</Text>
           </View>
           <Text style={s.callSite}>{d.company.name}</Text>
         </View>

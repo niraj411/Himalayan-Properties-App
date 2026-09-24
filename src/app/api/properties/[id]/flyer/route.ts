@@ -75,17 +75,27 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (thumbs.length >= 2) break;
   }
 
-  const listingUrl = `${new URL(req.url).origin}/listings/${property.id}`;
+  // Behind the CloudPanel proxy req.url reports the internal origin (localhost),
+  // so build public links from the configured site URL first.
+  const fwdHost = req.headers.get("x-forwarded-host");
+  const fwdProto = req.headers.get("x-forwarded-proto") ?? "https";
+  const origin =
+    process.env.NEXTAUTH_URL?.replace(/\/$/, "") ||
+    (fwdHost ? `${fwdProto}://${fwdHost}` : new URL(req.url).origin);
+  const listingUrl = `${origin}/listings/${property.id}`;
   const qrSrc = await qrDataUrl(listingUrl);
 
   const typeLabel =
     property.units.length === 2 ? "Duplex" : property.type === "COMMERCIAL" ? "Commercial" : "Residential";
-  const firstPara = (property.description ?? "").split(/\n\s*\n/)[0]?.trim().slice(0, 340) || null;
-  // Commercial flyers lead with the description's first sentence instead of the
-  // residential "move-in ready" line.
-  const tagline = commercial
-    ? (firstPara?.split(/(?<=[.!?])\s/)[0]?.slice(0, 90) ?? "Retail / office space for lease")
-    : undefined;
+  const rawFirst = (property.description ?? "").split(/\n\s*\n/)[0]?.trim() || "";
+  // Commercial flyers lead with the description's first sentence as the tagline
+  // and print the rest (capped) below it, so the sentence is not shown twice and
+  // the single page holds the contact strip.
+  const sentences = rawFirst.split(/(?<=[.!?])\s+/);
+  const tagline = commercial ? (sentences[0]?.slice(0, 90) || "Retail / office space for lease") : undefined;
+  const firstPara = commercial
+    ? sentences.slice(1).join(" ").trim().slice(0, 230) || null
+    : rawFirst.slice(0, 340) || null;
 
   const doc = PropertyFlyer({
     company,
