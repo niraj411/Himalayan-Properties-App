@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>655 S Federal Blvd Unit A — For Lease Banner 24x36</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="_shared.css"/>
+<style>
+  @page { size:24in 36in; margin:0; }
+  .page { width:24in; height:36in; background:#fff; margin:18px auto; box-shadow:0 20px 60px rgba(30,20,60,.25); display:flex; flex-direction:column; overflow:hidden; }
+  .banner { background:linear-gradient(120deg,var(--violet),var(--violet2)); color:#fff; text-align:center; padding:1.2in 1in 1in; }
+  .banner h1 { margin:0; font-size:5.4in; line-height:.95; font-weight:800; letter-spacing:.04em; }
+  .banner .sub { margin-top:.4in; font-size:1in; letter-spacing:.2em; text-transform:uppercase; font-weight:800; color:rgba(255,255,255,.92); }
+  .mid { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:1in; gap:.7in; }
+  .spec { font-size:2.1in; font-weight:600; font-style:italic; line-height:1.05; }
+  .price { font-size:1.35in; font-weight:800; color:var(--violet); letter-spacing:.02em; }
+  .price span { display:block; font-size:.6in; color:var(--muted); font-weight:700; letter-spacing:.16em; text-transform:uppercase; margin-top:.15in; }
+  .call { background:var(--ink); color:#fff; border-radius:1in; padding:1in 2in; }
+  .call small { display:block; font-size:.7in; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.6); font-weight:800; }
+  .call b { display:block; font-size:3.6in; line-height:1; margin-top:.2in; }
+  .bottom { display:flex; align-items:center; justify-content:space-between; padding:1in 2in 1.4in; }
+  .qr { width:6.5in; height:6.5in; padding:.35in; background:#fff; border:.18in solid var(--violet); border-radius:.9in; }
+  .qr img { width:100%; height:100%; display:block; image-rendering:pixelated; }
+  .site { text-align:left; }
+  .site b { display:block; font-size:1.4in; font-weight:800; color:var(--violet); }
+  .site span { display:block; font-size:.75in; color:var(--muted); font-weight:700; margin-top:.2in; }
+</style>
+</head>
+<body>
+<button class="print-btn no-print" onclick="window.print()">Print / Save PDF</button>
+<div class="page">
+  <div class="banner">
+    <h1 class="serif">FOR LEASE</h1>
+    <div class="sub">Retail · Office · Salon</div>
+  </div>
+  <div class="mid">
+    <div class="spec serif">1,008 sq ft<br/>Unit A</div>
+    <div class="price">$26 / sf NNN<span>3 to 5 year term · Available now</span></div>
+    <div class="call">
+      <small>Call or text</small>
+      <b class="serif">(510) 388-5124</b>
+    </div>
+  </div>
+  <div class="bottom">
+    <div class="site"><b>himalayanprop.cloud</b><span>Scan for photos, pricing and to request info</span></div>
+    <div class="qr"><img src="assets/qr-listing.png" alt="QR code to the listing"/></div>
+  </div>
+</div>
+</body>
+</html>
