@@ -68,3 +68,6 @@ tenant-records/
 
 # Legal matter files (eviction notices, demand letters, case logs — contain PII; never commit)
 /legal
+
+# keep the template even though .env* is ignored
+!.env.example

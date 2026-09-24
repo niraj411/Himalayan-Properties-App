@@ -5,7 +5,7 @@
 > repo** so context travels with the code. Keep it current when architecture,
 > conventions, or the deploy process change.
 >
-> Last synced: 2026-06-26.
+> Last synced: 2026-09-23.
 
 ---
 
@@ -150,7 +150,8 @@ Anything in Next.js `public/` is served to the open internet with **no auth**.
 **Every capability = UI action + API route + persisted/viewable record.** Do not do
 real work via throwaway VPS scripts — anything done by script is invisible to the
 owner and unmaintainable (e.g. an email sent by script leaves no Message/Notice log).
-- `prisma/add-*.ts` seeds are acceptable **only** for one-time bulk data imports.
+- One-time bulk import scripts are acceptable **only** for that purpose; they live in
+  `prisma/archive/` once run (keep `prisma/seed.ts` + `generate-tenant-records.ts` live).
 - Ongoing create/edit goes through the admin forms + `/api/*` routes.
 - Outbound email/notices route through the app (`lib/email.ts` + `Notice` model),
   never direct SMTP scripts.
@@ -223,27 +224,23 @@ take **safe writes**, not just reads:
 ## 9. Deploy
 
 Production runs on a **Hostinger VPS** (Ubuntu 24.04 + CloudPanel), under **PM2**
-(process `himalayan-prop`, port **3002** behind the CloudPanel proxy). It is **not**
-Docker, despite the repo's `Dockerfile`/`docker-compose.yml`. App lives at
+(process `himalayan-prop` = `npm start`, port **3002** behind the CloudPanel proxy).
+It is **not** Docker (the old Dockerfile was removed 2026-09-23). App lives at
 `/home/himalayanprop/htdocs/himalayanprop.cloud/`; DB at `data/himalayan.db`.
 
 > Connection details (VPS host/IP, SSH key path) are kept in the local
 > `~/.claude/commands/himalayan.md` and the owner's environment, not duplicated here.
 
-**Standalone gotcha (critical):** Next's standalone build does **not** copy `public/`
-or `private-uploads/`. After every `npm run build` you must mirror both into
-`.next/standalone/`, or photos/PDFs 404. The deploy one-liner does this:
+**Deploy one-liner** (run on the VPS in the app directory). Next runs as a regular
+`next start` build under PM2; `output: "standalone"` was dropped on 2026-09-23, so
+`public/` and `private-uploads/` are served straight from the app root (no mirroring):
 
 ```bash
-git pull && npm install && npx prisma db push && npm run build \
-  && mkdir -p .next/standalone/public/uploads/properties .next/standalone/private-uploads \
-  && cp -ru public/uploads/. .next/standalone/public/uploads/ \
-  && cp -ru private-uploads/. .next/standalone/private-uploads/ \
-  && pm2 restart himalayan-prop
+git pull && npm install && npx prisma db push && npm run build && pm2 restart himalayan-prop
 ```
 
-Seed scripts (`prisma/add-*.ts`) are **not** auto-run by deploy; run them manually on
-the VPS for one-time data imports, then re-mirror `private-uploads/` and `pm2 restart`.
+One-time import scripts (`prisma/archive/*.ts`) are **not** auto-run by deploy; run them
+manually on the VPS with `npx tsx` when needed, then `pm2 restart himalayan-prop`.
 
 **Backups:** SQLite `.backup` to `/root/db-backups/` on the VPS, pulled offsite via
 `scp`. No automated nightly yet (known gap).

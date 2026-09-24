@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import { isCommonArea } from "@/lib/units";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import UtilitiesSection from "./utilities-section";
+import UtilityBillsSection from "./utility-bills-section";
 import {
   Dialog,
   DialogContent,
@@ -122,7 +123,7 @@ export default function PropertyDetailPage({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
-  const fetchProperty = async () => {
+  const fetchProperty = useCallback(async () => {
     try {
       const response = await fetch(`/api/properties/${id}`);
       if (response.ok) {
@@ -137,11 +138,11 @@ export default function PropertyDetailPage({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, router]);
 
   useEffect(() => {
     fetchProperty();
-  }, [id]);
+  }, [fetchProperty]);
 
   const handleUnitSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -722,6 +723,11 @@ export default function PropertyDetailPage({
       </Card>
 
       <UtilitiesSection
+        propertyId={property.id}
+        units={property.units.map((u) => ({ id: u.id, unitNumber: u.unitNumber }))}
+      />
+
+      <UtilityBillsSection
         propertyId={property.id}
         units={property.units.map((u) => ({ id: u.id, unitNumber: u.unitNumber }))}
       />

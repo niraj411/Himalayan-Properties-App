@@ -146,6 +146,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
           <Text style={s.forrent}>FOR RENT</Text>
         </View>
 
+        {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}
         {d.heroSrc ? <Image src={d.heroSrc} style={s.hero} /> : <View style={s.heroPlaceholder} />}
 
         <View style={s.cap}>
@@ -180,6 +181,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
             {d.thumbs.length > 0 ? (
               <View style={s.thumbs}>
                 {d.thumbs.slice(0, 2).map((t, i) => (
+                  // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt
                   <Image key={i} src={t} style={s.thumb} />
                 ))}
               </View>
@@ -202,6 +204,7 @@ export function PropertyFlyer(d: PropertyFlyerData) {
             <Text style={s.scanLbl}>Point your camera</Text>
             <Text style={s.scanBig}>Scan to see photos &amp; apply</Text>
             {d.qrSrc ? (
+              // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt
               <Image src={d.qrSrc} style={s.qr} />
             ) : (
               <View style={s.qrPlaceholder} />

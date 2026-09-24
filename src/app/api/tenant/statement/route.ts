@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -13,7 +12,7 @@ export const dynamic = "force-dynamic";
 // Resolves the lease server-side so the balance page needs no leaseId. Picks the
 // most recent ACTIVE lease (falling back to the newest lease) when a tenant has
 // more than one.
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session) return unauthorized();
   const tenantId = session.user.tenantId;

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Film, Rotate3d } from "lucide-react";
 
 declare module "react" {
+  // React types expose JSX as a namespace; augmenting it needs the namespace form.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
       "model-viewer": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {

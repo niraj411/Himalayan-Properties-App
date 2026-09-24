@@ -21,7 +21,7 @@ const COMMERCIAL = {
 
 (async () => {
   const { PrismaClient } = await import("@prisma/client");
-  const { sendTenantEmail } = await import("../src/lib/email");
+  const { sendTenantEmail } = await import("../../src/lib/email");
   const db = new PrismaClient();
 
   const admin = await db.user.findFirst({ where: { role: "ADMIN" }, orderBy: { createdAt: "asc" } });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -149,7 +149,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchLease = async () => {
+  const fetchLease = useCallback(async () => {
     try {
       const response = await fetch(`/api/leases/${id}`);
       if (response.ok) {
@@ -170,7 +170,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
 
   const handleSaveDeposit = async () => {
     setIsSavingDeposit(true);
@@ -201,7 +201,7 @@ export default function LeaseDetailPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     fetchLease();
-  }, [id]);
+  }, [fetchLease]);
 
   const handleAddEscalation = async (e: React.FormEvent) => {
     e.preventDefault();

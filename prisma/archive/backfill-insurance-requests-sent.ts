@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { insuranceCopy } from "../src/lib/insurance";
+import { insuranceCopy } from "../../src/lib/insurance";
 
 const db = new PrismaClient();
 

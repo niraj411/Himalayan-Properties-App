@@ -45,21 +45,27 @@ async function main() {
   });
 
   const upcoming: Dated[] = [];
-  const indexRows: string[] = [];
+  const activeRows: string[] = [];
+  const formerRows: string[] = [];
   let fileCount = 0;
 
   for (const t of tenants) {
     const name = t.user.name;
+    // The COMMON_AREA unit's placeholder tenant anchors building-level maintenance;
+    // it is not a person and never has a lease.
+    if (t.unit?.status === "COMMON_AREA" || /^common area$/i.test(name.trim())) continue;
     const activeLease = t.leases.find((l) => l.status === "ACTIVE") ?? t.leases[0] ?? null;
     const prop = activeLease?.unit.property ?? t.unit?.property ?? null;
     const unitNo = activeLease?.unit.unitNumber ?? t.unit?.unitNumber ?? "—";
     const base = activeLease?.monthlyRent ?? null;
     const nnn = activeLease?.nnnMonthly ?? null;
     const total = base != null ? base + (nnn ?? 0) : null;
+    // Outstanding = what is still unpaid on OPEN charges (amount net of amountPaid),
+    // the same math as the app's balance pages.
     const outstanding = t.leases
       .flatMap((l) => l.charges)
       .filter((c) => c.status === "OPEN")
-      .reduce((s, c) => s + c.amount, 0);
+      .reduce((s, c) => s + (c.amount - (c.amountPaid ?? 0)), 0);
     const insAll = t.leases.flatMap((l) => l.insurance);
     const insOnFile = insAll.length > 0;
     const status = activeLease?.status ?? "NONE";
@@ -147,11 +153,11 @@ async function main() {
 
       const openCharges = l.charges.filter((c) => c.status === "OPEN");
       if (l.charges.length) {
-        const owed = openCharges.reduce((s, c) => s + c.amount, 0);
+        const owed = openCharges.reduce((s, c) => s + (c.amount - (c.amountPaid ?? 0)), 0);
         body.push(`**Charges** (${money(owed)} outstanding):`, "");
-        body.push("| Due | Kind | Label | Amount | Status |", "|---|---|---|---|---|");
+        body.push("| Due | Kind | Label | Amount | Paid | Status |", "|---|---|---|---|---|---|");
         for (const c of l.charges)
-          body.push(`| ${fmtDate(c.dueDate)} | ${c.kind} | ${c.label} | ${money(c.amount)} | ${c.status} |`);
+          body.push(`| ${fmtDate(c.dueDate)} | ${c.kind} | ${c.label} | ${money(c.amount)} | ${money(c.amountPaid ?? 0)} | ${c.status} |`);
         body.push("");
       }
 
@@ -178,9 +184,8 @@ async function main() {
     fs.writeFileSync(file, fm.join("\n") + body.join("\n") + "\n");
     fileCount++;
 
-    indexRows.push(
-      `| [${name}](${slug(name)}.md) | ${prop?.name ?? "—"} ${unitNo} | ${activeLease?.leaseType ?? "—"} | ${fmtDate(activeLease?.startDate)} → ${fmtDate(activeLease?.endDate)} | ${money(total)} | ${insOnFile ? "✓" : "✗"} | ${money(outstanding)} |`
-    );
+    const row = `| [${name}](${slug(name)}.md) | ${prop?.name ?? "—"} ${unitNo} | ${activeLease?.leaseType ?? "—"} | ${fmtDate(activeLease?.startDate)} → ${fmtDate(activeLease?.endDate)} | ${money(total)} | ${insOnFile ? "✓" : "✗"} | ${money(outstanding)} |`;
+    (status === "ACTIVE" ? activeRows : formerRows).push(row);
   }
 
   // ---- INDEX ----
@@ -188,10 +193,12 @@ async function main() {
   const idx: string[] = [];
   idx.push("# Tenant Records — Index", "");
   idx.push(`_Generated ${fmtDate(TODAY)} from production. ${fileCount} tenants. Regenerate: \`npx tsx prisma/generate-tenant-records.ts\`._`, "");
-  idx.push("## Tenants", "");
-  idx.push("| Tenant | Unit | Type | Term | Total/mo | Insurance | Outstanding |", "|---|---|---|---|---|---|---|");
-  idx.push(...indexRows.sort());
-  idx.push("");
+  const header = ["| Tenant | Unit | Type | Term | Total/mo | Insurance | Outstanding |", "|---|---|---|---|---|---|---|"];
+  idx.push("## Current tenants (active lease)", "");
+  idx.push(...header, ...activeRows.sort(), "");
+  idx.push("## Former tenants (no active lease; records kept for history / collections)", "");
+  if (formerRows.length) idx.push(...header, ...formerRows.sort(), "");
+  else idx.push("_None._", "");
   idx.push("## Upcoming key dates (for reminders / automation)", "");
   if (futureDates.length) {
     idx.push("| Date | Event |", "|---|---|");
