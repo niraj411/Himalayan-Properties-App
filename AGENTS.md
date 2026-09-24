@@ -238,6 +238,11 @@ It is **not** Docker (the old Dockerfile was removed 2026-09-23). App lives at
 > Connection details (VPS host/IP, SSH key path) are kept in the local
 > `~/.claude/commands/himalayan.md` and the owner's environment, not duplicated here.
 
+**Uploads after a build:** `next start` indexes `public/` at startup, so a photo uploaded
+through the admin UI would 404 until the next restart. `next.config.ts` has an
+`afterFiles` rewrite `/uploads/:path*` → `/api/public-files/:path*` that streams
+post-build files from `public/uploads/`; no restart needed. Private docs never go there.
+
 **Deploy one-liner** (run on the VPS in the app directory). Next runs as a regular
 `next start` build under PM2; `output: "standalone"` was dropped on 2026-09-23, so
 `public/` and `private-uploads/` are served straight from the app root (no mirroring):
