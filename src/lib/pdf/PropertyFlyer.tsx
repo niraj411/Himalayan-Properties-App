@@ -65,7 +65,7 @@ const s = StyleSheet.create({
   brandSub: { fontSize: 7, letterSpacing: 1.4, textTransform: "uppercase", color: "rgba(255,255,255,0.75)" },
   forrent: { fontSize: 18, fontFamily: "Helvetica-Bold", color: "#ffffff", letterSpacing: 1 },
   hero: { height: 250, width: "100%", objectFit: "cover" },
-  heroCompact: { height: 215, width: "100%", objectFit: "cover" },
+  heroCompact: { height: 205, width: "100%", objectFit: "cover" },
   heroPlaceholder: { height: 250, width: "100%", backgroundColor: "#e9e5f2" },
   cap: { paddingHorizontal: 34, paddingTop: 16 },
   badge: {
@@ -137,7 +137,8 @@ const s = StyleSheet.create({
   callLbl: { fontSize: 7.5, letterSpacing: 1.2, textTransform: "uppercase", color: "#b9b3cc" },
   callVal: { fontSize: 17, fontFamily: "Helvetica-Bold", color: "#ffffff", marginTop: 2 },
   callSite: { fontSize: 9, color: "#b9b3cc" },
-  gen: { textAlign: "center", fontSize: 7, color: colors.muted, marginTop: 14 },
+  // Pinned to the page bottom so it never pushes the layout onto a second page.
+  gen: { position: "absolute", bottom: 14, left: 0, right: 0, textAlign: "center", fontSize: 7, color: colors.muted },
 });
 
 const prettyPhone = (raw: string) => {
