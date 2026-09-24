@@ -223,7 +223,9 @@ take **safe writes**, not just reads:
   `create_charge`, `mark_charge_paid`, `waive_charge`, `record_payment`,
   `send_notice`, `request_insurance`, `log_message`, `add_utility`, `log_utility_bill`
   (upsert an owner-paid utility statement; resolve by `utilityId` or property + type, optional `unit`; whole-property account wins when several match), `announce`
-  (property-wide ANNOUNCEMENT to all ACTIVE leases; `deliver` PORTAL|EMAIL).
+  (property-wide ANNOUNCEMENT to all ACTIVE leases; `deliver` PORTAL|EMAIL),
+  `create_maintenance_request` (opens an OPEN request; `tenant`/`leaseId` for unit work, or
+  `property` + optional `unit`; no unit = the property's COMMON_AREA unit + placeholder tenant).
   **No deletes, no settings edits, no lease edits.** Outward emails need confirmation.
 
 ---

@@ -21,6 +21,7 @@ import { insuranceCopy } from "@/lib/insurance";
 import { UTILITY_TYPES, parseDateOnly, parseOptionalNumber, formatBillPeriod } from "@/lib/utilities";
 import { chargeRemaining, openBalance } from "@/lib/ledger";
 import { allocatePaymentToCharge } from "@/lib/ledger-db";
+import { COMMON_AREA_STATUS } from "@/lib/units";
 
 const LANDLORD_NAME = "Himalayan Holding Property LLC";
 const LANDLORD_ADDRESS = "884 Dakota Lane, Erie, CO 80516";
@@ -381,6 +382,94 @@ async function announce(p: Record<string, unknown>): Promise<AgentActionResult> 
 
 // ---------------------------------------------------------------------------
 // Dispatcher + read context
+// Maintenance: open a request the same way the admin "New request" form does.
+// Building-level work (parking lot, exterior, common areas) anchors on the
+// property's COMMON_AREA unit and its placeholder tenant; unit work resolves
+// via the active lease's tenant. No email is sent on creation (matches admin UI).
+const MAINTENANCE_CATEGORIES = ["PLUMBING", "ELECTRICAL", "HVAC", "APPLIANCE", "OTHER"];
+const MAINTENANCE_PRIORITIES = ["LOW", "MEDIUM", "HIGH", "EMERGENCY"];
+
+async function createMaintenanceRequest(p: Record<string, unknown>): Promise<AgentActionResult> {
+  const title = String(p.title || "").trim();
+  const description = String(p.description || title).trim();
+  if (!title) throw new Error("Specify a title for the maintenance request.");
+  const category = p.category ? String(p.category).toUpperCase() : null;
+  if (category && !MAINTENANCE_CATEGORIES.includes(category)) {
+    throw new Error(`Category must be one of: ${MAINTENANCE_CATEGORIES.join(", ")}.`);
+  }
+  const priority = p.priority ? String(p.priority).toUpperCase() : "MEDIUM";
+  if (!MAINTENANCE_PRIORITIES.includes(priority)) {
+    throw new Error(`Priority must be one of: ${MAINTENANCE_PRIORITIES.join(", ")}.`);
+  }
+
+  let tenantId: string;
+  let unitId: string;
+  let where: string;
+
+  const unitHint = String(p.unit || p.unitNumber || "").trim().toLowerCase().replace(/^unit\s*/, "");
+  const commonArea = !unitHint || /^(common|common area|building|exterior|parking|lot)$/.test(unitHint);
+
+  if (p.tenant || p.leaseId) {
+    const lease = await resolveLease({ leaseId: p.leaseId as string | undefined, tenant: p.tenant as string | undefined });
+    tenantId = lease.tenantId;
+    unitId = lease.unitId;
+    where = `${lease.unit.property.name} Unit ${lease.unit.unitNumber} (${lease.tenant.user.name})`;
+  } else {
+    let propertyId = p.propertyId as string | undefined;
+    let propName = "";
+    if (!propertyId) {
+      const needle = String(p.property || "").trim().toLowerCase();
+      if (!needle) throw new Error("Specify a tenant, or a property (name or propertyId) with an optional unit.");
+      const props = await db.property.findMany();
+      const match = props.filter((pr) => pr.name.toLowerCase().includes(needle) || pr.address.toLowerCase().includes(needle));
+      if (match.length === 0) throw new Error(`No property matched "${p.property}".`);
+      if (match.length > 1) throw new Error(`"${p.property}" matched multiple properties: ${match.map((m) => m.name).join("; ")}.`);
+      propertyId = match[0].id;
+      propName = match[0].name;
+    } else {
+      propName = (await db.property.findUnique({ where: { id: propertyId } }))?.name ?? propertyId;
+    }
+
+    if (commonArea) {
+      const unit = await db.unit.findFirst({ where: { propertyId, status: COMMON_AREA_STATUS } });
+      if (!unit) throw new Error(`${propName} has no common-area unit to attach building-level work to. Add one in the admin first.`);
+      const tenant = await db.tenant.findFirst({ where: { unitId: unit.id } });
+      if (!tenant) throw new Error(`${propName}'s common-area unit has no placeholder tenant record.`);
+      tenantId = tenant.id;
+      unitId = unit.id;
+      where = `${propName} (building / common area)`;
+    } else {
+      const units = (await db.unit.findMany({ where: { propertyId } })).filter(
+        (u) => u.unitNumber.toLowerCase().replace(/^unit\s*/, "") === unitHint
+      );
+      if (units.length === 0) throw new Error(`No unit "${unitHint}" at ${propName}.`);
+      const lease = await db.lease.findFirst({ where: { unitId: units[0].id, status: "ACTIVE" }, include: { tenant: { include: { user: true } } } });
+      if (!lease) throw new Error(`Unit ${units[0].unitNumber} at ${propName} has no active lease; name the tenant, or log it as common-area work.`);
+      tenantId = lease.tenantId;
+      unitId = units[0].id;
+      where = `${propName} Unit ${units[0].unitNumber} (${lease.tenant.user.name})`;
+    }
+  }
+
+  const record = await db.maintenanceRequest.create({
+    data: {
+      tenantId,
+      unitId,
+      title,
+      description,
+      category,
+      priority,
+      status: "OPEN",
+      notes: p.notes ? String(p.notes) : null,
+    },
+  });
+  return {
+    ok: true,
+    summary: `Opened ${priority.toLowerCase()} priority maintenance request "${title}" for ${where}.`,
+    record,
+  };
+}
+
 // ---------------------------------------------------------------------------
 
 export const AGENT_ACTIONS = [
@@ -394,6 +483,7 @@ export const AGENT_ACTIONS = [
   "add_utility",
   "log_utility_bill",
   "announce",
+  "create_maintenance_request",
 ] as const;
 export type AgentAction = (typeof AGENT_ACTIONS)[number];
 
@@ -410,6 +500,7 @@ export async function runAgentAction(action: string, params: Record<string, unkn
       case "add_utility": return await addUtility(params);
       case "log_utility_bill": return await logUtilityBill(params);
       case "announce": return await announce(params);
+      case "create_maintenance_request": return await createMaintenanceRequest(params);
       default:
         return { ok: false, summary: `Unknown or unsupported action "${action}". Allowed: ${AGENT_ACTIONS.join(", ")}.`, error: "unknown_action" };
     }
