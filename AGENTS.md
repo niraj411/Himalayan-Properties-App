@@ -131,6 +131,11 @@ Important model semantics — read before touching billing or files:
   no tenant-scoped API exists.** Unique on (utility, periodStart, periodEnd) so
   re-imports upsert. UI: property page "Utility bills" section + `/admin/utilities`
   portfolio overview. Helpers in `lib/utilities.ts` (`billStatus`, `formatBillPeriod`).
+- **Application** — status `PENDING|APPROVED|REJECTED|WITHDRAWN`. Admin can also "Log
+  applicant" for people who came in via Zillow/email. Admin-only fields `adminNotes`,
+  `holdingDeposit`/`holdingDepositDate` (money handed over before any lease exists, so
+  there is no Lease to attach a Payment to) and `refundAmount`/`refundDate` (what went
+  back when they backed out). Never shown to the applicant.
 - **MaintenanceRequest** — completing one can spawn a `Charge` (`chargeId` prevents
   duplicate billing); `contractor`/`repairCost`/`paymentMethod` are internal.
 - **Settings** — singleton: company info, Baselane link, Zillow URL, email toggle,

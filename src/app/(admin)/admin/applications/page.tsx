@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +41,9 @@ import {
   Home,
   FileText,
   ExternalLink,
+  Plus,
+  Undo2,
+  Wallet,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -72,16 +79,85 @@ interface Application {
   desiredTerm: string | null;
   guarantorName: string | null;
   status: string;
+  adminNotes: string | null;
+  holdingDeposit: number | null;
+  holdingDepositDate: string | null;
+  refundAmount: number | null;
+  refundDate: string | null;
   createdAt: string;
   property: { name: string; type: string } | null;
   unit: { unitNumber: string } | null;
 }
+
+interface PropertyOption {
+  id: string;
+  name: string;
+  type: string;
+  units: { id: string; unitNumber: string; status: string }[];
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  PENDING: "Pending",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+  WITHDRAWN: "Withdrawn",
+};
+
+function statusClass(status: string) {
+  switch (status) {
+    case "PENDING": return "bg-amber-50 text-amber-700";
+    case "APPROVED": return "bg-green-50 text-green-700";
+    case "WITHDRAWN": return "bg-surface-container-high text-on-surface-variant";
+    default: return "bg-red-50 text-red-700";
+  }
+}
+
+const money = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const toInputDate = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
+
+interface InternalForm {
+  adminNotes: string;
+  holdingDeposit: string;
+  holdingDepositDate: string;
+  refundAmount: string;
+  refundDate: string;
+}
+
+const emptyNewApplicant = {
+  applicationType: "RESIDENTIAL",
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  propertyId: "",
+  unitId: "",
+  moveInDate: "",
+  status: "PENDING",
+  adminNotes: "",
+};
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [internal, setInternal] = useState<InternalForm>({ adminNotes: "", holdingDeposit: "", holdingDepositDate: "", refundAmount: "", refundDate: "" });
+  const [savingInternal, setSavingInternal] = useState(false);
+  const [properties, setProperties] = useState<PropertyOption[]>([]);
+  const [logOpen, setLogOpen] = useState(false);
+  const [newApplicant, setNewApplicant] = useState({ ...emptyNewApplicant });
+  const [creating, setCreating] = useState(false);
+
+  const openApplication = (app: Application) => {
+    setSelectedApplication(app);
+    setInternal({
+      adminNotes: app.adminNotes ?? "",
+      holdingDeposit: app.holdingDeposit != null ? String(app.holdingDeposit) : "",
+      holdingDepositDate: toInputDate(app.holdingDepositDate),
+      refundAmount: app.refundAmount != null ? String(app.refundAmount) : "",
+      refundDate: toInputDate(app.refundDate),
+    });
+  };
 
   const fetchApplications = async () => {
     setIsLoading(true);
@@ -99,7 +175,65 @@ export default function ApplicationsPage() {
 
   useEffect(() => {
     fetchApplications();
+    fetch("/api/properties")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list: PropertyOption[]) => setProperties(Array.isArray(list) ? list : []))
+      .catch(() => setProperties([]));
   }, []);
+
+  const saveInternal = async () => {
+    if (!selectedApplication) return;
+    setSavingInternal(true);
+    try {
+      const response = await fetch(`/api/applications/${selectedApplication.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(internal),
+      });
+      if (!response.ok) throw new Error();
+      toast.success("Application updated");
+      fetchApplications();
+      setSelectedApplication(null);
+    } catch {
+      toast.error("Failed to save application");
+    } finally {
+      setSavingInternal(false);
+    }
+  };
+
+  const createApplicant = async () => {
+    const a = newApplicant;
+    if (!a.firstName || !a.lastName || !a.email || !a.phone) {
+      toast.error("Name, email and phone are required");
+      return;
+    }
+    setCreating(true);
+    try {
+      const response = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...a,
+          propertyId: a.propertyId || null,
+          unitId: a.unitId || null,
+          moveInDate: a.moveInDate || null,
+        }),
+      });
+      if (!response.ok) throw new Error();
+      const created: Application = await response.json();
+      toast.success("Applicant logged");
+      setLogOpen(false);
+      setNewApplicant({ ...emptyNewApplicant });
+      await fetchApplications();
+      openApplication({ ...created, property: created.property ?? null, unit: created.unit ?? null });
+    } catch {
+      toast.error("Failed to log applicant");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const selectedProperty = properties.find((p) => p.id === newApplicant.propertyId);
 
   const updateStatus = async (id: string, status: string) => {
     try {
@@ -110,7 +244,7 @@ export default function ApplicationsPage() {
       });
 
       if (response.ok) {
-        toast.success(`Application ${status.toLowerCase()}`);
+        toast.success(`Application marked ${STATUS_LABEL[status]?.toLowerCase() ?? status.toLowerCase()}`);
         fetchApplications();
         setSelectedApplication(null);
       } else {
@@ -163,9 +297,15 @@ export default function ApplicationsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Applications</h1>
-        <p className="text-slate-500 mt-1">Review and manage rental applications</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Applications</h1>
+          <p className="text-slate-500 mt-1">Review and manage rental applications</p>
+        </div>
+        <Button onClick={() => setLogOpen(true)}>
+          <Plus className="h-4 w-4 mr-1" />
+          Log applicant
+        </Button>
       </div>
 
       {applications.length === 0 ? (
@@ -174,7 +314,7 @@ export default function ApplicationsPage() {
             <ClipboardList className="h-12 w-12 text-slate-300 mb-4" />
             <h3 className="text-lg font-medium text-slate-900 mb-2">No applications yet</h3>
             <p className="text-slate-500 text-center">
-              Applications will appear here when prospective tenants apply
+              Applications will appear here when prospective tenants apply. Use &quot;Log applicant&quot; for people who came in through Zillow or in person.
             </p>
           </CardContent>
         </Card>
@@ -197,7 +337,7 @@ export default function ApplicationsPage() {
                   <TableRow
                     key={app.id}
                     className="cursor-pointer"
-                    onClick={() => setSelectedApplication(app)}
+                    onClick={() => openApplication(app)}
                   >
                     <TableCell>
                       <div>
@@ -225,17 +365,15 @@ export default function ApplicationsPage() {
                       {app.property?.name || "General Inquiry"}{app.unit ? ` · Unit ${app.unit.unitNumber}` : ""}
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        className={
-                          app.status === "PENDING"
-                            ? "bg-amber-50 text-amber-700"
-                            : app.status === "APPROVED"
-                            ? "bg-green-50 text-green-700"
-                            : "bg-red-50 text-red-700"
-                        }
-                      >
-                        {app.status}
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge className={statusClass(app.status)}>{STATUS_LABEL[app.status] ?? app.status}</Badge>
+                        {app.refundAmount != null && (
+                          <span className="text-xs text-on-surface-variant">Refunded {money(app.refundAmount)}</span>
+                        )}
+                        {app.refundAmount == null && app.holdingDeposit != null && (
+                          <span className="text-xs text-on-surface-variant">Holding {money(app.holdingDeposit)}</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-slate-500 text-sm">
                       {format(new Date(app.createdAt), "MMM d, yyyy")}
@@ -259,6 +397,12 @@ export default function ApplicationsPage() {
                                 Reject
                               </DropdownMenuItem>
                             </>
+                          )}
+                          {(app.status === "PENDING" || app.status === "APPROVED") && (
+                            <DropdownMenuItem onClick={() => updateStatus(app.id, "WITHDRAWN")}>
+                              <Undo2 className="h-4 w-4 mr-2 text-on-surface-variant" />
+                              Mark withdrawn
+                            </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onClick={() => handleDelete(app.id)} className="text-red-600">
                             <Trash2 className="h-4 w-4 mr-2" />
@@ -313,16 +457,8 @@ export default function ApplicationsPage() {
                     </p>
                   </div>
                 </div>
-                <Badge
-                  className={
-                    selectedApplication.status === "PENDING"
-                      ? "bg-amber-50 text-amber-700"
-                      : selectedApplication.status === "APPROVED"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-red-50 text-red-700"
-                  }
-                >
-                  {selectedApplication.status}
+                <Badge className={statusClass(selectedApplication.status)}>
+                  {STATUS_LABEL[selectedApplication.status] ?? selectedApplication.status}
                 </Badge>
               </div>
 
@@ -457,29 +593,166 @@ export default function ApplicationsPage() {
                 </div>
               )}
 
-              {selectedApplication.status === "PENDING" && (
-                <div className="flex justify-end gap-2 pt-4 border-t">
+              {/* Internal: money handed over before a lease exists, and admin notes */}
+              <Card className="bg-surface-container-low border-0 shadow-none">
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <CardTitle className="text-xs font-medium text-on-surface-variant uppercase tracking-wide flex items-center gap-1">
+                    <Wallet className="h-3.5 w-3.5" />
+                    Internal (not shown to applicant)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 px-4 pb-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="holdingDeposit" className="text-xs">Holding deposit received</Label>
+                      <Input id="holdingDeposit" type="number" step="0.01" min="0" placeholder="0.00" value={internal.holdingDeposit} onChange={(e) => setInternal({ ...internal, holdingDeposit: e.target.value })} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="holdingDepositDate" className="text-xs">Received on</Label>
+                      <Input id="holdingDepositDate" type="date" value={internal.holdingDepositDate} onChange={(e) => setInternal({ ...internal, holdingDepositDate: e.target.value })} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="refundAmount" className="text-xs">Refunded to applicant</Label>
+                      <Input id="refundAmount" type="number" step="0.01" min="0" placeholder="0.00" value={internal.refundAmount} onChange={(e) => setInternal({ ...internal, refundAmount: e.target.value })} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="refundDate" className="text-xs">Refunded on</Label>
+                      <Input id="refundDate" type="date" value={internal.refundDate} onChange={(e) => setInternal({ ...internal, refundDate: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="adminNotes" className="text-xs">Admin notes</Label>
+                    <Textarea id="adminNotes" rows={4} placeholder="What happened, how money moved, anything to remember." value={internal.adminNotes} onChange={(e) => setInternal({ ...internal, adminNotes: e.target.value })} />
+                  </div>
+                  <div className="flex justify-end">
+                    <Button size="sm" variant="outline" onClick={saveInternal} disabled={savingInternal}>
+                      {savingInternal ? "Saving..." : "Save notes"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {(selectedApplication.status === "PENDING" || selectedApplication.status === "APPROVED") && (
+                <div className="flex flex-wrap justify-end gap-2 pt-4 border-t">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-red-600 hover:text-red-700"
-                    onClick={() => updateStatus(selectedApplication.id, "REJECTED")}
+                    onClick={() => updateStatus(selectedApplication.id, "WITHDRAWN")}
                   >
-                    <XCircle className="h-4 w-4 mr-1" />
-                    Reject
+                    <Undo2 className="h-4 w-4 mr-1" />
+                    Mark withdrawn
                   </Button>
-                  <Button
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700"
-                    onClick={() => updateStatus(selectedApplication.id, "APPROVED")}
-                  >
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Approve
-                  </Button>
+                  {selectedApplication.status === "PENDING" && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => updateStatus(selectedApplication.id, "REJECTED")}
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => updateStatus(selectedApplication.id, "APPROVED")}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={logOpen} onOpenChange={setLogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Log applicant</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-on-surface-variant -mt-2">
+            For someone who applied through Zillow, by email or in person, so the paper trail lives here.
+          </p>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="na-first">First name</Label>
+                <Input id="na-first" value={newApplicant.firstName} onChange={(e) => setNewApplicant({ ...newApplicant, firstName: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="na-last">Last name</Label>
+                <Input id="na-last" value={newApplicant.lastName} onChange={(e) => setNewApplicant({ ...newApplicant, lastName: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="na-email">Email</Label>
+                <Input id="na-email" type="email" value={newApplicant.email} onChange={(e) => setNewApplicant({ ...newApplicant, email: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="na-phone">Phone</Label>
+                <Input id="na-phone" value={newApplicant.phone} onChange={(e) => setNewApplicant({ ...newApplicant, phone: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label>Property</Label>
+                <Select value={newApplicant.propertyId} onValueChange={(v) => setNewApplicant({ ...newApplicant, propertyId: v, unitId: "" })}>
+                  <SelectTrigger><SelectValue placeholder="Select property" /></SelectTrigger>
+                  <SelectContent>
+                    {properties.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Unit</Label>
+                <Select value={newApplicant.unitId} onValueChange={(v) => setNewApplicant({ ...newApplicant, unitId: v })} disabled={!selectedProperty}>
+                  <SelectTrigger><SelectValue placeholder="Select unit" /></SelectTrigger>
+                  <SelectContent>
+                    {(selectedProperty?.units ?? []).map((u) => (
+                      <SelectItem key={u.id} value={u.id}>Unit {u.unitNumber}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Type</Label>
+                <Select value={newApplicant.applicationType} onValueChange={(v) => setNewApplicant({ ...newApplicant, applicationType: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="RESIDENTIAL">Residential</SelectItem>
+                    <SelectItem value="COMMERCIAL">Commercial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Status</Label>
+                <Select value={newApplicant.status} onValueChange={(v) => setNewApplicant({ ...newApplicant, status: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(STATUS_LABEL).map(([k, label]) => (
+                      <SelectItem key={k} value={k}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1 col-span-2">
+                <Label htmlFor="na-movein">Requested move-in</Label>
+                <Input id="na-movein" type="date" value={newApplicant.moveInDate} onChange={(e) => setNewApplicant({ ...newApplicant, moveInDate: e.target.value })} />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="na-notes">Admin notes</Label>
+              <Textarea id="na-notes" rows={3} value={newApplicant.adminNotes} onChange={(e) => setNewApplicant({ ...newApplicant, adminNotes: e.target.value })} />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setLogOpen(false)}>Cancel</Button>
+              <Button onClick={createApplicant} disabled={creating}>{creating ? "Saving..." : "Log applicant"}</Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

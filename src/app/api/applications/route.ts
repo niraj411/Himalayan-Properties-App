@@ -24,9 +24,13 @@ export async function GET() {
 }
 
 // Public endpoint for application submission
+// An ADMIN session may also use it to log an applicant who came in through another
+// channel (Zillow, walk-in) so the pre-lease paper trail lives in the app.
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+    const session = await getServerSession(authOptions);
+    const isAdmin = session?.user?.role === "ADMIN";
     const {
       propertyId,
       applicationType,
@@ -51,6 +55,8 @@ export async function POST(request: Request) {
       intendedUse,
       desiredTerm,
       guarantorName,
+      status,
+      adminNotes,
     } = data;
 
     if (!firstName || !lastName || !email || !phone) {
@@ -95,15 +101,16 @@ export async function POST(request: Request) {
         intendedUse: intendedUse || null,
         desiredTerm: desiredTerm || null,
         guarantorName: guarantorName || null,
-        status: "PENDING",
+        status: isAdmin && ["PENDING", "APPROVED", "REJECTED", "WITHDRAWN"].includes(status) ? status : "PENDING",
+        adminNotes: isAdmin && adminNotes ? String(adminNotes) : null,
       },
       include: { unit: { select: { unitNumber: true } }, property: { select: { name: true } } },
     });
 
-    // Notify admin of new application
+    // Notify admin of new application (not when the admin logged it themselves)
     try {
       const settings = await db.settings.findFirst();
-      if (settings?.companyEmail) {
+      if (!isAdmin && settings?.companyEmail) {
         await sendEmail({
           to: settings.companyEmail,
           subject: `New ${application.applicationType} Application from ${firstName} ${lastName}`,

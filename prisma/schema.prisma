@@ -305,7 +305,15 @@ model Application {
   intendedUse         String?  // e.g. "nail salon", "insurance office"
   desiredTerm         String?  // e.g. "5 years"
   guarantorName       String?  // personal guarantor (owner/principal)
-  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED, WITHDRAWN (applicant backed out)
+  // Admin-only bookkeeping for the pre-lease stage. Money an approved applicant hands
+  // over before a lease exists (holding deposit / first month) has no Lease to attach a
+  // Payment to, so it is tracked here, together with any refund when they back out.
+  adminNotes          String?  // internal, never shown to the applicant
+  holdingDeposit      Float?   // amount received from the applicant before a lease
+  holdingDepositDate  DateTime?
+  refundAmount        Float?   // amount returned to the applicant
+  refundDate          DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
