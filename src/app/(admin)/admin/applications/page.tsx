@@ -114,6 +114,8 @@ function statusClass(status: string) {
 
 const money = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const toInputDate = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
+// Date-only fields are stored at UTC midnight; format them in UTC so they don't slip a day.
+const fmtDay = (iso: string) => new Date(iso).toLocaleDateString("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" });
 
 interface InternalForm {
   adminNotes: string;
@@ -561,7 +563,7 @@ export default function ApplicationsPage() {
                 {selectedApplication.moveInDate && (
                   <div className="flex items-center gap-2 text-slate-600">
                     <Calendar className="h-4 w-4 text-slate-400" />
-                    <span>Move-in: {format(new Date(selectedApplication.moveInDate), "MMM d, yyyy")}</span>
+                    <span>Move-in: {fmtDay(selectedApplication.moveInDate)}</span>
                   </div>
                 )}
                 {selectedApplication.numberOfOccupants && (
