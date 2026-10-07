@@ -1,7 +1,7 @@
 # 655 S Federal Blvd, Unit A. Leasing packet
 
 Everything needed to market and lease Unit A (1,008 sf retail/office bay, NNN).
-Numbers as of September 2026: $26/sf/yr base ($2,184/mo), est. NNN $1,074.53/mo,
+Numbers as of October 6, 2026 (rate cut from $26 with 2 months free on a 3-year lease): $24/sf/yr base ($2,016/mo), est. NNN $1,074.53/mo,
 3 to 5 year term, 3% annual increases. No tenant PII or building codes in this folder.
 
 | File | What it is |
