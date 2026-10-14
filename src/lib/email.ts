@@ -11,6 +11,8 @@ const transporter = nodemailer.createTransport({
 });
 
 const FROM = process.env.EMAIL_FROM || "Himalayan Properties <noreply@himalayanproperties.com>";
+// FROM is a no-reply sender, so replies default to the owner's inbox unless a caller overrides.
+const REPLY_TO = process.env.EMAIL_REPLY_TO || undefined;
 
 export async function sendEmail({
   to,
@@ -34,7 +36,7 @@ export async function sendEmail({
     from: FROM,
     to: Array.isArray(to) ? to.join(", ") : to,
     cc: cc ? (Array.isArray(cc) ? cc.join(", ") : cc) : undefined,
-    replyTo: replyTo || undefined,
+    replyTo: replyTo || REPLY_TO,
     subject,
     text: body,
     html: body.replace(/\n/g, "<br>"),
