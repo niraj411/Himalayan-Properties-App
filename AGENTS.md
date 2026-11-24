@@ -229,6 +229,7 @@ take **safe writes**, not just reads:
   `send_notice`, `request_insurance`, `log_message`, `add_utility`, `log_utility_bill`
   (upsert an owner-paid utility statement; resolve by `utilityId` or property + type, optional `unit`; whole-property account wins when several match), `announce`
   (property-wide ANNOUNCEMENT to all ACTIVE leases; `deliver` PORTAL|EMAIL),
+  `post_statement` (monthly rent statement as a portal-only STATEMENT notice: `period` "2026-12", `tenant`/`leaseId` or `all:true`, `preview`; rent = base + NNN + open charges due by the 1st; idempotent per lease+month; never emails),
   `create_maintenance_request` (opens an OPEN request; `tenant`/`leaseId` for unit work, or
   `property` + optional `unit`; no unit = the property's COMMON_AREA unit + placeholder tenant).
   **No deletes, no settings edits, no lease edits.** Outward emails need confirmation.

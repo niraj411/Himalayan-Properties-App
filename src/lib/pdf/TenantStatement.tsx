@@ -27,7 +27,10 @@ export interface TenantStatementData {
   tenantEmail?: string | null;
   premises: string;
   leaseTerm: string;
+  /** Base rent per month. */
   monthlyRent: number;
+  /** NNN / CAM per month (commercial). Total monthly = monthlyRent + nnnMonthly. */
+  nnnMonthly?: number | null;
   charges: StatementCharge[];
   payments: StatementPayment[];
   balance: number;
@@ -79,7 +82,14 @@ export function TenantStatement(d: TenantStatementData) {
           </View>
           <View style={styles.metaCol}>
             <Field label="Lease term">{d.leaseTerm}</Field>
-            <Field label="Monthly rent">{money(d.monthlyRent)}</Field>
+            {d.nnnMonthly ? (
+              <>
+                <Field label="Monthly rent">{money(d.monthlyRent + d.nnnMonthly)}</Field>
+                <Field label="Base + NNN">{`${money(d.monthlyRent)} + ${money(d.nnnMonthly)}`}</Field>
+              </>
+            ) : (
+              <Field label="Monthly rent">{money(d.monthlyRent)}</Field>
+            )}
           </View>
         </View>
 

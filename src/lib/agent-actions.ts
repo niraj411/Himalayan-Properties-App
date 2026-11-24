@@ -16,6 +16,7 @@
 import { db } from "@/lib/db";
 import { sendEmail, sendTenantEmail } from "@/lib/email";
 import { postAnnouncement } from "@/lib/announcements";
+import { activeStatementLeaseIds, buildMonthlyStatement, postMonthlyStatement } from "@/lib/statements";
 import { renderNotice, type NoticeType } from "@/lib/notices";
 import { insuranceCopy } from "@/lib/insurance";
 import { UTILITY_TYPES, parseDateOnly, parseOptionalNumber, formatBillPeriod } from "@/lib/utilities";
@@ -472,6 +473,33 @@ async function createMaintenanceRequest(p: Record<string, unknown>): Promise<Age
 
 // ---------------------------------------------------------------------------
 
+// post_statement: monthly rent statement as a STATEMENT notice (portal only,
+// status POSTED; never emails). { period:"2026-12", tenant|leaseId | all:true, preview? }
+async function postStatement(p: Record<string, unknown>): Promise<AgentActionResult> {
+  const period = String(p.period || "");
+  let ids: string[];
+  if (p.all === true) ids = await activeStatementLeaseIds();
+  else ids = [(p.leaseId as string) || (await resolveLease(p as never)).id];
+  if (p.preview === true) {
+    const statements = await Promise.all(ids.map((id) => buildMonthlyStatement(id, period)));
+    return {
+      ok: true,
+      summary: statements.map((s) => `${s.tenantName}: ${money(s.totalDue)} due ${s.periodLabel}`).join("; "),
+      record: statements,
+    };
+  }
+  const actorId = await adminActorId();
+  const results = [];
+  for (const id of ids) results.push(await postMonthlyStatement(id, period, actorId));
+  return {
+    ok: true,
+    summary: results
+      .map((r) => `${r.statement.tenantName}: ${money(r.statement.totalDue)} ${r.created ? "posted" : "already posted"}`)
+      .join("; "),
+    record: results.map((r) => r.notice),
+  };
+}
+
 export const AGENT_ACTIONS = [
   "create_charge",
   "mark_charge_paid",
@@ -484,6 +512,7 @@ export const AGENT_ACTIONS = [
   "log_utility_bill",
   "announce",
   "create_maintenance_request",
+  "post_statement",
 ] as const;
 export type AgentAction = (typeof AGENT_ACTIONS)[number];
 
@@ -501,6 +530,7 @@ export async function runAgentAction(action: string, params: Record<string, unkn
       case "log_utility_bill": return await logUtilityBill(params);
       case "announce": return await announce(params);
       case "create_maintenance_request": return await createMaintenanceRequest(params);
+      case "post_statement": return await postStatement(params);
       default:
         return { ok: false, summary: `Unknown or unsupported action "${action}". Allowed: ${AGENT_ACTIONS.join(", ")}.`, error: "unknown_action" };
     }

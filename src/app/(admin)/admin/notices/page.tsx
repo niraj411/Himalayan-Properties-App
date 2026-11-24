@@ -26,6 +26,7 @@ const TYPE_LABEL: Record<string, string> = {
   CO_DEMAND: "Compliance / possession",
   CUSTOM: "Custom",
   ANNOUNCEMENT: "Announcement",
+  STATEMENT: "Rent statement",
 };
 
 // Portfolio-wide log of every notice sent (or attempted), newest first. Drill

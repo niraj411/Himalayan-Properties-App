@@ -22,6 +22,7 @@ const TYPE_LABEL: Record<string, string> = {
   CO_DEMAND: "Compliance / possession",
   CUSTOM: "Notice",
   ANNOUNCEMENT: "Announcement",
+  STATEMENT: "Rent statement",
 };
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 

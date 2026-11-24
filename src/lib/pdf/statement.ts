@@ -61,6 +61,7 @@ export async function loadStatementDoc(leaseId: string): Promise<StatementDoc | 
     premises,
     leaseTerm: `${dateFmt(lease.startDate)} to ${dateFmt(lease.endDate)}`,
     monthlyRent: lease.monthlyRent,
+    nnnMonthly: lease.nnnMonthly,
     charges,
     payments,
     balance: openBalance(lease.charges),

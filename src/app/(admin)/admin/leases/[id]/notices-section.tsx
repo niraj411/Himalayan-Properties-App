@@ -32,7 +32,7 @@ import {
 import { toast } from "sonner";
 import { confirmDialog } from "@/components/ui/confirm";
 import { format } from "date-fns";
-import { FileWarning, Send, Eye, RotateCw } from "lucide-react";
+import { FileWarning, Send, Eye, RotateCw, Receipt } from "lucide-react";
 
 interface Notice {
   id: string;
@@ -58,7 +58,7 @@ const TYPES: { value: string; label: string }[] = [
 ];
 
 const typeLabel = (v: string) =>
-  v === "ANNOUNCEMENT" ? "Announcement" : (TYPES.find((t) => t.value === v)?.label ?? v);
+  v === "ANNOUNCEMENT" ? "Announcement" : v === "STATEMENT" ? "Rent statement" : (TYPES.find((t) => t.value === v)?.label ?? v);
 
 export default function NoticesSection({ leaseId }: { leaseId: string }) {
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -182,6 +182,33 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
     }
   };
 
+  // Next calendar month as "YYYY-MM" (statements are for rent due on the 1st).
+  const nextPeriod = () => {
+    const d = new Date();
+    const n = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
+  };
+
+  const postStatement = async () => {
+    const period = nextPeriod();
+    const label = new Date(`${period}-01T12:00:00`).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    if (!(await confirmDialog({ title: `Post ${label} statement?`, description: "Posts it to the tenant's Notices page (not emailed). Use Email now on the notice to send it.", confirmText: "Post", destructive: false }))) return;
+    try {
+      const res = await fetch("/api/notices/statement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leaseId, period }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error);
+      const r = data.results?.[0];
+      toast.success(r?.created ? `${label} statement posted` : `${label} statement was already posted`);
+      load();
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Failed to post statement");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -192,6 +219,10 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
             <Badge variant="secondary" className="ml-2">{notices.length}</Badge>
           )}
         </CardTitle>
+        <div className="flex items-center gap-2">
+        <Button size="sm" variant="outline" onClick={postStatement}>
+          <Receipt className="h-4 w-4 mr-1" /> Post statement
+        </Button>
         <Dialog open={open} onOpenChange={onOpenChange}>
           <DialogTrigger asChild>
             <Button size="sm" className="text-white">
@@ -277,6 +308,7 @@ export default function NoticesSection({ leaseId }: { leaseId: string }) {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         {notices.length === 0 ? (
